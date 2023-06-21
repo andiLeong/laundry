@@ -15,13 +15,13 @@ class UserTest extends TestCase
     public function an_user_should_contains_necessary_attributes(): void
     {
         $user = User::factory([
-            'phone' => '09060181233',
+            'phone' => '09000000000',
             'first_name' => 'nancy',
             'middle_name' => 'julie',
             'last_name' => 'macy',
         ])->create();
 
-        $this->assertEquals('09060181233', $user->phone);
+        $this->assertEquals('09000000000', $user->phone);
         $this->assertEquals('nancy', $user->first_name);
         $this->assertEquals('julie', $user->middle_name);
         $this->assertEquals('macy', $user->last_name);
@@ -42,5 +42,6 @@ class UserTest extends TestCase
         $orders = Order::factory(2)->create(['user_id' => $user->id]);
 
         $this->assertTrue(in_array($orders[0]->id, $user->orders->pluck('id')->all()));
+        $this->assertTrue(in_array($orders[1]->id, $user->orders->pluck('id')->all()));
     }
 }

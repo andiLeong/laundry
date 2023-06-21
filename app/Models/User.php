@@ -28,4 +28,9 @@ class User extends Authenticatable
     {
         return UserType::from($value)->name;
     }
+
+    public function isCustomer()
+    {
+        return $this->type === UserType::customer->name;
+    }
 }
