@@ -16,11 +16,13 @@ class OrderTest extends TestCase
     {
         $order = Order::factory([
             'user_id' => 1,
-            'amount' => 100
+            'amount' => 100,
+            'creator_id' => 2,
         ])->create();
 
         $this->assertEquals(100, $order->amount);
         $this->assertEquals(1, $order->user_id);
+        $this->assertEquals(2, $order->creator_id);
     }
 
     /** @test */
@@ -35,5 +37,16 @@ class OrderTest extends TestCase
 
         $this->assertEquals($user->id, $order->user->id);
         $this->assertNull($noUserOrder->user);
+    }
+
+    /** @test */
+    public function it_belongs_to_an_creator()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory([
+            'creator_id' => $user->id,
+        ])->create();
+
+        $this->assertEquals($user->id, $order->fresh()->creator->id);
     }
 }

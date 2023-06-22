@@ -20,6 +20,7 @@ class OrderFactory extends Factory
         return [
             'user_id' => User::factory(),
             'amount' => rand(120,150),
+            'creator_id' => User::factory(),
         ];
     }
 }

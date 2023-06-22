@@ -8,9 +8,11 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 use Tests\Validate;
 
-class CreateOrderTest extends TestCase
+class EmployeeCreateOrderTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    protected string $endpoint = 'api/admin/order';
 
     /** @test */
     public function it_can_create_order(): void
@@ -18,8 +20,7 @@ class CreateOrderTest extends TestCase
         $this->signInAsAdmin();
         $this->assertEmpty($this->user->orders);
 
-        $this->withoutExceptionHandling();
-        $response = $this->post('/api/orders', [
+        $response = $this->post($this->endpoint, [
             'user_id' => $this->user->id,
             'amount' => 200,
         ]);
@@ -35,7 +36,7 @@ class CreateOrderTest extends TestCase
         $this->actingAs($customer);
 
         $customer2 = User::factory()->create();
-        $response = $this->postJson('/api/orders', [
+        $response = $this->postJson($this->endpoint, [
             'user_id' => $customer2->id,
             'amount' => 200,
         ]);
@@ -46,7 +47,7 @@ class CreateOrderTest extends TestCase
     /** @test */
     public function only_login_none_customer_can_create_order()
     {
-        $this->postJson('/api/orders', [
+        $this->postJson($this->endpoint, [
             'user_id' => 100,
             'amount' => 200,
         ])->assertUnauthorized();
@@ -71,7 +72,7 @@ class CreateOrderTest extends TestCase
 
     public function createOrder($overwrites = [])
     {
-        return $this->signInAsAdmin()->postJson('/api/orders',
+        return $this->signInAsAdmin()->postJson($this->endpoint,
             $this->orderAttributes($overwrites)
         );
     }

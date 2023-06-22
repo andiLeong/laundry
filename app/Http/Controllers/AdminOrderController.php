@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class AdminOrderController extends Controller
 {
     public function store()
     {
@@ -19,6 +19,6 @@ class OrderController extends Controller
             'user_id' => 'nullable|exists:users,id',
         ]);
 
-        return Order::create($data);
+        return Order::create($data + ['creator_id' => $user->id]);
     }
 }

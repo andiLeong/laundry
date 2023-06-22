@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->decimal('amount');
+            $table->unsignedBigInteger('creator_id');
             $table->timestamps();
         });
     }
