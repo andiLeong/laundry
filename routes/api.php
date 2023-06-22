@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,17 +19,19 @@ use Illuminate\Support\Facades\Route;
 // employee ordering
 // 1 for walk-in customer, employee can make order/bulk order for him. (can apply promotion)
 
-// service
-// 1 implement services model
-
 // future feature
 // 1 employee management (payroll, work hour, punch in/out)
 // 2 dashboard chart data showing
+// 3 branch concept
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('auth:sanctum')->group(function(){
-    Route::post('admin/order', [AdminOrderController::class,'store']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('admin/order', [AdminOrderController::class, 'store']);
+
+
+    Route::post('/address', [AddressController::class, 'store']);
+    Route::delete('/address/{address}', [AddressController::class, 'destroy']);
 });

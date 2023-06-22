@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 class Validate
