@@ -18,4 +18,9 @@ class Order extends Model
     {
         return $this->belongsTo(User::class,'creator_id');
     }
+
+    public function service(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Service::class,'service_id');
+    }
 }

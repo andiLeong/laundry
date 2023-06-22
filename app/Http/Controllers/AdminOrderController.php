@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class AdminOrderController extends Controller
@@ -15,10 +16,14 @@ class AdminOrderController extends Controller
         }
 
         $data = request()->validate([
-            'amount' => 'required|decimal:0,4',
+            'amount' => 'nullable|decimal:0,4',
             'user_id' => 'nullable|exists:users,id',
+            'service_id' => 'required|exists:services,id',
         ]);
 
+        $service = Service::find($data['service_id']);
+        $data['amount'] ??= $service->price;
+//        dd($data);
         return Order::create($data + ['creator_id' => $user->id]);
     }
 }

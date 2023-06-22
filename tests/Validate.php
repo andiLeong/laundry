@@ -13,6 +13,7 @@ class Validate
     protected $rules;
     protected $message = [];
     protected $currentRule;
+    protected bool $canBeNull = false;
 
     public static function name($name)
     {
@@ -38,6 +39,7 @@ class Validate
         foreach ($this->rules as $key => $value) {
 
             [$method, $args] = $this->parseRule($key, $value);
+            $this->isNullable($method);
             if (method_exists($this, $method)) {
                 $this->{$method}(...$args);
             }
@@ -68,12 +70,11 @@ class Validate
     public function decimal($min = 1, $max = 4)
     {
         $invalids = [
-            [$this->name => null],
             [$this->name => 'string'],
-            [$this->name => ' '],
             [$this->name => ['foo']],
         ];
 
+        $invalids = $this->appendsNullValue($invalids);
         $this->currentRule = 'decimal';
         $this->trigger($invalids);
     }
@@ -229,5 +230,41 @@ class Validate
         if (array_key_exists($this->currentRule, $this->message)) {
             return $this->message[$this->currentRule];
         }
+    }
+
+    /**
+     * detect if a method is nullable
+     * @param mixed $method
+     */
+    protected function isNullable(mixed $method): void
+    {
+        if ($method === 'nullable') {
+            $this->canBeNull = true;
+        }
+    }
+
+    /**
+     * add some nullable to invalid array
+     * @param array $invalid
+     * @return array
+     */
+    protected function appendsNullValue(array $invalid): array
+    {
+        if (!$this->canBeNull) {
+            return array_merge($invalid, $this->nullableInvalid());
+        }
+        return $invalid;
+    }
+
+    /**
+     * return a list of nullable invalid array
+     * @return array
+     */
+    private function nullableInvalid() :array
+    {
+        return [
+            [$this->name => ' '],
+            [$this->name => null],
+        ];
     }
 }
