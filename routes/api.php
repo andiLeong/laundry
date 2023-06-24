@@ -33,5 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/address', [AddressController::class, 'store']);
+    Route::patch('/address/{address}', [AddressController::class, 'update']);
+    Route::get('/address', [AddressController::class, 'index']);
     Route::delete('/address/{address}', [AddressController::class, 'destroy']);
 });

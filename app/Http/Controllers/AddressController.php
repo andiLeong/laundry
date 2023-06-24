@@ -7,18 +7,22 @@ use Illuminate\Http\Request;
 
 class AddressController extends Controller
 {
+    public function index()
+    {
+        return Address::where('user_id',auth()->id())->get();
+    }
+
     public function store(Request $request)
     {
         $user = auth()->user();
-        $attributes = $request->validate([
-            'city' => 'required|string|max:100',
-            'number' => 'required|string|max:100',
-            'province' => 'required|string|max:100',
-            'street' => 'required|string|max:255',
-            'name' => 'nullable|string|max:100',
-        ]);
+        $attributes = $this->validateAttribute($request);
 
         return Address::create(array_merge($attributes, ['user_id' => $user->id]));
+    }
+
+    public function update(Address $address,Request $request)
+    {
+        $address->update($this->validateAttribute($request));
     }
 
     public function destroy(Address $address)
@@ -29,4 +33,14 @@ class AddressController extends Controller
         $address->delete();
     }
 
+    protected function validateAttribute(Request $request)
+    {
+        return $request->validate([
+            'city' => 'required|string|max:100',
+            'number' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'street' => 'required|string|max:255',
+            'name' => 'nullable|string|max:100',
+        ]);
+    }
 }

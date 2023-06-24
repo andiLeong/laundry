@@ -21,4 +21,10 @@ class DeleteAddressTest extends TestCase
         $response = $this->signIn()->deleteJson('/api/address/' . $address->id);
         $response->assertForbidden();
     }
+
+    /** @test */
+    public function it_gets_404_not_found(): void
+    {
+        $this->signIn()->deleteJson('/api/address/'. 99999)->assertNotFound();
+    }
 }
