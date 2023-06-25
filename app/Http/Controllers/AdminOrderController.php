@@ -23,7 +23,6 @@ class AdminOrderController extends Controller
 
         $service = Service::find($data['service_id']);
         $data['amount'] ??= $service->price;
-//        dd($data);
         return Order::create($data + ['creator_id' => $user->id]);
     }
 }
