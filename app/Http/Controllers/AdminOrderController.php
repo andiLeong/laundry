@@ -19,26 +19,21 @@ class AdminOrderController extends Controller
         $service = $validation->service;
         if ($validation->request->has('promotion_ids')) {
 
-            $promotions = $validation->promotions;
-            $qualifyPromotions = $promotions
+            unset($data['isolated']);
+            unset($data['promotion_ids']);
+            $qualifyPromotions = $validation->promotions
                 ->map(fn($promotion) => new $promotion['class']($validation->user, $service, $promotion))
                 ->filter
                 ->qualify();
 
-            $discounts = $qualifyPromotions->sum->getDiscount();
-            $data['amount'] = $service->price - $service->price * $discounts;
-
-            unset($data['isolated']);
-            unset($data['promotion_ids']);
-            $order = Order::create($data + ['creator_id' => $logInUser->id]);
-
-            foreach ($qualifyPromotions as $promo) {
-                OrderPromotion::insert([
-                    'order_id' => $order->id,
-                    'promotion_id' => $promo->id
-                ]);
+            if($qualifyPromotions->empty()){
+                abort(403, 'Sorry You are not entitled with these promotions');
             }
-            return $order;
+
+            $data['amount'] = $service->applyDiscount($qualifyPromotions->sum->getDiscount());
+            return tap(Order::create($data + ['creator_id' => $logInUser->id]), function ($order) use($qualifyPromotions) {
+                OrderPromotion::insertByPromotions($qualifyPromotions, $order);
+            });
         }
 
         $data['amount'] ??= $service->price;

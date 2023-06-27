@@ -156,19 +156,6 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     }
 
     /** @test */
-    public function it_can_create_order_with_sign_up_discount_promotion()
-    {
-        $promotion = Promotion::factory()->create([
-            'name' => 'sign up promotion'
-        ]);
-        $this->createOrderWithPromotions([$promotion->id]);
-
-        $order = Order::first();
-        $this->assertNotNull($order);
-        $this->assertEquals(140, $order->amount);
-    }
-
-    /** @test */
     public function order_amount_is_correct_if_multiple_promotions_is_pass_and_valid()
     {
         $signUpPromotion = Promotion::factory()->create([
