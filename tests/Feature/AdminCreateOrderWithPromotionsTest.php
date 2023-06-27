@@ -8,14 +8,15 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\OrderCanBeCreated;
 use Tests\TestCase;
 use Tests\Validate;
 
 class AdminCreateOrderWithPromotionsTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use OrderCanBeCreated;
 
-    protected string $endpoint = 'api/admin/order';
 
     /** @test */
     public function isolated_must_be_valid()
@@ -158,13 +159,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     /** @test */
     public function order_amount_is_correct_if_multiple_promotions_is_pass_and_valid()
     {
-        $signUpPromotion = Promotion::factory()->create([
-            'name' => 'sign up promotion'
-        ]);
-        $wednesdayPromotion = Promotion::factory()->create([
-            'name' => 'Wednesday Promotion',
-            'class' => 'App\Models\Promotions\WednesdayWasher',
-        ]);
+        $signUpPromotion = $this->getPromotion();
+        $wednesdayPromotion = $this->getWednesdayPromotion();
         $this->createOrderWithPromotions([$signUpPromotion->id, $wednesdayPromotion->id]);
 
         $order = Order::first();
@@ -175,13 +171,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     /** @test */
     public function after_order_is_created_with_promotion_it_should_record_order_promotion()
     {
-        $signUpPromotion = Promotion::factory()->create([
-            'name' => 'sign up promotion'
-        ]);
-        $wednesdayPromotion = Promotion::factory()->create([
-            'name' => 'Wednesday Promotion',
-            'class' => 'App\Models\Promotions\WednesdayWasher',
-        ]);
+        $signUpPromotion = $this->getPromotion();
+        $wednesdayPromotion = $this->getWednesdayPromotion();
         $this->createOrderWithPromotions([$signUpPromotion->id, $wednesdayPromotion->id]);
 
         $orderPromotion = OrderPromotion::all();
@@ -189,40 +180,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->assertTrue($orderPromotion->pluck('promotion_id')->contains($wednesdayPromotion->id));
     }
 
-    public function createOrderWithPromotions(array $promotions, User $user = null)
+    public function getWednesdayPromotion()
     {
-        $user ??= User::factory()->create();
-        $service = $this->getService();
-
-        $this->assertDatabaseCount('order_promotions', 0);
-        $this->createOrder([
-            'promotion_ids' => $promotions,
-            'service_id' => $service->id,
-            'user_id' => $user->id,
-        ]);
-
-        $this->assertDatabaseCount('order_promotions', count($promotions));
-        $this->assertDatabaseCount('orders', 1);
-    }
-
-    public function createOrder($overwrites = [])
-    {
-        return $this->signInAsAdmin()->postJson($this->endpoint,
-            $this->orderAttributes($overwrites)
-        );
-    }
-
-    private function orderAttributes(mixed $overwrites)
-    {
-        $attributes = Order::factory()->make()->toArray();
-        $attributes = $attributes + ['isolated' => 0];
-        return array_merge($attributes, $overwrites);
-    }
-
-    public function getService($price = 200)
-    {
-        return Service::factory()->create([
-            'price' => $price
-        ]);
+        return $this->getPromotion('Wednesday Promotion','App\Models\Promotions\WednesdayWasher');
     }
 }

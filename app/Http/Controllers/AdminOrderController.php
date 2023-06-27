@@ -26,7 +26,7 @@ class AdminOrderController extends Controller
                 ->filter
                 ->qualify();
 
-            if($qualifyPromotions->empty()){
+            if($qualifyPromotions->isEmpty()){
                 abort(403, 'Sorry You are not entitled with these promotions');
             }
 

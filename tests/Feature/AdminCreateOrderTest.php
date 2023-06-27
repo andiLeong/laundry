@@ -6,14 +6,14 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\OrderCanBeCreated;
 use Tests\TestCase;
 use Tests\Validate;
 
 class AdminCreateOrderTest extends TestCase
 {
     use LazilyRefreshDatabase;
-
-    protected string $endpoint = 'api/admin/order';
+    use OrderCanBeCreated;
 
     /** @test */
     public function it_can_create_order(): void
@@ -104,13 +104,6 @@ class AdminCreateOrderTest extends TestCase
 
         $order = Order::first();
         $this->assertEquals(201, $order->amount);
-    }
-
-    public function createOrder($overwrites = [])
-    {
-        return $this->signInAsAdmin()->postJson($this->endpoint,
-            $this->orderAttributes($overwrites)
-        );
     }
 
     private function orderAttributes(mixed $overwrites)
