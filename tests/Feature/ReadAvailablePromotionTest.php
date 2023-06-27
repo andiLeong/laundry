@@ -6,7 +6,7 @@ use App\Models\Promotion;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
-class ReadPromotionTest extends TestCase
+class ReadAvailablePromotionTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
@@ -34,7 +34,7 @@ class ReadPromotionTest extends TestCase
     }
 
     /** @test */
-    public function normal_user_cant_get_sensitive_column()
+    public function it_cant_get_sensitive_column()
     {
         $promotion = Promotion::factory()->create(['name' => 'signup']);
         $response = $this->getJson('/api/available-promotion')->json()[0];

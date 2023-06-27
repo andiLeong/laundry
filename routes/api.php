@@ -30,10 +30,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('available-promotion', [AvailablePromotionController::class, 'index']);
+Route::get('/available-promotion', [AvailablePromotionController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('admin/order', [AdminOrderController::class, 'store']);
+    Route::post('/admin/order', [AdminOrderController::class, 'store']);
 
 
     Route::post('/address', [AddressController::class, 'store']);

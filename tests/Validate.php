@@ -54,13 +54,12 @@ class Validate
     public function integer()
     {
         $invalids = [
-            [$this->name => null],
             [$this->name => 'string'],
-            [$this->name => ' '],
             [$this->name => ['foo']],
             [$this->name => 78.97],
         ];
 
+        $invalids = $this->appendsNullValue($invalids);
         $this->currentRule = 'integer';
         $this->trigger($invalids);
     }
