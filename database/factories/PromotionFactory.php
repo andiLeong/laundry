@@ -23,7 +23,7 @@ class PromotionFactory extends Factory
             'isolated' => 0,
             'start' => now()->startOfDay()->addDay(),
             'until' => now()->startOfDay()->addDays(7),
-            'class' => 'app\\Models\\Promotions\\SignUp.php',
+            'class' => 'App\\Models\\Promotions\\SignUpDiscount',
         ];
     }
 }
