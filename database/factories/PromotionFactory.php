@@ -21,8 +21,8 @@ class PromotionFactory extends Factory
             'description' => fake()->paragraph(2),
             'status' => 1,
             'isolated' => 0,
-            'start' => now()->startOfDay()->addDay(),
-            'until' => now()->startOfDay()->addDays(7),
+            'start' => today()->subDays(),
+            'until' => today()->addDays(7),
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
         ];
     }

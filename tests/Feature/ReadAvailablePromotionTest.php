@@ -14,15 +14,15 @@ class ReadAvailablePromotionTest extends TestCase
     public function it_can_only_get_available_promotions()
     {
         $promotion = Promotion::factory()->create();
-        $promotion2 = Promotion::factory()->create([
-            'until' => null
-        ]);
+        $promotion2 = Promotion::factory()->create();
         $expiredPromotion = Promotion::factory()->create([
             'until' => today()->subDays(7)
         ]);
         $disabledPromotion = Promotion::factory()->create([
             'status' => 0,
-            'until' => null,
+        ]);
+        $notStartedPromotion = Promotion::factory()->create([
+            'start' => now()->addDay(),
         ]);
         $response = $this->getJson('/api/available-promotion');
         $ids = array_column($response->json(),'id');
@@ -31,6 +31,7 @@ class ReadAvailablePromotionTest extends TestCase
         $this->assertTrue(in_array($promotion2->id, $ids));
         $this->assertFalse(in_array($expiredPromotion->id, $ids));
         $this->assertFalse(in_array($disabledPromotion->id, $ids));
+        $this->assertFalse(in_array($notStartedPromotion->id, $ids));
     }
 
     /** @test */

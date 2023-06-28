@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\OrderCanBeCreated;
 use Tests\TestCase;
 
-class CreateOrderWithSignUpDiscount extends TestCase
+class CreateOrderWithSignUpDiscountTest extends TestCase
 {
     use LazilyRefreshDatabase;
     use OrderCanBeCreated;
@@ -22,7 +22,7 @@ class CreateOrderWithSignUpDiscount extends TestCase
 
         $order = Order::first();
         $this->assertNotNull($order);
-        $this->assertEquals(140, $order->amount);
+        $this->assertEquals(100, $order->amount);
     }
 
     /** @test */
@@ -39,9 +39,9 @@ class CreateOrderWithSignUpDiscount extends TestCase
             'promotion_ids' => [$this->promotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
-        ])->assertForbidden();
+        ]);
 
-        $this->assertEquals('Sorry You are not entitled with these promotions', $response->json('message'));
+        $this->assertValidateMessage('Sorry You are not qualified with these promotions',$response,'promotion_ids');
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('order_promotions', 0);
     }
@@ -59,9 +59,9 @@ class CreateOrderWithSignUpDiscount extends TestCase
             'promotion_ids' => [$this->promotion->id],
             'service_id' => $services[1]->id,
             'user_id' => User::factory()->create()->id,
-        ])->assertForbidden();
+        ]);
 
-        $this->assertEquals('Sorry You are not entitled with these promotions', $response->json('message'));
+        $this->assertValidateMessage('Sorry You are not qualified with these promotions',$response,'promotion_ids');
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('order_promotions', 0);
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Validation;
 
 use App\Models\Promotion;
+use App\Models\QualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -44,12 +45,14 @@ class AdminCreateOrderValidation
         $this
             ->validateService()
             ->validateUser()
-            ->validatePromotion();
+            ->validatePromotion()
+            ->qualifyPromotion();
 
         return $data;
     }
 
     /**
+     * validate user
      * @throws ValidationException
      */
     private function validateUser(): static
@@ -57,31 +60,33 @@ class AdminCreateOrderValidation
         if ($this->request->has('user_id')) {
             $this->user = User::find($this->request->get('user_id'));
             if (is_null($this->user)) {
-                $this->exception('user_id','user is invalid');
+                $this->exception('user_id', 'user is invalid');
             }
         }
         return $this;
     }
 
     /**
+     * validate service
      * @throws ValidationException
      */
     private function validateService(): static
     {
         $this->service = Service::find($this->request->get('service_id'));
         if (is_null($this->service)) {
-            $this->exception('service_id','service is invalid');
+            $this->exception('service_id', 'service is invalid');
         }
 
         return $this;
     }
 
     /**
+     * validate promotions
      * @throws ValidationException
      */
-    private function validatePromotion(): void
+    private function validatePromotion()
     {
-        if ($this->request->has('promotion_ids')) {
+        if ($this->validatePromotionIds()) {
             $promotionIds = $this->request->get('promotion_ids');
             $isolated = $this->request->get('isolated');
 
@@ -92,22 +97,17 @@ class AdminCreateOrderValidation
                 ->get();
 
             if (count($promotions) !== count($promotionIds)) {
-                $this->exception('promotion_ids','promotions are invalid');
+                $this->exception('promotion_ids', 'promotions are invalid');
             }
 
-            if($isolated == 1 && count($promotionIds) !== 1 ){
-                $this->exception('promotion_ids','isolated promotion is only allow one at a time');
-            }
-
-            foreach ($promotions as $promotion)
-            {
-                if (!class_exists($promotion['class'])) {
-                    $this->exception('promotion_ids','promotion is not implemented');
-                }
+            if ($isolated == 1 && count($promotionIds) !== 1) {
+                $this->exception('promotion_ids', 'isolated promotion is only allow one at a time');
             }
 
             $this->promotions = $promotions;
         }
+
+        return $this;
     }
 
     /**
@@ -116,10 +116,40 @@ class AdminCreateOrderValidation
      * @return mixed
      * @throws ValidationException
      */
-    protected function exception($key,$value): mixed
+    protected function exception($key, $value): mixed
     {
         throw ValidationException::withMessages([
             $key => [$value]
         ]);
+    }
+
+    /**
+     * check if we need to validated promotion_ids
+     * @return bool
+     */
+    public function validatePromotionIds()
+    {
+        return $this->request->has('promotion_ids');
+    }
+
+    /**
+     * try to get the user qualified promotions
+     * @throws ValidationException
+     */
+    private function qualifyPromotion()
+    {
+        if ($this->validatePromotionIds()) {
+            try {
+                $qualifyPromotions = new QualifiedPromotion($this->user, $this->service);
+                $qualifyPromotions = $qualifyPromotions->filter($this->promotions);
+            } catch (\Exception $e) {
+                $this->exception('promotion_ids', $e->getMessage());
+            }
+
+            if($qualifyPromotions->isEmpty()){
+                $this->exception('promotion_ids', 'Sorry You are not qualified with these promotions');
+            }
+            $this->promotions = $qualifyPromotions;
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 
 use App\Models\Order;
-use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;

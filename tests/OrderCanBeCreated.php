@@ -50,13 +50,36 @@ trait OrderCanBeCreated
         ]);
     }
 
-    protected function getPromotion($name = 'sign up promotion',$class = 'App\\Models\\Promotions\\SignUpDiscount')
+    protected function getPromotion(
+        $name = 'sign up promotion',
+        $class = 'App\\Models\\Promotions\\SignUpDiscount',
+        $isolated = false
+    )
     {
         $this->promotion = Promotion::factory()->create([
             'name' => $name,
             'class' => $class,
+            'isolated' => $isolated,
         ]);
 
         return $this->promotion;
+    }
+
+    protected function getWednesdayPromotion($isolated = false)
+    {
+        return $this->getPromotion(
+            'Wednesday Promotion',
+            'App\Models\Promotions\WednesdayWasher',
+            $isolated
+        );
+    }
+
+    protected function rewardGiftCertificatePromotion($isolated = false)
+    {
+        return Promotion::factory()->create([
+            'name' => 'reward gift cert',
+            'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
+            'isolated' => $isolated
+        ]);
     }
 }

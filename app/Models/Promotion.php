@@ -10,6 +10,8 @@ class Promotion extends Model
 {
     use HasFactory;
 
+    protected $hidden = ['class'];
+
     protected $casts = [
         'status' => 'boolean',
         'isolated' => 'boolean',
@@ -31,6 +33,11 @@ class Promotion extends Model
         return now()->gt($this->until);
     }
 
+    public function isIsolated()
+    {
+       return $this->isolated;
+    }
+
     public function scopeEnabled(Builder $query)
     {
         $query->where('status', 1);
@@ -38,8 +45,11 @@ class Promotion extends Model
 
     public function scopeAvailable(Builder $query)
     {
-        $query->where(fn($query) =>
-            $query->whereNull('until')->orWhere('until', '>', now())
-        );
+        $now = now();
+        $query
+            ->where('start', '<', $now)
+            ->where(fn($query) =>
+                $query->whereNull('until')->orWhere('until', '>', $now)
+            );
     }
 }

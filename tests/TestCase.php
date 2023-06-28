@@ -28,4 +28,14 @@ abstract class TestCase extends BaseTestCase
         $this->actingAs($this->user = $user);
         return $this;
     }
+
+    public function assertValidateMessage($message,$response,$key): static
+    {
+        $response->assertJsonValidationErrorFor($key);
+        $this->assertTrue(in_array(
+            $message,
+            $response->collect('errors')->get($key)
+        ));
+        return $this;
+    }
 }

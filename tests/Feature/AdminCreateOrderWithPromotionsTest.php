@@ -56,8 +56,23 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             ->postJson($this->endpoint, $this->orderAttributes(
                 [$name => [100, 101]]
             ));
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('promotions are invalid', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('promotions are invalid', $response, $name);
+    }
+
+    /** @test */
+    public function not_started_promotion_ids_validation()
+    {
+        $name = 'promotion_ids';
+        $notStartedPromotion = Promotion::factory()->create([
+            'start' => now()->addDays(2),
+            'until' => null,
+        ]);
+
+        $payload = $this->orderAttributes([
+            $name => [$notStartedPromotion->id],
+        ]);
+        $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
+        $this->assertValidateMessage('promotions are invalid', $response, $name);
     }
 
     /** @test */
@@ -72,8 +87,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             $name => [$expiredPromotion->id],
         ]);
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('promotions are invalid', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('promotions are invalid', $response, $name);
     }
 
     /** @test */
@@ -88,8 +102,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             $name => [$disabledPromotion->id],
         ]);
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('promotions are invalid', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('promotions are invalid', $response, $name);
     }
 
     /** @test */
@@ -104,8 +117,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             $name => [$classNotExistedPromotion->id],
         ]);
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('promotion is not implemented', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('promotion is not implemented', $response, $name);
     }
 
     /** @test */
@@ -122,8 +134,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         ]);
 
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('promotions are invalid', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('promotions are invalid', $response, $name);
     }
 
     /** @test */
@@ -140,8 +151,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         ]);
 
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $response->assertJsonValidationErrorFor($name);
-        $this->assertTrue(in_array('isolated promotion is only allow one at a time', $response->collect('errors')->get($name)));
+        $this->assertValidateMessage('isolated promotion is only allow one at a time', $response, $name);
     }
 
     /** @test */
@@ -202,16 +212,5 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->assertEquals(100, $order->amount);
     }
 
-    public function getWednesdayPromotion()
-    {
-        return $this->getPromotion('Wednesday Promotion', 'App\Models\Promotions\WednesdayWasher');
-    }
 
-    private function rewardGiftCertificatePromotion()
-    {
-        return Promotion::factory()->create([
-            'name' => 'reward gift cert',
-            'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
-        ]);
-    }
 }

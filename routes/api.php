@@ -3,6 +3,7 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AvailablePromotionController;
+use App\Http\Controllers\UserQualifiedPromotion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,7 @@ Route::get('/available-promotion', [AvailablePromotionController::class, 'index'
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/order', [AdminOrderController::class, 'store']);
+    Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotion::class, 'index']);
 
 
     Route::post('/address', [AddressController::class, 'store']);

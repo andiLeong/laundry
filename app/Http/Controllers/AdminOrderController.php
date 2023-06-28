@@ -21,17 +21,14 @@ class AdminOrderController extends Controller
 
             unset($data['isolated']);
             unset($data['promotion_ids']);
-            $qualifyPromotions = $validation->promotions
-                ->map(fn($promotion) => new $promotion['class']($validation->user, $service, $promotion))
-                ->filter
-                ->qualify();
 
-            if($qualifyPromotions->isEmpty()){
-                abort(403, 'Sorry You are not entitled with these promotions');
-            }
+            $qualifyPromotions = $validation->promotions;
+//            if($qualifyPromotions->isEmpty()){
+//                abort(403, 'Sorry You are not entitled with these promotions');
+//            }
 
             $data['amount'] = $service->applyDiscount($qualifyPromotions->sum->getDiscount());
-            return tap(Order::create($data + ['creator_id' => $logInUser->id]), function ($order) use($qualifyPromotions) {
+            return tap(Order::create($data + ['creator_id' => $logInUser->id]), function ($order) use ($qualifyPromotions) {
                 OrderPromotion::insertByPromotions($qualifyPromotions, $order);
             });
         }
