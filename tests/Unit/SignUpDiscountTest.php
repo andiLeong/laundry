@@ -17,7 +17,7 @@ class SignUpDiscountTest extends TestCase
     /** @test */
     public function only_user_that_dose_not_make_any_order_can_avail(): void
     {
-        $service = Service::factory()->create();
+        $service = Service::factory()->create(['name' => 'full']);
         $user = User::factory()->create();
         $signUpPromotion = Promotion::factory()->create([
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',

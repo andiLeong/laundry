@@ -13,4 +13,9 @@ class Service extends Model
     {
         return $this->price - $this->price * $discount;
     }
+
+    public function isFull()
+    {
+        return $this->id === 1 || str_contains($this->name, 'full');
+    }
 }

@@ -42,10 +42,11 @@ trait OrderCanBeCreated
         $this->assertDatabaseCount('orders', 1);
     }
 
-    public function getService($price = 200)
+    public function getService($price = 200, $name = 'full service')
     {
         return Service::factory()->create([
-            'price' => $price
+            'price' => $price,
+            'name' => $name
         ]);
     }
 

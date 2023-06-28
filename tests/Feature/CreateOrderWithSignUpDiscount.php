@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
+use App\Models\Service;
+use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\OrderCanBeCreated;
 use Tests\TestCase;
@@ -33,13 +35,34 @@ class CreateOrderWithSignUpDiscount extends TestCase
         $this->assertDatabaseCount('order_promotions', 0);
         $this->assertDatabaseCount('orders', 1);
 
-        $this->createOrder([
+        $response = $this->createOrder([
             'promotion_ids' => [$this->promotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
-        ]);
+        ])->assertForbidden();
 
+        $this->assertEquals('Sorry You are not entitled with these promotions', $response->json('message'));
         $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_promotions', 0);
+    }
+
+    /** @test */
+    public function it_cant_create_order_if_service_is_not_full_service(): void
+    {
+        $this->getPromotion();
+        $services = Service::factory(2)->create();
+
+        $this->assertDatabaseCount('order_promotions', 0);
+        $this->assertDatabaseCount('orders', 0);
+
+        $response = $this->createOrder([
+            'promotion_ids' => [$this->promotion->id],
+            'service_id' => $services[1]->id,
+            'user_id' => User::factory()->create()->id,
+        ])->assertForbidden();
+
+        $this->assertEquals('Sorry You are not entitled with these promotions', $response->json('message'));
+        $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('order_promotions', 0);
     }
 }
