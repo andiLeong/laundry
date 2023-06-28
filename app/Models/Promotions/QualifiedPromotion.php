@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Promotions;
 
+use App\Models\Promotion;
+use App\Models\Service;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 class QualifiedPromotion

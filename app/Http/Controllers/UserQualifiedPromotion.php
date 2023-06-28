@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\QualifiedPromotion;
+use App\Models\Promotions\QualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 

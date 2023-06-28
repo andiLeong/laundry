@@ -3,7 +3,7 @@
 namespace App\Http\Validation;
 
 use App\Models\Promotion;
-use App\Models\QualifiedPromotion;
+use App\Models\Promotions\QualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
