@@ -19,13 +19,18 @@ abstract class PromotionAbstract
         //
     }
 
-    public function __get(string $name)
-    {
-        return $this->promotion->{$name};
-    }
-
     public function getDiscount()
     {
         return $this->discount;
+    }
+
+    protected function isFullService() :bool
+    {
+        return $this->service->isFull();
+    }
+
+    public function __get(string $name)
+    {
+        return $this->promotion->{$name};
     }
 }

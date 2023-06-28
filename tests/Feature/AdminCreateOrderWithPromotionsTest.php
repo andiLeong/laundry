@@ -151,8 +151,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->createOrderWithPromotions([$promotion->id], $user = User::factory()->create());
 
         $order = Order::first();
-        $this->assertEquals($this->user->id,$order->creator_id);
-        $this->assertEquals($user->id,$order->user_id);
+        $this->assertEquals($this->user->id, $order->creator_id);
+        $this->assertEquals($user->id, $order->user_id);
     }
 
     /** @test */
@@ -164,7 +164,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
 
         $order = Order::first();
         $this->assertNotNull($order);
-        $this->assertEquals(100, $order->amount);
+        $this->assertEquals(80, $order->amount);
     }
 
     /** @test */
@@ -179,8 +179,39 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->assertTrue($orderPromotion->pluck('promotion_id')->contains($wednesdayPromotion->id));
     }
 
+    /** @test */
+    public function some_promotions_that_will_not_apply_discount_like_reward_gift_certificates()
+    {
+        $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
+        $this->createOrderWithPromotions([$rewardGiftCertificatePromotion->id]);
+
+        $orderId = OrderPromotion::where('promotion_id', $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
+        $order = Order::find($orderId);
+        $this->assertEquals(200, $order->amount);
+    }
+
+    /** @test */
+    public function order_amount_is_correct_if_one_promotion_is_non_discount_apply_promotion_another_is_apply_discount()
+    {
+        $signUpPromotion = $this->getPromotion();
+        $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
+        $this->createOrderWithPromotions([$signUpPromotion->id, $rewardGiftCertificatePromotion->id]);
+
+        $orderId = OrderPromotion::where('promotion_id', $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
+        $order = Order::find($orderId);
+        $this->assertEquals(100, $order->amount);
+    }
+
     public function getWednesdayPromotion()
     {
-        return $this->getPromotion('Wednesday Promotion','App\Models\Promotions\WednesdayWasher');
+        return $this->getPromotion('Wednesday Promotion', 'App\Models\Promotions\WednesdayWasher');
+    }
+
+    private function rewardGiftCertificatePromotion()
+    {
+        return Promotion::factory()->create([
+            'name' => 'reward gift cert',
+            'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
+        ]);
     }
 }
