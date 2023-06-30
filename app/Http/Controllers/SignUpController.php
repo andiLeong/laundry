@@ -7,7 +7,6 @@ use App\Models\Sms\Template;
 use App\Models\User;
 use App\Models\VerificationToken;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
