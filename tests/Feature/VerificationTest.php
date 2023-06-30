@@ -85,7 +85,7 @@ class VerificationTest extends TestCase
     /** @test */
     public function verified_user_gets_404(): void
     {
-        $this->setUser('09111111111', now()->setDay());
+        $this->setUser('09111111111', now()->subDays());
         $response = $this->verify($this->token, $this->user->phone);
         $response->assertNotFound();
     }

@@ -41,6 +41,15 @@ class SignUpTest extends TestCase
     }
 
     /** @test */
+    public function after_signup_an_user_object_is_return_but_exclude_sensitive_information(): void
+    {
+        $response = $this->signup([
+            'password' => 'new pass'
+        ]);
+        $this->assertNull($response->json('password'));
+    }
+
+    /** @test */
     public function after_signup_a_verification_is_recorded(): void
     {
         $this->assertDatabaseCount('verification_tokens', 0);
@@ -146,6 +155,7 @@ class SignUpTest extends TestCase
     private function userAttributes(mixed $overwrites): array
     {
         $attributes = User::factory()->make()->toArray();
+        $overwrites = $overwrites + ['password' => 'password'];
         return array_merge($attributes, $overwrites);
     }
 }

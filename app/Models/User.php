@@ -12,6 +12,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $hidden = ['password'];
 
     /**
      * The attributes that should be cast.
