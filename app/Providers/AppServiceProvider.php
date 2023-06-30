@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Models\Sms\Contract\Sms as SmsContract;
 use App\Models\Sms\Sms;
+use App\Models\Sms\Template;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(SmsContract::class,function($app){
             return new Sms();
+        });
+
+        $this->app->singleton(Template::class,function($app){
+            return new Template();
         });
     }
 }

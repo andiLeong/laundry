@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Sms\Contract\Sms;
+use App\Models\Sms\Template;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -54,13 +55,26 @@ class SignUpTest extends TestCase
     }
 
     /** @test */
-    public function sms_is_sent_to_user_contains_the_token(): void
+    public function after_signup_sms_is_sent_to_user_contains_the_token(): void
     {
-        $this->withoutExceptionHandling();
         $this->mock(Sms::class, function($mock){
             return $mock->shouldReceive('send')->once()->andReturn(true);
         });
         $this->signup();
+    }
+
+    /** @test */
+    public function verification_sms_must_send_to_the_correct_number_and_message_as_well(): void
+    {
+        $this->mock(Template::class, fn ($mock) =>
+            $mock->shouldReceive('get')->once()->with('verification',8899)->andReturn('a template 8899')
+        );
+        $this->mock(Sms::class, fn($mock) =>
+            $mock->shouldReceive('send')->once()->with('09081187899', 'a template 8899')
+        );
+        $this->signup([
+            'phone' => '09081187899'
+        ]);
     }
 
     /** @test */
