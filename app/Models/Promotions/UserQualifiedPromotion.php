@@ -7,7 +7,7 @@ use App\Models\Service;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
-class QualifiedPromotion
+class UserQualifiedPromotion
 {
     protected $columns = ['*'];
 
@@ -49,9 +49,9 @@ class QualifiedPromotion
 
     /**
      * @param string[] $columns
-     * @return QualifiedPromotion
+     * @return UserQualifiedPromotion
      */
-    public function setColumns(array $columns): QualifiedPromotion
+    public function setColumns(array $columns): UserQualifiedPromotion
     {
         $this->columns = $columns;
         return $this;

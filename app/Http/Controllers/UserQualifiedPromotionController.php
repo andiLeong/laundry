@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Promotions\QualifiedPromotion;
+use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 
-class UserQualifiedPromotion extends Controller
+class UserQualifiedPromotionController extends Controller
 {
     public function index(User $user, Service $service)
     {
-        $qualifiedPromotion = new QualifiedPromotion($user, $service);
+        $qualifiedPromotion = new UserQualifiedPromotion($user, $service);
         $qualifiedPromotion->setColumns(['id', 'name', 'status', 'start', 'until', 'isolated', 'class']);
 
         try {

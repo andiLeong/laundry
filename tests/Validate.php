@@ -142,9 +142,23 @@ class Validate
     /**
      * @throws \Exception
      */
-    public function unique($column, $model)
+    public function min($length = 5)
     {
-        $model = create($model);
+        $invalids = [
+            [$this->name => Str::random($length - 1)],
+        ];
+
+        $this->currentRule = 'min';
+        $this->trigger($invalids);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function unique($column, $model, $value = null)
+    {
+        $attributes = $value ? [$column => $value] : [];
+        $model = $model::factory()->create($attributes);
         $invalids = [
             [$this->name => $model->{$column}],
         ];
@@ -260,7 +274,7 @@ class Validate
      * return a list of nullable invalid array
      * @return array
      */
-    private function nullableInvalid() :array
+    private function nullableInvalid(): array
     {
         return [
             [$this->name => ' '],

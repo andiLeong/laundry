@@ -3,7 +3,7 @@
 namespace App\Http\Validation;
 
 use App\Models\Promotion;
-use App\Models\Promotions\QualifiedPromotion;
+use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -140,7 +140,7 @@ class AdminCreateOrderValidation
     {
         if ($this->validatePromotionIds()) {
             try {
-                $qualifyPromotions = new QualifiedPromotion($this->user, $this->service);
+                $qualifyPromotions = new UserQualifiedPromotion($this->user, $this->service);
                 $qualifyPromotions = $qualifyPromotions->filter($this->promotions);
             } catch (\Exception $e) {
                 $this->exception('promotion_ids', $e->getMessage());

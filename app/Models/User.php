@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,7 +18,9 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'phone_verified_at' => 'datetime'
+    ];
 
     public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
@@ -32,5 +35,10 @@ class User extends Authenticatable
     public function isCustomer()
     {
         return $this->type === UserType::customer->name;
+    }
+
+    public function isVerified()
+    {
+        return !is_null($this->phone_verified_at);
     }
 }

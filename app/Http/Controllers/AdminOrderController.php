@@ -23,9 +23,6 @@ class AdminOrderController extends Controller
             unset($data['promotion_ids']);
 
             $qualifyPromotions = $validation->promotions;
-//            if($qualifyPromotions->isEmpty()){
-//                abort(403, 'Sorry You are not entitled with these promotions');
-//            }
 
             $data['amount'] = $service->applyDiscount($qualifyPromotions->sum->getDiscount());
             return tap(Order::create($data + ['creator_id' => $logInUser->id]), function ($order) use ($qualifyPromotions) {

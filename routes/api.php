@@ -3,7 +3,8 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AvailablePromotionController;
-use App\Http\Controllers\UserQualifiedPromotion;
+use App\Http\Controllers\SignUpController;
+use App\Http\Controllers\UserQualifiedPromotionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,9 +15,6 @@ use Illuminate\Support\Facades\Route;
 // 3 when customer ordering they may choose what service they want.
 // 4 only few places are allow to pickup/delivery (at least for right now) since pickup/delivery is free
 // 5 implement logic to check what date/time is available for pickup
-
-// promotion
-// 1 implement promotions
 
 // employee ordering
 // 1 for walk-in customer, employee can make order/bulk order for him. (can apply promotion)
@@ -32,10 +30,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/available-promotion', [AvailablePromotionController::class, 'index']);
+Route::post('/signup', [SignUpController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/order', [AdminOrderController::class, 'store']);
-    Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotion::class, 'index']);
+    Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
 
     Route::post('/address', [AddressController::class, 'store']);
