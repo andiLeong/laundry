@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Models\VerificationToken;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -43,5 +44,16 @@ class UserTest extends TestCase
 
         $this->assertTrue(in_array($orders[0]->id, $user->orders->pluck('id')->all()));
         $this->assertTrue(in_array($orders[1]->id, $user->orders->pluck('id')->all()));
+    }
+
+    /** @test */
+    public function it_can_fetch_the_latest_verification_token()
+    {
+        $user = User::factory()->create();
+        $firstToken = VerificationToken::factory()->create(['user_id' => $user]);
+        $secondToken = VerificationToken::factory()->create(['user_id' => $user]);
+
+        $this->assertEquals($secondToken->token, $user->verification->token);
+        $this->assertEquals($secondToken->user_id, $user->id);
     }
 }

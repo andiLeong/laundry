@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sms\Contract\Sms;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -33,9 +34,33 @@ class SignUpTest extends TestCase
     /** @test */
     public function after_signup_user_type_is_customer(): void
     {
-        $this->signup();
-        $user = User::first();
+        $response = $this->signup();
+        $user = User::find($response->json('id'));
         $this->assertTrue($user->isCustomer());
+    }
+
+    /** @test */
+    public function after_signup_a_verification_is_recorded(): void
+    {
+        $this->assertDatabaseCount('verification_tokens', 0);
+        $response = $this->signup();
+        $user = User::find($response->json('id'));
+        $verification = $user->verification;
+        $mins = $verification->expired_at->diffInMinutes(now());
+
+        $this->assertTrue($mins <= 5);
+        $this->assertFalse($mins > 5);
+        $this->assertNotNull($user->verification->token);
+    }
+
+    /** @test */
+    public function sms_is_sent_to_user_contains_the_token(): void
+    {
+        $this->withoutExceptionHandling();
+        $this->mock(Sms::class, function($mock){
+            return $mock->shouldReceive('send')->once()->andReturn(true);
+        });
+        $this->signup();
     }
 
     /** @test */

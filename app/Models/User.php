@@ -27,6 +27,11 @@ class User extends Authenticatable
        return $this->hasMany(Order::class,'user_id','id');
     }
 
+    public function verification()
+    {
+        return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
+    }
+
     public function getTypeAttribute($value)
     {
         return UserType::from($value)->name;
