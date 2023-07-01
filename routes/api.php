@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AvailablePromotionController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\UserQualifiedPromotionController;
+use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,8 +32,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/available-promotion', [AvailablePromotionController::class, 'index']);
-Route::post('/signup', [SignUpController::class, 'store']);
-Route::post('/verification', [VerificationController::class, 'store']);
+
+
+Route::middleware('guest')->group(function () {
+    Route::post('/signup', [SignUpController::class, 'store']);
+    Route::post('/verification', [VerificationController::class, 'store']);
+    Route::post('/verification-code/send/{user:phone}', [SendVerificationCodeController::class, 'store']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/order', [AdminOrderController::class, 'store']);

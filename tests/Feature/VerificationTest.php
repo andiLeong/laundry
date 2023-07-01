@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
+use Tests\UserCanBeVerified;
 
 class VerificationTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use UserCanBeVerified;
 
     protected $endpoint = 'api/verification';
     private $phone;
@@ -23,7 +25,7 @@ class VerificationTest extends TestCase
         parent::setUp();
         $this->phone = '09050887900';
         $this->token = 95862;
-        $this->setUser();
+        $this->setUserForVerification();
     }
 
     /** @test */
@@ -85,7 +87,7 @@ class VerificationTest extends TestCase
     /** @test */
     public function verified_user_gets_404(): void
     {
-        $this->setUser('09111111111', now()->subDays());
+        $this->setUserForVerification('09111111111', now()->subDays());
         $response = $this->verify($this->token, $this->user->phone);
         $response->assertNotFound();
     }
@@ -97,13 +99,10 @@ class VerificationTest extends TestCase
         $this->assertValidateMessage('Phone is invalid', $response, 'phone');
     }
 
-    public function setUser($phone = null, $verifiedAt = null)
+    /** @test */
+    public function authenticated_user_cant_verify_other_phone()
     {
-        $phone ??= $this->phone;
-        $this->user = User::factory()->create([
-            'phone' => $phone,
-            'phone_verified_at' => $verifiedAt
-        ]);
+        $this->signIn()->postJson($this->endpoint, ['0956484444'])->assertForbidden();
     }
 
     /**
