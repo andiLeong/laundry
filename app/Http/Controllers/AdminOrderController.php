@@ -8,13 +8,15 @@ use App\Models\OrderPromotion;
 
 class AdminOrderController extends Controller
 {
+    public function index()
+    {
+        $orders = Order::orderBy('id','desc')->get();
+        return $orders;
+    }
+
     public function store(AdminCreateOrderValidation $validation)
     {
         $logInUser = auth()->user();
-        if ($logInUser->isCustomer()) {
-            abort(403, 'You do not have right to perform this action');
-        }
-
         $data = $validation->validate();
         $service = $validation->service;
         if ($validation->request->has('promotion_ids')) {

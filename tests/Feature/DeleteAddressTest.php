@@ -15,6 +15,12 @@ class DeleteAddressTest extends TestCase
     }
 
     /** @test */
+    public function only_login_user_can_delete()
+    {
+        $this->deleteJson('/api/address/9988')->assertUnauthorized();
+    }
+
+    /** @test */
     public function it_can_only_be_deleted_by_its_owner()
     {
         $address = Address::factory()->create();

@@ -23,7 +23,8 @@ class UserQualifiedPromotionTest extends TestCase
     /** @test */
     public function it_can_check_what_promotions_a_user_is_qualify(): void
     {
-        $signUpDiscountPromotion = $this->getPromotion('sign up promotion', 'App\\Models\\Promotions\\SignUpDiscount', true);
+        $signUpDiscountPromotion = $this->getPromotion('sign up promotion', 'App\\Models\\Promotions\\SignUpDiscount',
+            true);
         $wednesdayPromotion = $this->getWednesdayPromotion();
         $rewardCertificate = $this->rewardGiftCertificatePromotion();
         $service = $this->getService();
@@ -62,11 +63,11 @@ class UserQualifiedPromotionTest extends TestCase
     /** @test */
     public function if_promotion_class_not_implement_it_should_gets_503(): void
     {
-        $this->getPromotion('foo','App\\Foo');
+        $this->getPromotion('foo', 'App\\Foo');
         $response = $this->getQualifiedPromotions();
 
         $message = $response->assertServiceUnavailable()->json('message');
-        $this->assertEquals('promotion is not implemented',$message);
+        $this->assertEquals('promotion is not implemented', $message);
     }
 
     /** @test */
@@ -105,6 +106,23 @@ class UserQualifiedPromotionTest extends TestCase
             $qualifyPromotion2->id,
             array_column($body['isolated'], 'id')
         ));
+    }
+
+    /** @test */
+    public function only_admin_can_access()
+    {
+        $customer = User::factory()->create(['type' => 0]);
+        $this->actingAs($customer);
+
+        $service = $this->getService();
+        $response = $this->getJson($this->endpoint . "/{$customer->id}/{$service->id}");
+        $response->assertForbidden();
+    }
+
+    /** @test */
+    public function only_logged_in_user_can_access()
+    {
+        $this->getJson($this->endpoint . "/8/9")->assertUnauthorized();
     }
 
     public function getQualifiedPromotions($user = null)

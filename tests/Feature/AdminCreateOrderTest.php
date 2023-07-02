@@ -24,7 +24,7 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function customer_it_self_cant_create_order()
+    public function only_admin_can_create_order()
     {
         $customer = User::factory()->create();
         $this->actingAs($customer);
@@ -39,7 +39,7 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function only_login_none_customer_can_create_order()
+    public function only_login_user_can_create_order()
     {
         $this->postJson($this->endpoint, [
             'user_id' => 100,
