@@ -25,7 +25,7 @@ class VerificationTest extends TestCase
         parent::setUp();
         $this->phone = '09050887900';
         $this->token = 95862;
-        $this->setUserForVerification();
+        $this->setVerifiedUser();
     }
 
     /** @test */
@@ -34,10 +34,9 @@ class VerificationTest extends TestCase
         $this->bindToken($this->token);
 
         $this->assertFalse($this->user->isVerified());
-        $response = $this->verify($this->token);
+        $this->verify($this->token)->assertStatus(200);
 
         $this->assertTrue($this->user->fresh()->isVerified());
-        $response->assertStatus(200);
     }
 
     /** @test */
@@ -78,7 +77,7 @@ class VerificationTest extends TestCase
     }
 
     /** @test */
-    public function none_token_can_not_be_verified(): void
+    public function none_verification_token_can_not_be_verified(): void
     {
         $response = $this->verify($this->token);
         $this->assertValidateMessage('Token is invalid', $response, 'token');
@@ -87,9 +86,8 @@ class VerificationTest extends TestCase
     /** @test */
     public function verified_user_gets_404(): void
     {
-        $this->setUserForVerification('09111111111', now()->subDays());
-        $response = $this->verify($this->token, $this->user->phone);
-        $response->assertNotFound();
+        $this->setVerifiedUser('09111111111', now()->subDays());
+        $this->verify($this->token, $this->user->phone)->assertNotFound();
     }
 
     /** @test */

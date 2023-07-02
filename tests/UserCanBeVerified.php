@@ -33,7 +33,7 @@ trait UserCanBeVerified
         ]);
     }
 
-    public function setUserForVerification($phone = null, $verifiedAt = null)
+    public function setVerifiedUser($phone = null, $verifiedAt = null)
     {
         $phone ??= $this->phone;
         $this->user = User::factory()->create([

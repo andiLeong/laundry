@@ -27,8 +27,8 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function it_can_send_a_verification_code_to_user_phone_with_correct_number_and_message(): void
     {
-        $this->setUserForVerification();
-        $this->fakeSms()
+        $this->setVerifiedUser()
+            ->fakeSms()
             ->postJson($this->endpoint . '/' . $this->user->phone)
             ->assertOk();
     }
@@ -37,7 +37,7 @@ class SendVerificationCodeTest extends TestCase
     public function once_sms_code_is_sent_an_sms_log_is_recorded()
     {
         $this->assertDatabaseCount('sms_logs', 0);
-        $this->setUserForVerification()
+        $this->setVerifiedUser()
             ->fakeSms()
             ->postJson($this->endpoint . '/' . $this->user->phone);
 
@@ -51,7 +51,7 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function once_sms_code_is_sent_verification_token_record_is_added()
     {
-        $this->setUserForVerification();
+        $this->setVerifiedUser();
         $user = $this->user;
         $this->assertNull($user->verification);
         $this->fakeSms()->postJson($this->endpoint . '/' . $user->phone);
@@ -66,7 +66,7 @@ class SendVerificationCodeTest extends TestCase
     }
 
     /** @test */
-    public function if_user_is_verified_there_is_no_reason_to_send()
+    public function verified_user_get_403()
     {
         $user = User::factory()->create();
         $this->postJson($this->endpoint . '/' . $user->phone)->assertForbidden();
@@ -79,16 +79,16 @@ class SendVerificationCodeTest extends TestCase
     }
 
     /** @test */
-    public function its_only_available_for_non_sign_in_user()
+    public function sign_in_user_gets_403()
     {
-        $this->setUserForVerification();
-        $this->signIn()
+        $this->setVerifiedUser()
+            ->signIn()
             ->postJson($this->endpoint . '/' . $this->user->phone)
             ->assertForbidden();
     }
 
     /** @test */
-    public function it_abort_the_request_if_user_is_abusing_the_endpoint()
+    public function it_gets_400_if_user_is_black_list_for_sms_verification()
     {
         $this->markTestSkipped();
     }

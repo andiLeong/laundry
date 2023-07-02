@@ -26,10 +26,9 @@ class SignUpTest extends TestCase
     /** @test */
     public function it_can_sign_up_user(): void
     {
-        $response = $this->fakeSms()->signUpWithPhone();
+        $response = $this->fakeSms()->signUpWithPhone()->assertSuccessful();
         $user = User::find($response->json('id'));
         $this->assertNotNull($user);
-        $response->assertSuccessful();
     }
 
     /** @test */
@@ -86,12 +85,6 @@ class SignUpTest extends TestCase
         $this->assertTrue($mins <= 5);
         $this->assertFalse($mins > 5);
         $this->assertNotNull($user->verification->token);
-    }
-
-    /** @test */
-    public function after_signup_sms_is_sent_to_user_contains_the_token(): void
-    {
-        $this->fakeSms()->signUpWithPhone();
     }
 
     /** @test */
