@@ -3,6 +3,7 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AvailablePromotionController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
@@ -36,6 +37,7 @@ Route::get('/available-promotion', [AvailablePromotionController::class, 'index'
 
 Route::middleware('guest')->group(function () {
     Route::post('/signup', [SignUpController::class, 'store']);
+    Route::post('/login', [LoginController::class, 'store']);
     Route::post('/verification', [VerificationController::class, 'store']);
     Route::post('/verification-code/send/{user:phone}', [SendVerificationCodeController::class, 'store']);
 });

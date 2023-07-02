@@ -27,7 +27,7 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function it_can_send_a_verification_code_to_user_phone_with_correct_number_and_message(): void
     {
-        $this->setVerifiedUser()
+        $this->setUnverifiedUser()
             ->fakeSms()
             ->postJson($this->endpoint . '/' . $this->user->phone)
             ->assertOk();
@@ -37,7 +37,7 @@ class SendVerificationCodeTest extends TestCase
     public function once_sms_code_is_sent_an_sms_log_is_recorded()
     {
         $this->assertDatabaseCount('sms_logs', 0);
-        $this->setVerifiedUser()
+        $this->setUnverifiedUser()
             ->fakeSms()
             ->postJson($this->endpoint . '/' . $this->user->phone);
 
@@ -51,7 +51,7 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function once_sms_code_is_sent_verification_token_record_is_added()
     {
-        $this->setVerifiedUser();
+        $this->setUnverifiedUser();
         $user = $this->user;
         $this->assertNull($user->verification);
         $this->fakeSms()->postJson($this->endpoint . '/' . $user->phone);
@@ -81,7 +81,7 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function sign_in_user_gets_403()
     {
-        $this->setVerifiedUser()
+        $this->setUnverifiedUser()
             ->signIn()
             ->postJson($this->endpoint . '/' . $this->user->phone)
             ->assertForbidden();

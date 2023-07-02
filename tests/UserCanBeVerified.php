@@ -35,6 +35,18 @@ trait UserCanBeVerified
 
     public function setVerifiedUser($phone = null, $verifiedAt = null)
     {
+        $this->setUserForVerification($phone,now()->subDays());
+        return $this;
+    }
+
+    public function setUnverifiedUser($phone = null)
+    {
+        $this->setUserForVerification($phone);
+        return $this;
+    }
+
+    protected function setUserForVerification($phone = null, $verifiedAt = null)
+    {
         $phone ??= $this->phone;
         $this->user = User::factory()->create([
             'phone' => $phone,

@@ -32,6 +32,7 @@ abstract class TestCase extends BaseTestCase
     public function assertValidateMessage($message,$response,$key): static
     {
         $response->assertJsonValidationErrorFor($key);
+        $response->assertStatus(422);
         $this->assertTrue(in_array(
             $message,
             $response->collect('errors')->get($key)

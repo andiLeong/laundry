@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\VerificationToken;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +24,7 @@ class VerificationTest extends TestCase
         parent::setUp();
         $this->phone = '09050887900';
         $this->token = 95862;
-        $this->setVerifiedUser();
+        $this->setUnverifiedUser();
     }
 
     /** @test */
