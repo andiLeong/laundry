@@ -60,6 +60,21 @@ class SignUpTest extends TestCase
     }
 
     /** @test */
+    public function after_signup_user_password_is_hash(): void
+    {
+        $this->fakeSms();
+        $password = '1234qwer';
+        $response = $this->signup([
+            'password' => $password,
+            'phone' => $this->phone
+        ]);
+
+        $user = User::find($response->json('id'));
+        $this->assertNotEquals($user->password, $password);
+        $this->assertTrue(password_verify($password, $user->password));
+    }
+
+    /** @test */
     public function after_signup_a_verification_is_recorded(): void
     {
         $this->assertDatabaseCount('verification_tokens', 0);

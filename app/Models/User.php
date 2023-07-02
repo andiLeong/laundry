@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Attribute;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -33,9 +33,19 @@ class User extends Authenticatable
         return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
     }
 
-    public function getTypeAttribute($value)
+    protected function type(): Attribute
     {
-        return UserType::from($value)->name;
+        return Attribute::make(
+            get: fn (string $value) => UserType::from($value)->name
+        );
+    }
+
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            get: null,
+            set: fn (string $value) => bcrypt($value),
+        );
     }
 
     public function isCustomer()
