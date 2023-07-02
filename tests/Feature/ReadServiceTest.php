@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Service;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ReadServiceTest extends TestCase
@@ -25,6 +26,7 @@ class ReadServiceTest extends TestCase
         $this->assertTrue($body->contains($dry->name));
         $this->assertTrue($body->contains($full->name));
         $this->assertfalse($body->contains('wash + dry'));
+        Cache::flush();
     }
 
     /** @test */
@@ -41,5 +43,6 @@ class ReadServiceTest extends TestCase
 
         $this->assertFalse($body->contains($new->name));
         $this->assertTrue($body->contains($full->name));
+        Cache::flush();
     }
 }

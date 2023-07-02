@@ -11,7 +11,7 @@ class ServiceController extends Controller
     {
          return Cache::remember(
              'services',
-             now()->addDays(7),
+             now()->addDays(30),
              fn() => Service::all()
          );
     }

@@ -38,6 +38,11 @@ class Promotion extends Model
        return $this->isolated;
     }
 
+    public function active()
+    {
+       return $this->status == true;
+    }
+
     public function scopeEnabled(Builder $query)
     {
         $query->where('status', 1);
