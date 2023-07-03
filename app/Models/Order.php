@@ -23,4 +23,9 @@ class Order extends Model
     {
         return $this->belongsTo(Service::class,'service_id');
     }
+
+    public function promotions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Promotion::class, 'order_promotions', 'order_id', 'promotion_id');
+    }
 }

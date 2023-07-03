@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->type === UserType::customer->name;
     }
 
+    public function isEmployee()
+    {
+        return $this->type === UserType::employee->name;
+    }
+
     public function isVerified()
     {
         return !is_null($this->phone_verified_at);

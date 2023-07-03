@@ -5,12 +5,51 @@ namespace App\Http\Controllers;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Models\Order;
 use App\Models\OrderPromotion;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::orderBy('id','desc')->get();
+        $user = Auth::user();
+        $query = Order::query();
+
+        if ($request->has('phone')) {
+            $query->whereHas('user', function (Builder $query) use ($request) {
+                return $query->where('phone', $request->phone);
+            });
+        }
+
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->has('first_name')) {
+            $query->whereHas('user', function (Builder $query) use ($request) {
+                return $query->where('first_name', $request->first_name);
+            });
+        }
+
+        if ($request->has('include_user') && $request->include_user == false) {
+            $query->whereNull('user_id');
+        }
+
+        if ($request->has('include_user') && $request->include_user == true) {
+            $query->whereNotNull('user_id');
+        }
+
+        if ($user->isEmployee()) {
+            $query->where('creator_id', $user->id);
+        }
+
+        $orders = $query
+            ->orderBy('id', 'desc')
+            ->with('user:id,phone,first_name', 'service:name,id')
+            ->withCount('promotions')
+            ->get();
+
         return $orders;
     }
 

@@ -24,7 +24,7 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function only_admin_can_create_order()
+    public function only_admin_and_employee_can_create_order()
     {
         $customer = User::factory()->create();
         $this->actingAs($customer);
