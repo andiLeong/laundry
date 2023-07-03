@@ -10,7 +10,6 @@ class WhereNullFilter implements Filters
 {
 
     private $option;
-    private $clauses = ['whereNull','whereNotNull'];
 
     /**
      * WhereNullFilter constructor.
@@ -29,20 +28,8 @@ class WhereNullFilter implements Filters
      */
     public function filter()
     {
-        if ($this->shouldFilter()) {
-            $method = $this->option['clause'];
-            $this->query->{$method}($this->parser->column);
-        }
+        $method = $this->option['clause'];
+        $this->query->{$method}($this->parser->column);
         return $this->query;
-    }
-
-    /**
-     * decide if we should filter based on the option
-     *
-     * @return bool
-     */
-    public function shouldFilter() :bool
-    {
-        return isset($this->option['clause']) && in_array($this->option['clause'], $this->clauses);
     }
 }

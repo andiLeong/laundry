@@ -2,19 +2,21 @@
 
 namespace App\QueryFilter\Filters;
 
+
 use App\QueryFilter\QueryArgumentPhaser;
 
-class WhereFilter implements Filters
+class WhereNotNullFilter implements Filters
 {
+    private $option;
 
     /**
-     * WhereFilter constructor.
+     * WhereNullFilter constructor.
      * @param $query
      * @param QueryArgumentPhaser $parser
      */
     public function __construct(private $query, private QueryArgumentPhaser $parser)
     {
-        //
+        $this->option = $this->parser->getOption();
     }
 
     /**
@@ -24,8 +26,8 @@ class WhereFilter implements Filters
      */
     public function filter()
     {
-        $arg = [$this->parser->column, $this->parser->operator, $this->parser->value];
-        $this->query->where(...$arg);
+        $method = $this->option['clause'];
+        $this->query->{$method}($this->parser->column);
         return $this->query;
     }
 }

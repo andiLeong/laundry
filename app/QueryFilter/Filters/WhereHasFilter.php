@@ -20,21 +20,15 @@ class WhereHasFilter implements Filters
 
     public function filter()
     {
-        if ($this->shouldFilter()) {
-            $method = $this->option['clause'];
+        $method = $this->option['clause'];
 
-            $this->query->{$method}(
-                $this->option['relationship'],
-                $this->callback()
-            );
-        }
+        $this->query->{$method}(
+            $this->option['relationship'],
+            $this->callback()
+        );
         return $this->query;
     }
 
-    public function shouldFilter(): bool
-    {
-        return isset($this->option['clause']) && $this->option['clause'] == 'whereHas';
-    }
 
     private function callback()
     {

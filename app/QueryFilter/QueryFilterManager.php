@@ -2,10 +2,7 @@
 
 namespace App\QueryFilter;
 
-use App\QueryFilter\Filters\SpecialFilter;
 use App\QueryFilter\Filters\WhereFilter;
-use App\QueryFilter\Filters\WhereHasFilter;
-use App\QueryFilter\Filters\WhereNullFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -39,7 +36,7 @@ class QueryFilterManager
     {
         $this->query = $query;
         $this->filterOption = $filterOption;
-        if(is_null($request)){
+        if (is_null($request)) {
             $request = app(Request::class);
         }
         $this->request = $request;
@@ -69,21 +66,17 @@ class QueryFilterManager
     public function attachQuery($option, $key)
     {
         $parser = new QueryArgumentPhaser($option, $key, $this->getRequest());
-        $filters = [
-            SpecialFilter::class,
-            WhereFilter::class,
-            WhereNullFilter::class,
-            WhereHasFilter::class,
-            CallBackFilter::class,
-        ];
+        if (empty($option)) {
+            return (new WhereFilter($this->query, $parser))->filter();
+        }
 
+        $class = "App\\QueryFilter\\Filters\\" . ucfirst($option['clause']) . 'Filter';
+        if (!class_exists($class)) {
+            throw new \RuntimeException('query filter class not found ' . $class);
+        }
 
-        collect($filters)
-            ->map(fn($filter) => new $filter($this->query, $parser))
-            ->each
-            ->filter();
-
-        return $this->query;
+        $instance = new $class($this->query, $parser);
+        return $instance->filter();
     }
 
 
