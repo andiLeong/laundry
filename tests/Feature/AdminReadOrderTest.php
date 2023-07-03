@@ -146,7 +146,7 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
-    public function only_admin_can_access()
+    public function only_admin_or_employee_can_access()
     {
         $this->signIn()->getJson($this->endpoint)->assertForbidden();
     }

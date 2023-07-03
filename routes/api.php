@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('admin.only')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
+        Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);
         Route::post('/admin/order', [AdminOrderController::class, 'store']);
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
     });

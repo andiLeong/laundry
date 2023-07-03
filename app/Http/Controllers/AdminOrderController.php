@@ -52,6 +52,16 @@ class AdminOrderController extends Controller
         return $orders;
     }
 
+    public function show(Order $order)
+    {
+        $user = Auth::user();
+        if ($user->isEmployee() && $order->creator_id !== $user->id) {
+            abort(403, 'You do not have right to perform this action');
+        }
+        $order->load('user:id,first_name,phone', 'service:id,name', 'promotions:id,name');
+        return $order;
+    }
+
     public function store(AdminCreateOrderValidation $validation)
     {
         $logInUser = auth()->user();
