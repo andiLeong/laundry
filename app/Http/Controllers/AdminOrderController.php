@@ -16,35 +16,34 @@ class AdminOrderController extends Controller
         $user = Auth::user();
         $query = Order::query();
 
-        if ($request->has('phone')) {
-            $query->whereHas('user', function (Builder $query) use ($request) {
-                return $query->where('phone', $request->phone);
-            });
-        }
-
-        if ($request->has('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        if ($request->has('first_name')) {
-            $query->whereHas('user', function (Builder $query) use ($request) {
-                return $query->where('first_name', $request->first_name);
-            });
-        }
-
-        if ($request->has('include_user') && $request->include_user == false) {
-            $query->whereNull('user_id');
-        }
-
-        if ($request->has('include_user') && $request->include_user == true) {
-            $query->whereNotNull('user_id');
-        }
-
         if ($user->isEmployee()) {
             $query->where('creator_id', $user->id);
         }
 
         $orders = $query
+            ->filters([
+                'user_id' => [],
+                'exclude_user' => [
+                    'clause' => 'whereNull',
+                    'column' => 'user_id',
+                ],
+                'include_user' => [
+                    'clause' => 'whereNotNull',
+                    'column' => 'user_id',
+                ],
+                'phone' => [
+                    'clause' => 'whereHas',
+                    'relationship' => 'user',
+                ],
+                'first_name' => [
+                    'clause' => 'callBack',
+                    'callback' => function (Builder $query, Request $request) {
+                        $query->whereHas('user', function (Builder $query) use ($request) {
+                            return $query->where('first_name', $request->first_name);
+                        });
+                    }
+                ],
+            ], $request)
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
             ->withCount('promotions')
