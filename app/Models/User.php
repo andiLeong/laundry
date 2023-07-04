@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\QueryFilter\Filterable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Filterable;
 
     protected $hidden = ['password'];
 
@@ -56,6 +57,11 @@ class User extends Authenticatable
     public function isEmployee()
     {
         return $this->type === UserType::employee->name;
+    }
+
+    public function isAdmin()
+    {
+        return $this->type === UserType::admin->name;
     }
 
     public function isVerified()

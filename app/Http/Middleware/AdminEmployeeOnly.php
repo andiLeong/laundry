@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminOnly
+class AdminEmployeeOnly
 {
     /**
      * Handle an incoming request.
@@ -15,7 +15,7 @@ class AdminOnly
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->user()->isAdmin()) {
+        if (auth()->user()->isCustomer()) {
             abort(403, 'You do not have right to perform this action');
         }
 

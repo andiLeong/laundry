@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ServiceController;
@@ -47,11 +48,13 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::middleware('admin.only')->group(function () {
+    Route::middleware('admin.employee.only')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);
         Route::post('/admin/order', [AdminOrderController::class, 'store']);
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
+
+        Route::get('/admin/user', [AdminUserController::class, 'index'])->middleware('admin.only');
     });
 
 
