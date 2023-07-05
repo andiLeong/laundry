@@ -19,6 +19,7 @@ class Twilio implements SmsContract
 
     public function send($number, $message): bool
     {
+        dd('sms real implementation');
         $result = $this->twilio->messages->create(
             $number,
             ['from' => $this->number, 'body' => $message]

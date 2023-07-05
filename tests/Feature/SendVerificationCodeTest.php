@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sms\Contract\Sms;
+use App\Models\Sms\Exception\SendSmsFailureException;
+use App\Models\Sms\Template;
 use App\Models\SmsLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Mockery\MockInterface;
 use Tests\TestCase;
 use Tests\UserCanBeVerified;
 
@@ -62,7 +66,17 @@ class SendVerificationCodeTest extends TestCase
     /** @test */
     public function if_send_sms_fails_it_should_return_proper_response()
     {
-        $this->markTestSkipped();
+        $code = 8899;
+        $this->mock(Template::class,
+            fn($mock) => $mock->shouldReceive('get')->once()->with('verification', $code)->andReturn($code)
+        );
+        $this->mock(Sms::class,
+            fn(MockInterface $mock) => $mock
+                ->shouldReceive('send')
+                ->andThrow(SendSmsFailureException::class, 'Service unavailable')
+        );
+
+        $this->setUnverifiedUser()->postJson($this->endpoint . '/' . $this->user->phone)->assertStatus(502);
     }
 
     /** @test */

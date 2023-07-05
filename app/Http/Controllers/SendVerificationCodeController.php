@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Sms\Contract\Sms;
 use App\Models\Sms\Template;
-use App\Models\SmsLog;
 use App\Models\User;
 use App\Models\VerificationToken;
 
@@ -16,11 +15,15 @@ class SendVerificationCodeController extends Controller
             abort(403, 'Your phone is verified');
         }
 
-        $code = VerificationToken::generate();
-        $sms->send(
-            $user->phone,
-            $template->get('verification', $code)
-        );
+        try {
+            $code = VerificationToken::generate();
+            $sms->send(
+                $user->phone,
+                $template->get('verification', $code)
+            );
+        } catch (\Exception $e) {
+            abort(502, $e->getMessage());
+        }
 
         VerificationToken::create([
             'token' => $code,

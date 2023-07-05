@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sms\Contract\Sms;
+use App\Models\Sms\Exception\SendSmsFailureException;
+use App\Models\Sms\Template;
 use App\Models\SmsLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Mockery\MockInterface;
 use Tests\TestCase;
 use Tests\UserCanBeVerified;
 use Tests\Validate;
@@ -110,7 +114,17 @@ class SignUpTest extends TestCase
     /** @test */
     public function if_sms_got_exception_we_should_throw_a_proper_response()
     {
-        $this->markTestSkipped();
+        $code = 8899;
+        $this->mock(Template::class,
+            fn($mock) => $mock->shouldReceive('get')->once()->with('verification', $code)->andReturn($code)
+        );
+        $this->mock(Sms::class,
+            fn(MockInterface $mock) => $mock
+                ->shouldReceive('send')
+                ->andThrow(SendSmsFailureException::class, 'Service unavailable')
+        );
+
+        $this->signUpWithPhone()->assertStatus(502);
     }
 
     /** @test */
