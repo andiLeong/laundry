@@ -4,10 +4,11 @@ namespace App\Providers;
 
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Models\Sms\Contract\Sms as SmsContract;
-use App\Models\Sms\Sms;
+use App\Models\Sms\Twilio;
 use App\Models\Sms\Template;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use Twilio\Rest\Client as TwilioSdk;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,7 +31,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SmsContract::class,function($app){
-            return new Sms();
+            $config = $app['config'];
+            $sid = $config->get('services.twilio.sid');
+            $token = $config->get('services.twilio.auth_toke');
+            $number = $config->get('services.twilio.number');
+            return new Twilio(new TwilioSdk($sid,$token),$number);
         });
 
         $this->app->singleton(Template::class,function($app){
