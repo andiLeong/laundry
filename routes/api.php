@@ -3,12 +3,13 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SignUpController;
+use App\Http\Controllers\TwilioSmsWebhookController;
 use App\Http\Controllers\UserQualifiedPromotionController;
-use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,3 +64,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/address', [AddressController::class, 'index']);
     Route::delete('/address/{address}', [AddressController::class, 'destroy']);
 });
+
+
+Route::post('/twilio/sms', TwilioSmsWebhookController::class);
