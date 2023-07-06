@@ -168,10 +168,18 @@ class SignUpTest extends TestCase
     public function phone_must_valid(): void
     {
         $name = 'phone';
-        $rule = ['required', 'string', 'max:11', 'unique:phone:' . User::class . ':09172149989'];
+        $rule = ['required', 'unique:phone:' . User::class . ':09172149989'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->signup($payload)
         );
+
+        //sign up with not phone number less than 11
+        $response = $this->signUpWithPhone('0906014783');
+        $this->assertValidateMessage('The phone is invalid.', $response,'phone');
+
+        //sign up with not phone number not starts with 09
+        $response = $this->signUpWithPhone('01060147839');
+        $this->assertValidateMessage('The phone is invalid.', $response,'phone');
 
     }
 

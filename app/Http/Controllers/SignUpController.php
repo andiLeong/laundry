@@ -6,6 +6,7 @@ use App\Models\Sms\Contract\Sms;
 use App\Models\Sms\Template;
 use App\Models\User;
 use App\Models\VerificationToken;
+use Closure;
 use Illuminate\Http\Request;
 
 class SignUpController extends Controller
@@ -13,7 +14,15 @@ class SignUpController extends Controller
     public function store(Request $request, Sms $sms, Template $template)
     {
         $attributes = $request->validate([
-            'phone' => 'required|string|max:11|unique:users,phone',
+            'phone' => ['required', 'string', 'unique:users,phone', function (string $attribute, mixed $value, Closure $fail) {
+                if (is_string($value) && strlen($value) != 11) {
+                    $fail("The {$attribute} is invalid.");
+                }
+
+                if (is_string($value) && !str_starts_with($value, '09')) {
+                    $fail("The {$attribute} is invalid.");
+                }
+            }],
             'password' => 'required|string|max:90|min:8',
             'first_name' => 'required|string|max:50',
             'middle_name' => 'nullable|string|max:50',
