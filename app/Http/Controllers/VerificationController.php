@@ -10,7 +10,7 @@ class VerificationController extends Controller
 {
     public function store(Request $request)
     {
-        $user = User::where('phone', $request->phone)->first();
+        $user = User::withoutGlobalScope('verified')->where('phone', $request->phone)->first();
         if (is_null($user)) {
             throw ValidationException::withMessages([
                 'phone' => ['Phone is invalid'],

@@ -31,6 +31,7 @@ class Twilio implements SmsContract
         $this->to = $number;
         $this->message = $message;
 
+        dd('real sms implementation');
         try {
             $result = $this->twilio->messages->create(
                 '+63' . $number,

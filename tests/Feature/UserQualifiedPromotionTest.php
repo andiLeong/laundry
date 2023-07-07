@@ -125,6 +125,14 @@ class UserQualifiedPromotionTest extends TestCase
         $this->getJson($this->endpoint . "/8/9")->assertUnauthorized();
     }
 
+    /** @test */
+    public function unverified_user_gets_404(): void
+    {
+        $unverifiedUser = User::factory()->create(['phone_verified_at' => null]);
+        $service = $this->getService();
+        $this->signInAsAdmin()->getJson($this->endpoint."/{$unverifiedUser->id}/{$service->id}")->assertNotFound();
+    }
+
     public function getQualifiedPromotions($user = null)
     {
         $service = $this->getService();

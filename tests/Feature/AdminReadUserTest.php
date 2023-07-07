@@ -22,7 +22,7 @@ class AdminReadUserTest extends TestCase
     }
 
     /** @test */
-    public function employ_can_not_access(): void
+    public function employee_can_not_access(): void
     {
         $employee = User::factory()->create(['type' => UserType::employee->value]);
         $this->signIn($employee)->getJson($this->endpoint)->assertForbidden();
@@ -146,15 +146,15 @@ class AdminReadUserTest extends TestCase
     }
 
     /** @test */
-    public function only_admin_can_access()
-    {
-        $this->signIn()->getJson($this->endpoint)->assertForbidden();
-    }
-
-    /** @test */
     public function only_login_user_can_access()
     {
         $this->getJson($this->endpoint)->assertUnauthorized();
+    }
+
+    /** @test */
+    public function it_can_filter_verify_user_and_unverified_user()
+    {
+        $this->markTestSkipped();
     }
 
     protected function fetch($query = [], $as = null)

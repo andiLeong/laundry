@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\QueryFilter\Filterable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +24,13 @@ class User extends Authenticatable
     protected $casts = [
         'phone_verified_at' => 'datetime'
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('verified', function (Builder $builder) {
+            $builder->whereNotNull('phone_verified_at');
+        });
+    }
 
     public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
@@ -67,5 +75,10 @@ class User extends Authenticatable
     public function isVerified()
     {
         return !is_null($this->phone_verified_at);
+    }
+
+    public static function findUnverifiedById($id)
+    {
+        return User::withoutGlobalScope('verified')->find($id);
     }
 }

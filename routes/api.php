@@ -44,18 +44,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/signup', [SignUpController::class, 'store']);
     Route::post('/login', [LoginController::class, 'store']);
     Route::post('/verification', [VerificationController::class, 'store']);
-    Route::post('/verification-code/send/{user:phone}', [SendVerificationCodeController::class, 'store']);
+    Route::post('/verification-code/send/{phone}', [SendVerificationCodeController::class, 'store']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::middleware('admin.employee.only')->group(function () {
+    Route::middleware('staff.only')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);
         Route::post('/admin/order', [AdminOrderController::class, 'store']);
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
         Route::get('/admin/user', [AdminUserController::class, 'index'])->middleware('admin.only');
+        Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
     });
 
 

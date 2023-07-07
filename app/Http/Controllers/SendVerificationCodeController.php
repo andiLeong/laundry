@@ -9,8 +9,9 @@ use App\Models\VerificationToken;
 
 class SendVerificationCodeController extends Controller
 {
-    public function store(User $user, Sms $sms, Template $template)
+    public function store($phone, Sms $sms, Template $template)
     {
+        $user = User::withoutGlobalScope('verified')->where('phone', $phone)->firstOrFail();
         if ($user->isVerified()) {
             abort(403, 'Your phone is verified');
         }

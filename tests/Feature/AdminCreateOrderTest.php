@@ -7,12 +7,16 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\OrderCanBeCreated;
 use Tests\TestCase;
+use Tests\UserCanBeVerified;
 use Tests\Validate;
 
 class AdminCreateOrderTest extends TestCase
 {
     use LazilyRefreshDatabase;
     use OrderCanBeCreated;
+    use UserCanBeVerified;
+
+    protected string $phone = '09060785699';
 
     /** @test */
     public function it_can_create_order(): void
@@ -62,6 +66,14 @@ class AdminCreateOrderTest extends TestCase
     {
         $name = 'user_id';
         $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
+    }
+
+    /** @test */
+    public function unverified_user_cant_be_create_order()
+    {
+        $this->setUnverifiedUser();
+        $response = $this->createOrder(['user_id' => $this->user->id]);
+        $this->assertValidateMessage('user is invalid', $response, 'user_id');
     }
 
     /** @test */

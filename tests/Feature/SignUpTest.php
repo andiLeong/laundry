@@ -31,7 +31,7 @@ class SignUpTest extends TestCase
     public function it_can_sign_up_user(): void
     {
         $response = $this->fakeSms()->signUpWithPhone()->assertSuccessful();
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
         $this->assertNotNull($user);
     }
 
@@ -39,7 +39,7 @@ class SignUpTest extends TestCase
     public function after_signup_phone_still_not_been_verified(): void
     {
         $response = $this->fakeSms()->signUpWithPhone();
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
         $this->assertFalse($user->isVerified());
     }
 
@@ -47,7 +47,7 @@ class SignUpTest extends TestCase
     public function after_signup_user_type_is_customer(): void
     {
         $response = $this->fakeSms()->signUpWithPhone();
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
         $this->assertTrue($user->isCustomer());
     }
 
@@ -72,7 +72,7 @@ class SignUpTest extends TestCase
             'phone' => $this->phone
         ]);
 
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
         $this->assertNotEquals($user->password, $password);
         $this->assertTrue(password_verify($password, $user->password));
     }
@@ -82,7 +82,7 @@ class SignUpTest extends TestCase
     {
         $this->assertDatabaseCount('verification_tokens', 0);
         $response = $this->fakeSms()->signUpWithPhone();
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
         $verification = $user->verification;
         $mins = $verification->expired_at->diffInMinutes(now());
 
@@ -102,7 +102,7 @@ class SignUpTest extends TestCase
     {
         $this->assertDatabaseCount('sms_logs', 0);
         $response = $this->fakeSms()->signUpWithPhone();
-        $user = User::find($response->json('id'));
+        $user = User::findUnverifiedById($response->json('id'));
 
         $log = SmsLog::first();
         $this->assertNotNull($log);

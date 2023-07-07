@@ -3,7 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\AbortIfLoggedIn;
-use App\Http\Middleware\AdminEmployeeOnly;
+use App\Http\Middleware\StaffOnly;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -67,7 +67,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'admin.employee.only' => AdminEmployeeOnly::class,
+        'staff.only' => StaffOnly::class,
         'admin.only' => AdminOnly::class,
     ];
 }

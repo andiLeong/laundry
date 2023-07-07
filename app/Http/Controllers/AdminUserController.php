@@ -36,4 +36,9 @@ class AdminUserController extends Controller
 
         return $query->get();
     }
+
+    public function show(User $user)
+    {
+        return $user;
+    }
 }
