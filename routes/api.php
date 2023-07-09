@@ -13,6 +13,7 @@ use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 
 // customer ordering
@@ -48,6 +49,14 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('/logout', function(Request $request){
+        Auth::logout();
+ 
+        $request->session()->invalidate();
+     
+        $request->session()->regenerateToken();
+    });
 
     Route::middleware('staff.only')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
