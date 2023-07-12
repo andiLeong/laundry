@@ -47,7 +47,7 @@ class AdminOrderController extends Controller
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
             ->withCount('promotions')
-            ->get();
+            ->paginate();
 
         return $orders;
     }

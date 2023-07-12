@@ -28,7 +28,7 @@ class AdminReadOrderTest extends TestCase
     public function it_can_get_all_orders(): void
     {
         $orders = Order::factory(2)->create();
-        $ids = $this->fetch()->assertOk()->collect()->pluck('id');
+        $ids = $this->fetch()->assertOk()->collect('data')->pluck('id');
 
         $this->assertTrue($ids->contains($orders[0]->id));
         $this->assertTrue($ids->contains($orders[1]->id));
@@ -69,7 +69,7 @@ class AdminReadOrderTest extends TestCase
         $service = Service::factory()->create();
         $orders = Order::factory(2)->create(['user_id' => $user->id, 'service_id' => $service->id]);
         OrderPromotion::insertByPromotions($promotions, $orders[1]);
-        $order = $this->fetch()->collect()->first();
+        $order = $this->fetch()->collect('data')->first();
 
         $this->assertEquals($user->phone, $order['user']['phone']);
         $this->assertEquals($user->first_name, $order['user']['first_name']);
@@ -83,7 +83,7 @@ class AdminReadOrderTest extends TestCase
         $firstOrder = Order::factory()->create();
         $secondOrder = Order::factory()->create();
         $ids = $this->signInAsAdmin()->getJson($this->endpoint)
-            ->collect();
+            ->collect('data');
 
         $this->assertEquals($ids[0]['id'], $secondOrder->id);
         $this->assertEquals($ids[1]['id'], $firstOrder->id);
@@ -165,6 +165,6 @@ class AdminReadOrderTest extends TestCase
 
     public function fetchOrderIds($query = [], $as = null)
     {
-        return $this->fetch($query, $as)->collect()->pluck('id');
+        return $this->fetch($query, $as)->collect('data')->pluck('id');
     }
 }

@@ -34,7 +34,7 @@ class AdminUserController extends Controller
             ->groupBy('users.id')
             ->orderBy('users.id', 'desc');
 
-        return $query->get();
+        return $query->paginate();
     }
 
     public function show(User $user)

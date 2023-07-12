@@ -45,7 +45,7 @@ class AdminReadUserTest extends TestCase
             'user_id' => $users[1]->id,
         ]);
 
-        $user = $this->fetch()->collect()->first(fn($user) => $user['id'] === $users[1]->id);
+        $user = $this->fetch()->collect('data')->first(fn($user) => $user['id'] === $users[1]->id);
 
         $this->assertEquals($users[1]->phone, $user['phone']);
         $this->assertEquals($users[1]->id, $user['id']);
@@ -61,7 +61,7 @@ class AdminReadUserTest extends TestCase
     public function sensitive_column_not_hidden(): void
     {
         User::factory()->create(['first_name' => 'kate']);
-        $user = $this->fetch()->collect()->first();
+        $user = $this->fetch()->collect('data')->first();
         $this->assertArrayNotHasKey('password', $user);
     }
 
@@ -70,7 +70,7 @@ class AdminReadUserTest extends TestCase
     {
         $firstUser = $this->admin();
         $secondUser = User::factory()->create();
-        $users = $this->fetch([], $firstUser)->collect();
+        $users = $this->fetch([], $firstUser)->collect('data');
 
         $this->assertEquals($users[0]['phone'], $secondUser->phone);
         $this->assertEquals($users[1]['phone'], $firstUser->phone);
@@ -135,7 +135,7 @@ class AdminReadUserTest extends TestCase
         Order::factory()->create([
             'service_id' => $service->id,
             'amount' => 220,
-            'user_id' => $kate->id,
+            'user_id' => $maggie->id,
             'created_at' => now()->subDays(30)
         ]);
 
@@ -143,18 +143,17 @@ class AdminReadUserTest extends TestCase
 
         $this->assertTrue($ids->contains($kate->id));
         $this->assertFalse($ids->contains($maggie->id));
+
+        $ids = $this->fetchUsersIds(['last_order_this_month' => null]);
+
+        $this->assertTrue($ids->contains($kate->id));
+        $this->assertTrue($ids->contains($maggie->id));
     }
 
     /** @test */
     public function only_login_user_can_access()
     {
         $this->getJson($this->endpoint)->assertUnauthorized();
-    }
-
-    /** @test */
-    public function it_can_filter_verify_user_and_unverified_user()
-    {
-        $this->markTestSkipped();
     }
 
     protected function fetch($query = [], $as = null)
@@ -165,6 +164,6 @@ class AdminReadUserTest extends TestCase
 
     public function fetchUsersIds($query = [], $as = null)
     {
-        return $this->fetch($query, $as)->collect()->pluck('id');
+        return $this->fetch($query, $as)->collect('data')->pluck('id');
     }
 }

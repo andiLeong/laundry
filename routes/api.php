@@ -52,9 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', function(Request $request){
         Auth::logout();
- 
+
         $request->session()->invalidate();
-     
+
         $request->session()->regenerateToken();
     });
 
