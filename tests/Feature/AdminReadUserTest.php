@@ -99,6 +99,17 @@ class AdminReadUserTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_by_last_name(): void
+    {
+        $kate = User::factory()->create(['last_name' => 'kate']);
+        $maggie = User::factory()->create(['last_name' => 'maggie']);
+        $ids = $this->fetchUsersIds(['last_name' => $kate->last_name]);
+
+        $this->assertTrue($ids->contains($kate->id));
+        $this->assertFalse($ids->contains($maggie->id));
+    }
+
+    /** @test */
     public function it_can_filter_by_total_order_amount_is_large_than(): void
     {
         $service = Service::factory()->create();
