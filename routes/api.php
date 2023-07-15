@@ -51,7 +51,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', function(Request $request){
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
