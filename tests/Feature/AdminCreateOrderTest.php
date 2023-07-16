@@ -66,6 +66,7 @@ class AdminCreateOrderTest extends TestCase
     {
         $name = 'user_id';
         $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
+        $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name);
     }
 
     /** @test */

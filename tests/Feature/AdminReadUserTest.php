@@ -6,6 +6,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\UserType;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class AdminReadUserTest extends TestCase
@@ -48,6 +49,7 @@ class AdminReadUserTest extends TestCase
         $user = $this->fetch()->collect('data')->first(fn($user) => $user['id'] === $users[1]->id);
 
         $this->assertEquals($users[1]->phone, $user['phone']);
+        $this->assertEquals($users[1]->created_at->format('yyyy-mm-dd'), Carbon::parse($user['created_at'])->format('yyyy-mm-dd'));
         $this->assertEquals($users[1]->id, $user['id']);
         $this->assertEquals($users[1]->first_name, $user['first_name']);
         $this->assertEquals($users[1]->last_name, $user['last_name']);

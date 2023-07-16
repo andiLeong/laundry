@@ -57,7 +57,7 @@ class AdminCreateOrderValidation
      */
     private function validateUser(): static
     {
-        if ($this->request->has('user_id')) {
+        if ($this->request->has('user_id') && !is_null($this->request->get('user_id'))) {
             $this->user = User::find($this->request->get('user_id'));
             if (is_null($this->user)) {
                 $this->exception('user_id', 'user is invalid');

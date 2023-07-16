@@ -67,10 +67,11 @@ class AdminReadOrderTest extends TestCase
         $promotions = Promotion::factory(2)->create();
         $user = User::factory()->create();
         $service = Service::factory()->create();
-        $orders = Order::factory(2)->create(['user_id' => $user->id, 'service_id' => $service->id]);
+        $orders = Order::factory(2)->create(['user_id' => $user->id, 'service_id' => $service->id,'amount' => 210]);
         OrderPromotion::insertByPromotions($promotions, $orders[1]);
         $order = $this->fetch()->collect('data')->first();
 
+        $this->assertEquals(210, $order['amount']);
         $this->assertEquals($user->phone, $order['user']['phone']);
         $this->assertEquals($user->first_name, $order['user']['first_name']);
         $this->assertEquals($service->name, $order['service']['name']);
