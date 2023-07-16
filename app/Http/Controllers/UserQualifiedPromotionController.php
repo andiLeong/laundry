@@ -19,8 +19,8 @@ class UserQualifiedPromotionController extends Controller
                 ->partition(fn($promotion) => $promotion->isIsolated());
 
             return [
-                'isolated' => $isolated,
-                'non-isolated' => $nonIsolated,
+                'isolated' => $isolated->values(),
+                'non-isolated' => $nonIsolated->values(),
             ];
 
         } catch (\Exception $e) {

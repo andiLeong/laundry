@@ -31,14 +31,14 @@ class AdminCreateOrderValidation
             'amount' => 'nullable|decimal:0,4',
             'user_id' => [
                 'nullable',
-                Rule::requiredIf($request->has('promotion_ids'))
+                Rule::requiredIf($this->shouldValidatePromotionIds())
             ],
             'service_id' => 'required',
-            'promotion_ids' => 'nullable|array',
+            'promotion_ids' => 'nullable|array|min:1',
             'isolated' => [
                 'nullable',
                 'in:0,1',
-                Rule::requiredIf($request->has('promotion_ids'))
+                Rule::requiredIf($this->shouldValidatePromotionIds())
             ],
         ]);
 
@@ -48,6 +48,12 @@ class AdminCreateOrderValidation
             ->validatePromotion()
             ->qualifyPromotion();
 
+        if(!$this->shouldValidatePromotionIds()){
+            $data['amount'] ??= $this->service->price;
+        }
+
+        unset($data['isolated']);
+        unset($data['promotion_ids']);
         return $data;
     }
 
@@ -86,7 +92,7 @@ class AdminCreateOrderValidation
      */
     private function validatePromotion()
     {
-        if ($this->validatePromotionIds()) {
+        if ($this->shouldValidatePromotionIds()) {
             $promotionIds = $this->request->get('promotion_ids');
             $isolated = $this->request->get('isolated');
 
@@ -127,9 +133,9 @@ class AdminCreateOrderValidation
      * check if we need to validated promotion_ids
      * @return bool
      */
-    public function validatePromotionIds()
+    public function shouldValidatePromotionIds()
     {
-        return $this->request->has('promotion_ids');
+        return !is_null($this->request->get('promotion_ids'));
     }
 
     /**
@@ -138,7 +144,7 @@ class AdminCreateOrderValidation
      */
     private function qualifyPromotion()
     {
-        if ($this->validatePromotionIds()) {
+        if ($this->shouldValidatePromotionIds()) {
             try {
                 $qualifyPromotions = new UserQualifiedPromotion($this->user, $this->service);
                 $qualifyPromotions = $qualifyPromotions->filter($this->promotions);

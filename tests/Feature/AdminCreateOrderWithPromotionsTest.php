@@ -23,6 +23,14 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $name = 'isolated';
         $this->signInAsAdmin()->postJson($this->endpoint, [$name => 2])->assertJsonValidationErrorFor($name);
         $this->signInAsAdmin()->postJson($this->endpoint, [$name => 3])->assertJsonValidationErrorFor($name);
+
+        $this->createOrder([$name => null,'promotion_ids' => null])
+            ->assertJsonMissingValidationErrors($name)
+            ->assertSuccessful();
+
+        $this->createOrder([$name => null])
+            ->assertJsonMissingValidationErrors($name)
+            ->assertSuccessful();
     }
 
     /** @test */
@@ -41,6 +49,10 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->signInAsAdmin()
             ->postJson($this->endpoint, ['promotion_ids' => [$promotion->id]])
             ->assertJsonValidationErrorFor('user_id');
+
+        $this->signInAsAdmin()
+            ->postJson($this->endpoint, ['promotion_ids' => null])
+            ->assertJsonMissingValidationErrors('user_id');
     }
 
     /** @test */
@@ -103,6 +115,15 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         ]);
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
         $this->assertValidateMessage('promotions are invalid', $response, $name);
+    }
+
+    /** @test */
+    public function promotion_id_validation()
+    {
+        $name = 'promotion_ids';
+        $response = $this->createOrder([$name => []]);
+        $this->assertValidateMessage('The promotion ids field must have at least 1 items.',$response,$name);
+        $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name)->assertSuccessful();
     }
 
     /** @test */
