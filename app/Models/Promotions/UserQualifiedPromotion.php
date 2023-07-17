@@ -13,10 +13,11 @@ class UserQualifiedPromotion
 
     public function __construct(
         protected User    $user,
-        protected Service $service
+        protected Service $service,
+        protected \Exception $exception
     )
     {
-        //
+
     }
 
     public function get()
@@ -34,7 +35,7 @@ class UserQualifiedPromotion
         return $promotions
             ->map(function ($promotion) {
                 if (!class_exists($promotion['class'])) {
-                    throw new PromotionNotFoundException('promotion is not implemented');
+                    throw $this->exception;
                 }
                 return new $promotion['class']($this->user, $this->service, $promotion);
             })

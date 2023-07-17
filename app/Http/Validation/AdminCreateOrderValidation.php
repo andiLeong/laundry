@@ -3,6 +3,7 @@
 namespace App\Http\Validation;
 
 use App\Models\Promotion;
+use App\Models\Promotions\PromotionNotFoundException;
 use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
@@ -48,7 +49,7 @@ class AdminCreateOrderValidation
             ->validatePromotion()
             ->qualifyPromotion();
 
-        if(!$this->shouldValidatePromotionIds()){
+        if (!$this->shouldValidatePromotionIds()) {
             $data['amount'] ??= $this->service->price;
         }
 
@@ -145,14 +146,16 @@ class AdminCreateOrderValidation
     private function qualifyPromotion()
     {
         if ($this->shouldValidatePromotionIds()) {
-            try {
-                $qualifyPromotions = new UserQualifiedPromotion($this->user, $this->service);
-                $qualifyPromotions = $qualifyPromotions->filter($this->promotions);
-            } catch (\Exception $e) {
-                $this->exception('promotion_ids', $e->getMessage());
-            }
 
-            if($qualifyPromotions->isEmpty()){
+            $exception = new PromotionNotFoundException('', 422);
+            $exception->setValidationMessages([
+                'promotion_ids' => [$exception->getMessage()]
+            ]);
+            $qualifyPromotions = new UserQualifiedPromotion($this->user, $this->service, $exception);
+            $qualifyPromotions = $qualifyPromotions->filter($this->promotions);
+
+
+            if ($qualifyPromotions->isEmpty()) {
                 $this->exception('promotion_ids', 'Sorry You are not qualified with these promotions');
             }
             $this->promotions = $qualifyPromotions;
