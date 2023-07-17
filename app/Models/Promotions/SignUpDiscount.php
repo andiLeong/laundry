@@ -12,7 +12,7 @@ class SignUpDiscount extends PromotionAbstract implements Promotion
             return false;
         }
 
-        $this->discount = 0.5;
+        $this->discount = $this->promotion->discount;
         return true;
     }
 }

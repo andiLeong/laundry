@@ -23,6 +23,7 @@ class PromotionFactory extends Factory
             'isolated' => 0,
             'start' => today()->subDays(),
             'until' => today()->addDays(7),
+            'discount' => 0.5,
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
         ];
     }

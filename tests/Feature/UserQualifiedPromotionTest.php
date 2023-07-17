@@ -57,7 +57,19 @@ class UserQualifiedPromotionTest extends TestCase
         $response = $this->getQualifiedPromotions();
 
         $keys = array_keys($response->json()['non-isolated'][0]);
-        $this->assertSame(['id', 'name', 'status', 'start', 'until', 'isolated'], $keys);
+        $this->assertSame(['id', 'name', 'status', 'start', 'until', 'isolated', 'discount'], $keys);
+    }
+
+    /** @test */
+    public function it_also_return_the_qualified_promotion_discount(): void
+    {
+        $this->getPromotion();
+        $this->promotion->discount = 0.35;
+        $this->promotion->save();
+
+        $response = $this->getQualifiedPromotions();
+        $discount = $response->json()['non-isolated'][0]['discount'];
+        $this->assertSame(0.35, $discount);
     }
 
     /** @test */
@@ -130,7 +142,7 @@ class UserQualifiedPromotionTest extends TestCase
     {
         $unverifiedUser = User::factory()->create(['phone_verified_at' => null]);
         $service = $this->getService();
-        $this->signInAsAdmin()->getJson($this->endpoint."/{$unverifiedUser->id}/{$service->id}")->assertNotFound();
+        $this->signInAsAdmin()->getJson($this->endpoint . "/{$unverifiedUser->id}/{$service->id}")->assertNotFound();
     }
 
     public function getQualifiedPromotions($user = null)

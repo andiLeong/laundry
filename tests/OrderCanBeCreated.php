@@ -53,33 +53,37 @@ trait OrderCanBeCreated
     protected function getPromotion(
         $name = 'sign up promotion',
         $class = 'App\\Models\\Promotions\\SignUpDiscount',
-        $isolated = false
+        $isolated = false,
+        $discount = 0.5
     )
     {
         $this->promotion = Promotion::factory()->create([
             'name' => $name,
             'class' => $class,
             'isolated' => $isolated,
+            'discount' => $discount,
         ]);
 
         return $this->promotion;
     }
 
-    protected function getWednesdayPromotion($isolated = false)
+    protected function getWednesdayPromotion($isolated = false, $discount = 0.1)
     {
         return $this->getPromotion(
             'Wednesday Promotion',
             'App\Models\Promotions\WednesdayWasher',
-            $isolated
+            $isolated,
+            $discount
         );
     }
 
-    protected function rewardGiftCertificatePromotion($isolated = false)
+    protected function rewardGiftCertificatePromotion($isolated = false, $discount = 0)
     {
-        return Promotion::factory()->create([
-            'name' => 'reward gift cert',
-            'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
-            'isolated' => $isolated
-        ]);
+        return $this->getPromotion(
+            'reward gift cert',
+            'App\Models\Promotions\RewardGiftCertificate',
+            $isolated,
+            $discount
+        );
     }
 }

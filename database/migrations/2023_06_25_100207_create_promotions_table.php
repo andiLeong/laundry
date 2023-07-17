@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('isolated')->default(0);
             $table->dateTime('start');
             $table->dateTime('until')->nullable();
+            $table->decimal('discount',3)->default(0);
             $table->string('class');
             $table->timestamps();
         });

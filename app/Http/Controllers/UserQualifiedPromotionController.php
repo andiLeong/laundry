@@ -11,7 +11,7 @@ class UserQualifiedPromotionController extends Controller
     public function index(User $user, Service $service)
     {
         $qualifiedPromotion = new UserQualifiedPromotion($user, $service);
-        $qualifiedPromotion->setColumns(['id', 'name', 'status', 'start', 'until', 'isolated', 'class']);
+        $qualifiedPromotion->setColumns(['id', 'name', 'status', 'start', 'until', 'isolated', 'class','discount']);
 
         try {
             [$isolated, $nonIsolated] = $qualifiedPromotion

@@ -11,7 +11,7 @@ class WednesdayWasher extends PromotionAbstract implements Promotion
     public function qualify(): bool
     {
 
-        $this->discount = 0.1;
+        $this->discount = $this->promotion->discount;
         return true;
     }
 }
