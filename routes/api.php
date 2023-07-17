@@ -4,6 +4,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
@@ -13,7 +14,6 @@ use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 
 // customer ordering
@@ -50,13 +50,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('/logout', function(Request $request){
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-    });
+    Route::post('/logout', LogOutController::class);
 
     Route::middleware('staff.only')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);

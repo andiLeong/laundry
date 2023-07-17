@@ -73,11 +73,9 @@ class LoginTest extends TestCase
         $this->user->password = 'password';
         $this->user->save();
 
-        $this->postJson($this->endpoint, [
-            'phone' => $this->user->phone,
-            'password' => 'password',
-        ]);
+        $this->sanctumLogIn($this->user->phone)->assertOk();
         $this->assertTrue(Auth::check());
+        $this->assertAuthenticatedAs($this->user);
         $this->assertEquals($this->user->id, Auth::id());
     }
 }

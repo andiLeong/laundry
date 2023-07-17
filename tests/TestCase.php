@@ -34,7 +34,23 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
-    public function assertValidateMessage($message,$response,$key): static
+    protected function sanctumLogIn($phone, $password = 'password', $referer = 'localhost:3000'): \Illuminate\Testing\TestResponse
+    {
+        return $this->postJson('api/login', [
+            'phone' => $phone,
+            'password' => $password,
+        ], ['referer' => $referer]);
+    }
+
+    protected function sanctumLogOut($phone, $password = 'password', $referer = 'localhost:3000'): \Illuminate\Testing\TestResponse
+    {
+        return $this->postJson('api/logout', [
+            'phone' => $phone,
+            'password' => $password,
+        ], ['referer' => $referer]);
+    }
+
+    public function assertValidateMessage($message, $response, $key): static
     {
         $response->assertJsonValidationErrorFor($key);
         $response->assertStatus(422);
