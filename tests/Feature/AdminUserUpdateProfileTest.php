@@ -11,7 +11,7 @@ class AdminUserUpdateProfileTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private $endpoint = '/api/admin/user/';
+    private $endpoint = '/api/admin/user/profile';
     private $phone;
 
     protected function setUp(): void
@@ -24,11 +24,23 @@ class AdminUserUpdateProfileTest extends TestCase
     /** @test */
     public function it_can_update_user_basic_information(): void
     {
-        $this->withoutExceptionHandling();
         $user = $this->user;
         $this->update(['first_name' => 'new'])->assertStatus(200);
 
         $this->assertEquals('new', $user->fresh()->first_name);
+    }
+
+    /** @test */
+    public function it_can_perform_update_if_you_not_sign_in(): void
+    {
+         $this->patchJson($this->endpoint, [])->assertUnauthorized();
+    }
+
+    /** @test */
+    public function only_staff_or_admin_can_update(): void
+    {
+        $user = User::factory()->create();
+        $this->be($user)->patchJson($this->endpoint, [])->assertForbidden();
     }
 
     /** @test */
@@ -64,7 +76,7 @@ class AdminUserUpdateProfileTest extends TestCase
     public function update($overwrites = [])
     {
         $payload = $this->userAttributes($overwrites);
-        return $this->signInAsAdmin()->patchJson($this->endpoint . $this->phone, $payload);
+        return $this->signInAsAdmin($this->user)->patchJson($this->endpoint, $payload);
     }
 
     private function userAttributes(mixed $overwrites)
