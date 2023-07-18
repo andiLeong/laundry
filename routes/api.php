@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/user', [AdminUserController::class, 'index'])->middleware('admin.only');
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
+        Route::patch('/admin/user/{user:phone}', [AdminUserController::class, 'update']);
     });
 
 

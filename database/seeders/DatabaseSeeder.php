@@ -32,6 +32,27 @@ class DatabaseSeeder extends Seeder
             'start' => now()->subDay(),
             'until' => null,
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
+            'discount' => 0.5,
+        ]);
+
+        \App\Models\Promotion::factory()->create([
+            'name' => 'gift certificate reward',
+            'description' => 'give gc to customers',
+            'isolated' => 0,
+            'start' => now()->subDay(),
+            'until' => null,
+            'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
+            'discount' => 0,
+        ]);
+
+        \App\Models\Promotion::factory()->create([
+            'name' => 'Wednesday washer promo',
+            'description' => 'customer wash on wednesday gets discount',
+            'isolated' => 0,
+            'start' => now()->subDay(),
+            'until' => null,
+            'class' => 'App\Models\Promotions\WednesdayWasher',
+            'discount' => 0.1,
         ]);
 
         $users->each(function ($user) {

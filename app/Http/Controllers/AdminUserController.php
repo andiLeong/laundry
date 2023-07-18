@@ -41,4 +41,15 @@ class AdminUserController extends Controller
     {
         return $user;
     }
+
+    public function update(User $user, Request $request)
+    {
+        $attributes = $request->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'middle_name' => 'nullable|string|max:50',
+        ]);
+        $user->update($attributes);
+        return $user;
+    }
 }
