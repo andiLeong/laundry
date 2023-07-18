@@ -14,7 +14,7 @@ class UserQualifiedPromotion
     public function __construct(
         protected User    $user,
         protected Service $service,
-        protected \Exception $exception
+        protected PromotionNotFoundException $exception
     )
     {
 

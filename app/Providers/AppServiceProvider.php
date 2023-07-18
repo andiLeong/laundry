@@ -43,15 +43,5 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Template::class, function ($app) {
             return new Template();
         });
-
-        $this->app->bind(UserQualifiedPromotion::class, function ($app, $args) {
-            if (count($args) === 3) {
-                $e = array_pop($args);
-            } else {
-                $e = new PromotionNotFoundException();
-            }
-            [$user, $service] = $args;
-            return new UserQualifiedPromotion($user, $service, $e);
-        });
     }
 }
