@@ -19,6 +19,13 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
+    public function staff()
+    {
+        return User::factory()->create([
+            'type' => UserType::employee->value,
+        ]);
+    }
+
     public function signInAsAdmin($admin = null)
     {
         $admin = $admin ?? $this->admin();

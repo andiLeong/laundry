@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\AdminStatController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminUserProfileController;
 use App\Http\Controllers\LoginController;
@@ -62,6 +63,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/user', [AdminUserController::class, 'index'])->middleware('admin.only');
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
         Route::patch('/admin/user/profile', AdminUserProfileController::class);
+
+        Route::get('/admin/stats', [AdminStatController::class, 'index'])->middleware('admin.only');
     });
 
 
