@@ -58,6 +58,7 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_see_order_count_and_total_amount_group_by_days_in_pass_x_days(): void
     {
+        $this->withoutExceptionHandling();
         $days = 5;
         $today = Order::factory()->create(['amount' => 100, 'created_at' => today()->addHours()]);
         $today2 = Order::factory()->create(['amount' => 200, 'created_at' => today()->addHours(2)]);
@@ -66,11 +67,9 @@ class AdminOrderStatsTest extends TestCase
         $tomorrow = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDay()]);
         $lastDayOfWeek = Order::factory()->create(['amount' => 100, 'created_at' => now()->subDays(31)]);
 
-        $end = now()->addDay()->startOfDay();
-        $start = now()->addDay()->startOfDay()->subDays($days);
         $dates = array_map(
             fn($dt) => $dt->format('Y-m-d'),
-            CarbonPeriod::create($start, $end)->toArray()
+            CarbonPeriod::create(today()->subDays($days - 1), today())->toArray()
         );
 
         $response = $this->fetch(['group_by_days' => $days])->keyBy('dt');
@@ -85,8 +84,47 @@ class AdminOrderStatsTest extends TestCase
             $response[today()->subDays()->format('Y-m-d')]['order_total_amount']
         );
 
-        $this->assertEquals(2, $response[today()->format('Y-m-d')]['order_count']
+        $this->assertEquals(2, $response[today()->format('Y-m-d')]['order_count'] );
+
+        $this->assertArrayNotHasKey($tomorrow->created_at->format('Y-m'), $response);
+        $this->assertArrayNotHasKey($lastDayOfWeek->created_at->format('Y-m'), $response);
+    }
+
+    /** @test */
+    public function it_can_see_order_count_and_total_amount_group_by_months_in_pass_x_months(): void
+    {
+        $month = 6;
+        $currentMonth = Order::factory(2)->create(['amount' => 100]);
+        $lastMonth = Order::factory()->create(['amount' => 80, 'created_at' => today()->subMonths()]);
+        $twoMonthsAgo = Order::factory()->create(['amount' => 90, 'created_at' => today()->subMonths(2)]);
+
+        $lastYear = Order::factory()->create(['amount' => 100, 'created_at' => today()->subYears()]);
+        $nextMonth = Order::factory()->create(['amount' => 100, 'created_at' => today()->addMonths()]);
+
+        $dates = array_map(
+            fn($dt) => $dt->format('Y-m'),
+            CarbonPeriod::create(now()->startOfMonth()->subMonths($month - 1), '1 month', now()->startOfMonth())->toArray()
         );
+        $response = $this->fetch(['group_by_months' => $month])->keyBy('dt');
+
+        $this->assertEquals($dates, $response->pluck('dt')->values()->all());
+        $this->assertEquals(
+            $currentMonth->sum('amount'),
+            $response[today()->format('Y-m')]['order_total_amount']
+        );
+        $this->assertEquals(
+            $lastMonth->amount,
+            $response[today()->subMonths()->format('Y-m')]['order_total_amount']
+        );
+
+        $this->assertEquals(
+            $twoMonthsAgo->amount,
+            $response[today()->subMonths(2)->format('Y-m')]['order_total_amount']
+        );
+        $this->assertEquals(2, $response[today()->format('Y-m')]['order_count'] );
+
+        $this->assertArrayNotHasKey($lastYear->created_at->format('Y-m'), $response);
+        $this->assertArrayNotHasKey($nextMonth->created_at->format('Y-m'), $response);
     }
 
     /** @test */
