@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use Carbon\CarbonPeriod;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class AdminOrderStatsTest extends TestCase
@@ -42,13 +43,13 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_get_weekly_order_count_and_total_order_amount_count(): void
     {
+        Carbon::setTestNow(Carbon::parse('2023-07-17')); //set to monday
         $today = Order::factory()->create(['amount' => 100]);
-        $tomorrow = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDay()]);
-        $lastDayOfWeek = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDays(6)]);
-        $lastMinuts = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDays(7)->subMinutes(90)]);
+        $tomorrow = Order::factory()->create(['amount' => 100, 'created_at' => today()->addDay()]);
+        $sunday = Order::factory()->create(['amount' => 100, 'created_at' => today()->addDays(6)]);
+        $nextMonday = Order::factory()->create(['amount' => 100, 'created_at' => today()->addDays(7)]);
 
-        $yesterday = Order::factory()->create(['amount' => 100, 'created_at' => now()->subDays()]);
-        $nextWeek = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDays(7)]);
+        $yesterday = Order::factory()->create(['amount' => 100, 'created_at' => today()->subDays()]);
 
         $response = $this->fetch(['timeframe' => 'weekly']);
         $this->assertEquals(3, $response['order_count']);

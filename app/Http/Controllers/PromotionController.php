@@ -4,25 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Promotion;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 
 class PromotionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Cache::remember(
-            'promotions',
-            now()->addDays(5),
-            fn() => Promotion::enabled()
-                ->get(['id', 'name', 'description', 'start', 'until', 'isolated'])
-        );
+        return Promotion::query()
+            ->select(['id', 'name', 'description', 'start', 'until', 'isolated','status'])
+            ->filters([
+                'name' => [
+                    'clause' => 'like',
+                ],
+            ], $request)
+            ->orderBy('id', 'desc')
+            ->paginate();
     }
 
     public function show(Promotion $promotion)
     {
-        if(!$promotion->active()){
-            abort(404,'Promotion not found');
-        }
-
         return $promotion;
     }
 }
