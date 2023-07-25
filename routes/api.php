@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AdminExpenseController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
 use App\Http\Controllers\AdminStatController;
@@ -67,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/stats', [AdminStatController::class, 'index'])->middleware('admin.only');
         Route::get('/admin/order-stats', [AdminOrderStatController::class, 'index'])->middleware('admin.only');
+        Route::get('/admin/expense', [AdminExpenseController::class, 'index'])->middleware('admin.only');
     });
 
 

@@ -17,7 +17,9 @@ class ExpenseFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => 'water_bill',
+            'amount' => rand(100,5000),
+            'branch_id' => rand(1,10)
         ];
     }
 }
