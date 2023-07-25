@@ -62,13 +62,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/order', [AdminOrderController::class, 'store']);
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
-        Route::get('/admin/user', [AdminUserController::class, 'index'])->middleware('admin.only');
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
         Route::patch('/admin/user/profile', AdminUserProfileController::class);
 
-        Route::get('/admin/stats', [AdminStatController::class, 'index'])->middleware('admin.only');
-        Route::get('/admin/order-stats', [AdminOrderStatController::class, 'index'])->middleware('admin.only');
-        Route::get('/admin/expense', [AdminExpenseController::class, 'index'])->middleware('admin.only');
+        Route::middleware('admin.only')->group(function () {
+            Route::get('/admin/user', [AdminUserController::class, 'index']);
+            Route::get('/admin/stats', [AdminStatController::class, 'index']);
+            Route::get('/admin/order-stats', [AdminOrderStatController::class, 'index']);
+            Route::get('/admin/expense', [AdminExpenseController::class, 'index']);
+        });
     });
 
 
