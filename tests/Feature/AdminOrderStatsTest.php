@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Expense;
 use App\Models\Order;
 use Carbon\CarbonPeriod;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -126,6 +127,37 @@ class AdminOrderStatsTest extends TestCase
 
         $this->assertArrayNotHasKey($lastYear->created_at->format('Y-m'), $response);
         $this->assertArrayNotHasKey($nextMonth->created_at->format('Y-m'), $response);
+    }
+
+    /** @test */
+    public function it_can_see_margin_group_by_months_in_pass_x_months(): void
+    {
+        $month = 6;
+        $currentMonth = Order::factory(2)->create(['amount' => 100]);
+        $currentMonthExpense = Expense::factory()->create(['amount' => 50, 'created_at' => now()]);
+        $lastMonth = Order::factory()->create(['amount' => 80, 'created_at' => today()->subMonths()]);
+        $lastMonthExpense = Expense::factory()->create(['amount' => 800, 'created_at' => today()->subMonths()]);
+        $currentMonthMargin = $currentMonth->sum('amount') - $currentMonthExpense->amount;
+        $lastMonthMargin = $lastMonth->amount - $lastMonthExpense->amount;
+
+        $dates = array_map(
+            fn($dt) => $dt->format('Y-m'),
+            CarbonPeriod::create(now()->startOfMonth()->subMonths($month - 1), '1 month', now()->startOfMonth())->toArray()
+        );
+        $response = $this->fetch(['margin_group_by_months' => $month])->keyBy('dt');
+        $this->withoutExceptionHandling();
+
+        $this->assertEquals($dates, $response->pluck('dt')->values()->all());
+        $this->assertEquals(
+            $currentMonthMargin,
+            $response[today()->format('Y-m')]['margin']
+        );
+        $this->assertEquals(
+            $lastMonthMargin,
+            $response[today()->subMonths()->format('Y-m')]['margin']
+        );
+
+        $this->assertEquals(0, $response[today()->subMonths(2)->format('Y-m')]['margin'] );
     }
 
     /** @test */

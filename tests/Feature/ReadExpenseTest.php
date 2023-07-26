@@ -29,10 +29,14 @@ class ReadExpenseTest extends TestCase
     /** @test */
     public function it_can_filter_by_year_month(): void
     {
-        $today = Expense::factory()->create();
+        $today = Expense::factory()->create([
+            'created_at' => now()
+        ]);
+
         $lastMonth = Expense::factory()->create([
             'created_at' => today()->subMonths()
         ]);
+
         $threeMonthsAgo = Expense::factory()->create([
             'created_at' => today()->subMonths(3)
         ]);

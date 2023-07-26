@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Illuminate\Support\Carbon;
 
 class OrderGroupByDatesCollection
 {
-    private Carbon $start;
-    private Carbon $end;
-    private string $format;
+    protected Carbon $start;
+    protected Carbon $end;
+    protected string $format;
+    private $collection;
 
     public function __construct(protected int $span, protected $groupBy = 'day')
     {
@@ -26,7 +27,7 @@ class OrderGroupByDatesCollection
 
     public function __invoke()
     {
-        return collect($this->getDates())->map(fn($dt) => $this->addOrder($dt));
+        return collect($this->getDates())->map(fn($dt) => $this->apply($dt));
     }
 
     /**
@@ -34,7 +35,7 @@ class OrderGroupByDatesCollection
      * @param $dt
      * @return array
      */
-    public function emptyState($dt): array
+    protected function emptyState($dt): array
     {
         return [
             'dt' => $dt,
@@ -56,13 +57,13 @@ class OrderGroupByDatesCollection
     }
 
     /**
-     * add order data to date collection
-     * @param $dt
+     * apply data to the collection
+     * @param Carbon $dt
      * @return array|mixed
      */
-    protected function addOrder($dt): mixed
+    protected function apply(Carbon $dt): mixed
     {
-        $orders = $this->queryOrder();
+        $orders = $this->get();
         $dt = $dt->format($this->format);
         if ($orders->has($dt)) {
             return $orders[$dt]->toArray();
@@ -72,10 +73,10 @@ class OrderGroupByDatesCollection
     }
 
     /**
-     * get order collection
+     * get data collection
      * @return mixed
      */
-    protected function queryOrder()
+    protected function get()
     {
         if ($this->groupBy === 'day') {
             $arg = [$this->start, today()->copy()->addDay(), 'day'];
@@ -83,10 +84,14 @@ class OrderGroupByDatesCollection
             $arg = [$this->start, $this->end->copy()->addMonths()];
         }
 
-        return Order::query()
-            ->groupByCreated(...$arg)
-            ->get()
-            ->keyBy('dt');
+        if(is_null($this->collection)){
+            return $this->collection = Order::query()
+                ->groupByCreated(...$arg)
+                ->get()
+                ->keyBy('dt');
+        }
+
+        return $this->collection;
     }
 
 }

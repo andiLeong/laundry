@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MarginGroupByMonthCollection;
 use App\Models\Order;
 use App\Models\OrderGroupByDatesCollection;
-use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class AdminOrderStatController extends Controller
 {
@@ -17,7 +15,7 @@ class AdminOrderStatController extends Controller
 
         if ($request->filled('group_by_months')) {
             $months = $request->get('group_by_months');
-            $collection = new OrderGroupByDatesCollection($months,'month');
+            $collection = new OrderGroupByDatesCollection($months, 'month');
             return $collection();
         }
 
@@ -27,6 +25,11 @@ class AdminOrderStatController extends Controller
             return $collection();
         }
 
+        if ($request->filled('margin_group_by_months')) {
+            $months = $request->get('margin_group_by_months');
+            $collection = new MarginGroupByMonthCollection($months, 'month');
+            return $collection();
+        }
 
         if ($request->filled('timeframe') && $request->get('timeframe') === 'monthly') {
             $query->currentMonth();
