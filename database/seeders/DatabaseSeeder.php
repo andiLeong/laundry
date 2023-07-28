@@ -21,6 +21,18 @@ class DatabaseSeeder extends Seeder
             'born_at' => today(),
         ]);
 
+        \App\Models\Product::factory()->create([
+            'name' => 'Detergent',
+            'stock' => 100,
+            'price' => 50,
+        ]);
+
+        \App\Models\Product::factory()->create([
+            'name' => 'Conditioner',
+            'stock' => 100,
+            'price' => 70,
+        ]);
+
         $users = \App\Models\User::factory(200)->create();
         \App\Models\Service::factory()->create([
             'name' => 'Full service',
