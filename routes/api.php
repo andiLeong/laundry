@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Route;
 
 // future feature
 // 1 employee management (payroll, work hour, punch in/out)
-// 2 dashboard chart data showing
+// 2 product concept, there is some cases customer will buy washing product when order
 // 3 branch concept
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

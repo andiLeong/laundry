@@ -36,6 +36,7 @@ class AdminCreateOrderValidation
             ],
             'service_id' => 'required',
             'promotion_ids' => 'nullable|array|min:1',
+            'product_ids' => 'nullable|array',
             'isolated' => [
                 'nullable',
                 'in:0,1',

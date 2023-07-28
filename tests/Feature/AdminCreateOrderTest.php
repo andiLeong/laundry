@@ -2,6 +2,7 @@
 
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -28,8 +29,13 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function only_admin_and_employee_can_create_order()
+    public function only_login_admin_or_staff_can_create_order()
     {
+        $this->postJson($this->endpoint, [
+            'user_id' => 100,
+            'amount' => 200,
+        ])->assertUnauthorized();
+
         $customer = User::factory()->create();
         $this->actingAs($customer);
 
@@ -40,15 +46,6 @@ class AdminCreateOrderTest extends TestCase
         ]);
 
         $response->assertForbidden();
-    }
-
-    /** @test */
-    public function only_login_user_can_create_order()
-    {
-        $this->postJson($this->endpoint, [
-            'user_id' => 100,
-            'amount' => 200,
-        ])->assertUnauthorized();
     }
 
     /** @test */
@@ -116,6 +113,78 @@ class AdminCreateOrderTest extends TestCase
 
         $order = Order::first();
         $this->assertEquals(201, $order->amount);
+    }
+
+    /** @test */
+    public function when_create_order_customer_can_create_order_with_product()
+    {
+        $this->withoutExceptionHandling();
+        $this->assertDatabaseCount('product_orders', 0);
+
+        $service = Service::factory()->create(['price' => 201]);
+        $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $product2 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $this->createOrder([
+            'service_id' => $service->id,
+            'product_ids' => [
+                ['id' => $product1->id],
+                ['id' => $product2->id],
+            ],
+            'amount' => null,
+        ]);
+
+        $order = Order::first();
+        $this->assertEquals($service->price, $order->amount);
+        $this->assertEquals($product1->price + $product2->price + $service->price, $order->total_amount);
+        $this->assertEquals($product1->price + $product2->price, $order->product_amount);
+        $this->assertDatabaseHas('product_orders', [
+            'order_id' => $order->id,
+            'product_id' => $product1->id,
+            'quantity' => 1,
+        ]);
+
+        $this->assertDatabaseHas('product_orders', [
+            'order_id' => $order->id,
+            'product_id' => $product2->id,
+            'quantity' => 1,
+        ]);
+
+        $this->assertEquals($product1->stock - 1, $product1->fresh()->stock);
+        $this->assertEquals($product2->stock - 1, $product2->fresh()->stock);
+    }
+
+    /** @test */
+    public function when_create_order_customer_can_choose_multiple_products()
+    {
+        $service = Service::factory()->create(['price' => 201]);
+        $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $this->createOrder([
+            'service_id' => $service->id,
+            'product_ids' => [
+                ['id' => $product1->id, 'quantity' => 5]
+            ],
+        ]);
+
+        $order = Order::with('productOrder')->first();
+        $this->assertEquals(5, $order->productOrder[0]->pivot->quantity);
+        $this->assertDatabaseHas('product_orders', [
+            'order_id' => $order->id,
+            'product_id' => $product1->id,
+            'quantity' => 5
+        ]);
+        $this->assertEquals($product1->stock - 5, $product1->fresh()->stock);
+    }
+
+    /** @test */
+    public function product_id_validation()
+    {
+        $this->markTestSkipped();
+    }
+
+    /** @test */
+    public function product_must_to_have_enough_stocks()
+    {
+        $this->markTestSkipped();
     }
 
     private function orderAttributes(mixed $overwrites)

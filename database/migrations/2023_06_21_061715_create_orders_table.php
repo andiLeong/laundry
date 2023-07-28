@@ -16,7 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('service_id');
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->decimal('amount');
+            $table->unsigneddecimal('amount');
+            $table->unsigneddecimal('total_amount');
+            $table->unsignedBigInteger('product_amount')->default(0);
             $table->unsignedBigInteger('creator_id');
             $table->timestamps();
         });

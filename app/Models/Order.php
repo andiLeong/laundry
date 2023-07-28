@@ -33,6 +33,13 @@ class Order extends Model
         return $this->belongsToMany(Promotion::class, 'order_promotions', 'order_id', 'promotion_id');
     }
 
+    public function productOrder()
+    {
+        return $this
+            ->belongsToMany(Product::class,'product_orders','order_id','product_id')
+            ->withPivot('quantity');
+    }
+
     public function scopeToday(Builder $query)
     {
         return $query->where('created_at', '>', today()->startOfDay())

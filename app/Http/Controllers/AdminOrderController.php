@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Models\Order;
 use App\Models\OrderPromotion;
+use App\Models\Product;
+use App\Models\ProductOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,6 +79,38 @@ class AdminOrderController extends Controller
                 });
         }
 
-        return Order::create($data + ['creator_id' => $logInUser->id]);
+        $products = null;
+        if ($validation->request->has('product_ids')) {
+            $productIds = $validation->request->get('product_ids');
+            $products = Product::whereIn('id', array_column($productIds, 'id'))->get();
+        }
+        unset($data['product_ids']);
+
+        $order = Order::create($data + [
+                'creator_id' => $logInUser->id,
+                'total_amount' => $products ? $data['amount'] + $products->sum('price') : $data['amount'],
+                'product_amount' => $products ? $products->sum('price') : 0
+            ]);
+
+
+//        dump($validation->request->get('product_ids'));
+
+        if ($products) {
+            $products->each(function ($product, $key) use ($order, $validation) {
+                $quantity = array_key_exists('quantity', $validation->request->get('product_ids')[$key])
+                    ? $validation->request->get('product_ids')[$key]['quantity']
+                    : 1;
+
+                ProductOrder::create([
+                    'product_id' => $product->id,
+                    'order_id' => $order->id,
+                    'quantity' => $quantity
+                ]);
+//                dump($key);
+//                dump($quantity);
+                $product->decrement('stock', $quantity);
+            });
+        }
+        return $order;
     }
 }
