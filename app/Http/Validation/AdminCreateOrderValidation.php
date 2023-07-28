@@ -2,12 +2,14 @@
 
 namespace App\Http\Validation;
 
+use App\Models\Product;
 use App\Models\Promotion;
 use App\Models\Promotions\PromotionNotFoundException;
 use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -15,7 +17,9 @@ class AdminCreateOrderValidation
 {
     public Service|null $service;
     public User|null $user;
-    public $promotions;
+    public Collection|null $promotions;
+    public Collection|null $products = null;
+    public array $validated;
 
     public function __construct(public Request $request)
     {
@@ -52,6 +56,7 @@ class AdminCreateOrderValidation
 
         $this
             ->validateService()
+            ->validateProduct()
             ->validateUser()
             ->validatePromotion()
             ->qualifyPromotion();
@@ -61,8 +66,16 @@ class AdminCreateOrderValidation
         }
 
         unset($data['isolated']);
+        unset($data['product_ids']);
         unset($data['promotion_ids']);
-        return $data;
+        $this->validated = $data;
+        $this->setAmount();
+
+
+        return array_merge($this->validated, [
+            'total_amount' => $this->getTotalAmount(),
+            'product_amount' => $this->getProductAmount()
+        ]);
     }
 
     /**
@@ -167,5 +180,43 @@ class AdminCreateOrderValidation
             }
             $this->promotions = $qualifyPromotions;
         }
+    }
+
+    private function validateProduct()
+    {
+        if ($this->request->has('product_ids')) {
+            $productIds = $this->request->get('product_ids');
+            $this->products = Product::whereIn('id', array_column($productIds, 'id'))->get();
+        }
+
+        return $this;
+    }
+
+    public function hasProducts()
+    {
+        return !is_null($this->products);
+    }
+
+    private function getTotalAmount()
+    {
+        return $this->hasProducts()
+            ? $this->validated['amount'] + $this->products->sum('price')
+            : $this->validated['amount'];
+    }
+
+    public function setAmount()
+    {
+        if($this->shouldValidatePromotionIds()){
+            $this->validated['amount'] = $this->service->applyDiscount(
+                $this->promotions->sum->getDiscount()
+            );
+        }
+    }
+
+    private function getProductAmount()
+    {
+        return $this->hasProducts()
+            ? $this->products->sum('price')
+            : 0;
     }
 }

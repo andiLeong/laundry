@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Event\OrderCreated;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Models\Order;
 use App\Models\OrderPromotion;
-use App\Models\Product;
-use App\Models\ProductOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,74 +67,15 @@ class AdminOrderController extends Controller
     {
         $logInUser = auth()->user();
         $data = $validation->validate();
-        if ($validation->shouldValidatePromotionIds()) {
 
-            $qualifyPromotions = $validation->promotions;
+        return tap(Order::create($data + ['creator_id' => $logInUser->id,]),
+            function ($order) use ($validation) {
 
-            $data['amount'] = $validation->service->applyDiscount($qualifyPromotions->sum->getDiscount());
-
-
-            $products = null;
-            if ($validation->request->has('product_ids')) {
-                $productIds = $validation->request->get('product_ids');
-                $products = Product::whereIn('id', array_column($productIds, 'id'))->get();
-            }
-            unset($data['product_ids']);
-
-            return tap(Order::create($data + [
-                    'creator_id' => $logInUser->id,
-                    'total_amount' => $products ? $data['amount'] + $products->sum('price') : $data['amount'],
-                    'product_amount' => $products ? $products->sum('price') : 0
-                ]),
-                function ($order) use ($qualifyPromotions,$products,$validation) {
+                if ($validation->shouldValidatePromotionIds()) {
+                    $qualifyPromotions = $validation->promotions;
                     OrderPromotion::insertByPromotions($qualifyPromotions, $order);
-                    if ($products) {
-                        $products->each(function ($product, $key) use ($order, $validation) {
-                            $quantity = array_key_exists('quantity', $validation->request->get('product_ids')[$key])
-                                ? $validation->request->get('product_ids')[$key]['quantity']
-                                : 1;
-
-                            ProductOrder::create([
-                                'product_id' => $product->id,
-                                'order_id' => $order->id,
-                                'quantity' => $quantity
-                            ]);
-                            $product->decrement('stock', $quantity);
-                        });
-                    }
-                });
-        }
-
-        $products = null;
-        if ($validation->request->has('product_ids')) {
-            $productIds = $validation->request->get('product_ids');
-            $products = Product::whereIn('id', array_column($productIds, 'id'))->get();
-        }
-        unset($data['product_ids']);
-
-        $order = Order::create($data + [
-                'creator_id' => $logInUser->id,
-                'total_amount' => $products ? $data['amount'] + $products->sum('price') : $data['amount'],
-                'product_amount' => $products ? $products->sum('price') : 0
-            ]);
-
-
-//        dump($validation->request->get('product_ids'));
-
-        if ($products) {
-            $products->each(function ($product, $key) use ($order, $validation) {
-                $quantity = array_key_exists('quantity', $validation->request->get('product_ids')[$key])
-                    ? $validation->request->get('product_ids')[$key]['quantity']
-                    : 1;
-
-                ProductOrder::create([
-                    'product_id' => $product->id,
-                    'order_id' => $order->id,
-                    'quantity' => $quantity
-                ]);
-                $product->decrement('stock', $quantity);
+                }
+                OrderCreated::dispatch($order);
             });
-        }
-        return $order;
     }
 }
