@@ -13,7 +13,7 @@ class ReadPromotionTest extends TestCase
     protected $endpoint = '/api/promotion';
 
     /** @test */
-    public function it_cant_get_sensitive_column()
+    public function it_can_get_promotion_details_but_exclude_sensitive_column()
     {
         $promotion = Promotion::factory()->create(['name' => 'signup']);
         $response = $this->getJson($this->endpoint)->json('data')[0];

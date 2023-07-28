@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminUserProfileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::get('/product', [ProductController::class, 'index']);
 Route::get('/promotion', [PromotionController::class, 'index']);
 Route::get('/promotion/{promotion}', [PromotionController::class, 'show']);
 Route::get('/service', [ServiceController::class, 'index']);

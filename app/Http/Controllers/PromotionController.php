@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Promotion;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 class PromotionController extends Controller
@@ -11,7 +10,7 @@ class PromotionController extends Controller
     public function index(Request $request)
     {
         return Promotion::query()
-            ->select(['id', 'name', 'description', 'start', 'until', 'isolated','status'])
+            ->select(['id', 'name', 'description', 'start', 'until', 'isolated', 'status'])
             ->filters([
                 'name' => [
                     'clause' => 'like',
