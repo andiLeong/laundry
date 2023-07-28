@@ -73,9 +73,36 @@ class AdminOrderController extends Controller
             $qualifyPromotions = $validation->promotions;
 
             $data['amount'] = $validation->service->applyDiscount($qualifyPromotions->sum->getDiscount());
-            return tap(Order::create($data + ['creator_id' => $logInUser->id]),
-                function ($order) use ($qualifyPromotions) {
+
+
+            $products = null;
+            if ($validation->request->has('product_ids')) {
+                $productIds = $validation->request->get('product_ids');
+                $products = Product::whereIn('id', array_column($productIds, 'id'))->get();
+            }
+            unset($data['product_ids']);
+
+            return tap(Order::create($data + [
+                    'creator_id' => $logInUser->id,
+                    'total_amount' => $products ? $data['amount'] + $products->sum('price') : $data['amount'],
+                    'product_amount' => $products ? $products->sum('price') : 0
+                ]),
+                function ($order) use ($qualifyPromotions,$products,$validation) {
                     OrderPromotion::insertByPromotions($qualifyPromotions, $order);
+                    if ($products) {
+                        $products->each(function ($product, $key) use ($order, $validation) {
+                            $quantity = array_key_exists('quantity', $validation->request->get('product_ids')[$key])
+                                ? $validation->request->get('product_ids')[$key]['quantity']
+                                : 1;
+
+                            ProductOrder::create([
+                                'product_id' => $product->id,
+                                'order_id' => $order->id,
+                                'quantity' => $quantity
+                            ]);
+                            $product->decrement('stock', $quantity);
+                        });
+                    }
                 });
         }
 
@@ -106,8 +133,6 @@ class AdminOrderController extends Controller
                     'order_id' => $order->id,
                     'quantity' => $quantity
                 ]);
-//                dump($key);
-//                dump($quantity);
                 $product->decrement('stock', $quantity);
             });
         }

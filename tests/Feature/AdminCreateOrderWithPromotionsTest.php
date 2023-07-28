@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\OrderPromotion;
+use App\Models\Product;
 use App\Models\Promotion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -233,5 +234,47 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->assertEquals(100, $order->amount);
     }
 
+    /** @test */
+    public function it_can_create_order_when_product_id_is_present()
+    {
+        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        $service = $this->getService();
+        $signUpPromotion = $this->getPromotion();
+        $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $product2 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $this->assertDatabaseCount('product_orders', 0);
+
+        $this->createOrder([
+            'promotion_ids' => [$signUpPromotion->id],
+            'service_id' => $service->id,
+            'user_id' => $user->id,
+            'product_ids' => [
+                ['id' => $product1->id],
+                ['id' => $product2->id],
+            ],
+        ]);
+
+
+        $order = Order::first();
+        $discountedPrice = $service->price * $signUpPromotion->discount;
+        $this->assertEquals($discountedPrice, $order->amount);
+        $this->assertEquals($product1->price + $product2->price + $discountedPrice, $order->total_amount);
+        $this->assertEquals($product1->price + $product2->price, $order->product_amount);
+        $this->assertDatabaseHas('product_orders', [
+            'order_id' => $order->id,
+            'product_id' => $product1->id,
+            'quantity' => 1,
+        ]);
+
+        $this->assertDatabaseHas('product_orders', [
+            'order_id' => $order->id,
+            'product_id' => $product2->id,
+            'quantity' => 1,
+        ]);
+
+        $this->assertEquals($product1->stock - 1, $product1->fresh()->stock);
+        $this->assertEquals($product2->stock - 1, $product2->fresh()->stock);
+    }
 
 }

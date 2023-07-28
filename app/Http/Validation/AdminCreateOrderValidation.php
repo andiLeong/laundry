@@ -20,6 +20,12 @@ class AdminCreateOrderValidation
     public function __construct(public Request $request)
     {
         //
+        // different type of validation
+        //one with promotion
+        //one no promotion
+
+        //add on
+        //sometime need to validation order product
     }
 
     /**
