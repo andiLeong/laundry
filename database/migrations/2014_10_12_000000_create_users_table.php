@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('last_name',50);
             $table->string('password');
             $table->timestamp('phone_verified_at')->nullable();
+            $table->unsignedBigInteger('branch_id')->nullable();
             $table->timestamps();
         });
     }

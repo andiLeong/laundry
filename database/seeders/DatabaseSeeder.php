@@ -15,6 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $branch = \App\Models\Branch::factory()->create([
+            'name' => 'Saint paul branch',
+            'address' => 'Saint Paul str',
+            'born_at' => today(),
+        ]);
+
         $users = \App\Models\User::factory(200)->create();
         \App\Models\Service::factory()->create([
             'name' => 'Full service',

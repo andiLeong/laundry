@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('branch_id')->nullable();
             $table->string('name',100);
             $table->text('description');
             $table->unsignedTinyInteger('status')->default(1);
