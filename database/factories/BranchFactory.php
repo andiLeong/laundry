@@ -19,7 +19,7 @@ class BranchFactory extends Factory
         return [
             'name' => fake()->name,
             'address' => fake()->address(),
-            'bord_at' => today()->addDays(5)
+            'born_at' => today()->addDays(5)
         ];
     }
 }

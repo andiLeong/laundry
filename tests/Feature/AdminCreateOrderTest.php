@@ -156,21 +156,30 @@ class AdminCreateOrderTest extends TestCase
     /** @test */
     public function when_create_order_customer_can_choose_multiple_products()
     {
+        $this->withoutExceptionHandling();
+        $quantity = 5;
         $service = Service::factory()->create(['price' => 201]);
         $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $product2 = Product::factory()->create(['price' => 70, 'stock' => 10]);
         $this->createOrder([
             'service_id' => $service->id,
             'product_ids' => [
-                ['id' => $product1->id, 'quantity' => 5]
+                ['id' => $product1->id, 'quantity' => $quantity],
+                ['id' => $product2->id, 'quantity' => $quantity],
             ],
+            'amount' => null,
         ]);
 
         $order = Order::with('productOrder')->first();
+        $productAmount = $product1->price * $quantity + $product2->price * $quantity;
         $this->assertEquals(5, $order->productOrder[0]->pivot->quantity);
+        $this->assertEquals($productAmount + $service->price, $order->total_amount);
+        $this->assertEquals($productAmount, $order->product_amount);
+
         $this->assertDatabaseHas('product_orders', [
             'order_id' => $order->id,
             'product_id' => $product1->id,
-            'quantity' => 5
+            'quantity' => $quantity
         ]);
         $this->assertEquals($product1->stock - 5, $product1->fresh()->stock);
     }

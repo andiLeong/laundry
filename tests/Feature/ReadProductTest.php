@@ -20,4 +20,14 @@ class ReadProductTest extends TestCase
 
         $this->assertEquals($response['name'], $product->name);
     }
+
+    /** @test */
+    public function it_can_also_get_all_the_products()
+    {
+        $product = Product::factory()->create(['name' => 'downny conditioner']);
+        $response = $this->getJson($this->endpoint . '?all=1')->assertSuccessful()->json()[0];
+
+        $this->assertEquals($response['name'], $product->name);
+    }
+
 }

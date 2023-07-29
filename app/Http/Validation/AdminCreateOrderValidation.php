@@ -72,9 +72,10 @@ class AdminCreateOrderValidation
         $this->setAmount();
 
 
+        $productAmount = $this->getProductAmount();
         return array_merge($this->validated, [
-            'total_amount' => $this->getTotalAmount(),
-            'product_amount' => $this->getProductAmount()
+            'product_amount' => $productAmount,
+            'total_amount' => $this->validated['amount'] + $productAmount
         ]);
     }
 
@@ -215,8 +216,15 @@ class AdminCreateOrderValidation
 
     private function getProductAmount()
     {
-        return $this->hasProducts()
-            ? $this->products->sum('price')
-            : 0;
+        if($this->hasProducts()){
+            return $this->products->map(function($product){
+                $quantity = array_values(array_filter(
+                    $this->request->get('product_ids'),
+                    fn($pro) => $pro['id']  === $product->id
+                ))[0]['quantity'] ?? 1;
+                return $product->price * $quantity;
+            })->sum();
+        }
+        return 0;
     }
 }
