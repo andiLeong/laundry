@@ -235,6 +235,43 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     }
 
     /** @test */
+    public function if_all_promotions_id_are_not_qualified_validation_error_will_throw()
+    {
+        $unqualified = $this->unqualifiedPromotion();
+        $unqualified2 = $this->unqualifiedPromotion2();
+        $service = $this->getService();
+        $user = User::factory()->create();
+
+        $response = $this->createOrder([
+            'promotion_ids' => [$unqualified->id, $unqualified2->id],
+            'service_id' => $service->id,
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertValidateMessage('Sorry You are not qualified with these promotions',$response,'promotion_ids');
+    }
+
+    /** @test */
+    public function only_qualified_promotion_discount_will_be_applied()
+    {
+        $unqualified = $this->unqualifiedPromotion();
+        $unqualified2 = $this->unqualifiedPromotion2();
+        $signUpPromotion = $this->getPromotion();
+        $service = $this->getService();
+        $user = User::factory()->create();
+
+        $this->createOrder([
+            'promotion_ids' => [$unqualified->id, $unqualified2->id,$signUpPromotion->id],
+            'service_id' => $service->id,
+            'user_id' => $user->id,
+        ]);
+
+        $order = Order::first();
+        $this->assertNotNull($order);
+        $this->assertEquals($service->price * $signUpPromotion->discount, $order->amount);
+    }
+
+    /** @test */
     public function it_can_create_order_when_product_id_is_present()
     {
         $this->withoutExceptionHandling();

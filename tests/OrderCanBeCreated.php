@@ -86,4 +86,24 @@ trait OrderCanBeCreated
             $discount
         );
     }
+
+    protected function unqualifiedPromotion($isolated = false, $discount = 0.5)
+    {
+        return $this->getPromotion(
+            'unqualified for every one',
+            'App\Models\Promotions\NotQualifiedPromotion',
+            $isolated,
+            $discount
+        );
+    }
+
+    protected function unqualifiedPromotion2($isolated = false, $discount = 0.2)
+    {
+        return $this->getPromotion(
+            'unqualified for every one 2nd',
+            'App\Models\Promotions\NotQualifiedPromotion',
+            $isolated,
+            $discount
+        );
+    }
 }
