@@ -47,11 +47,11 @@ class AdminCreateOrderValidation
             'service_id' => 'required',
             'promotion_ids' => 'nullable|array|min:1',
             'product_ids' => 'nullable|array',
-            'isolated' => [
-                'nullable',
-                'in:0,1',
-                Rule::requiredIf($this->shouldValidatePromotionIds())
-            ],
+//            'isolated' => [
+//                'nullable',
+//                'in:0,1',
+//                Rule::requiredIf($this->shouldValidatePromotionIds())
+//            ],
         ]);
 
         $this
@@ -116,19 +116,17 @@ class AdminCreateOrderValidation
     {
         if ($this->shouldValidatePromotionIds()) {
             $promotionIds = $this->request->get('promotion_ids');
-            $isolated = $this->request->get('isolated');
 
             $promotions = Promotion::enabled()
                 ->available()
                 ->whereIn('id', $promotionIds)
-                ->where('isolated', $this->request->get('isolated'))
                 ->get();
 
             if (count($promotions) !== count($promotionIds)) {
                 $this->exception('promotion_ids', 'promotions are invalid');
             }
 
-            if ($isolated == 1 && count($promotionIds) !== 1) {
+            if ($promotions->contains->isIsolated() && $promotions->count() !== 1) {
                 $this->exception('promotion_ids', 'isolated promotion is only allow one at a time');
             }
 
@@ -207,7 +205,7 @@ class AdminCreateOrderValidation
 
     public function setAmount()
     {
-        if($this->shouldValidatePromotionIds()){
+        if ($this->shouldValidatePromotionIds()) {
             $this->validated['amount'] = $this->service->applyDiscount(
                 $this->promotions->sum->getDiscount()
             );
@@ -216,11 +214,11 @@ class AdminCreateOrderValidation
 
     private function getProductAmount()
     {
-        if($this->hasProducts()){
-            return $this->products->map(function($product){
+        if ($this->hasProducts()) {
+            return $this->products->map(function ($product) {
                 $quantity = array_values(array_filter(
                     $this->request->get('product_ids'),
-                    fn($pro) => $pro['id']  === $product->id
+                    fn($pro) => $pro['id'] === $product->id
                 ))[0]['quantity'] ?? 1;
                 return $product->price * $quantity;
             })->sum();

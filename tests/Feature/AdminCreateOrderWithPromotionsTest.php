@@ -17,32 +17,6 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     use LazilyRefreshDatabase;
     use OrderCanBeCreated;
 
-
-    /** @test */
-    public function isolated_must_be_valid()
-    {
-        $name = 'isolated';
-        $this->signInAsAdmin()->postJson($this->endpoint, [$name => 2])->assertJsonValidationErrorFor($name);
-        $this->signInAsAdmin()->postJson($this->endpoint, [$name => 3])->assertJsonValidationErrorFor($name);
-
-        $this->createOrder([$name => null,'promotion_ids' => null])
-            ->assertJsonMissingValidationErrors($name)
-            ->assertSuccessful();
-
-        $this->createOrder([$name => null])
-            ->assertJsonMissingValidationErrors($name)
-            ->assertSuccessful();
-    }
-
-    /** @test */
-    public function isolated_is_required_if_promotion_ids_is_present()
-    {
-        $promotion = Promotion::factory()->create();
-        $this->signInAsAdmin()
-            ->postJson($this->endpoint, ['promotion_ids' => [$promotion->id]])
-            ->assertJsonValidationErrorFor('isolated');
-    }
-
     /** @test */
     public function user_id_is_required_if_promotion_ids_is_present()
     {
@@ -123,7 +97,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $name = 'promotion_ids';
         $response = $this->createOrder([$name => []]);
-        $this->assertValidateMessage('The promotion ids field must have at least 1 items.',$response,$name);
+        $this->assertValidateMessage('The promotion ids field must have at least 1 items.', $response, $name);
         $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name)->assertSuccessful();
     }
 
@@ -143,33 +117,18 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     }
 
     /** @test */
-    public function if_isolated_flag_is_passed_then_the_promotion_must_be_isolated()
+    public function if_isolated_flag_is_passed_then_the_promotion_must_be_isolated_and_only_be_one()
     {
         $name = 'promotion_ids';
+        $isolatedPromotion = Promotion::factory()->create([
+            'isolated' => true
+        ]);
         $nonIsolatedPromotion = Promotion::factory()->create([
             'isolated' => false
         ]);
 
         $payload = $this->orderAttributes([
-            $name => [$nonIsolatedPromotion->id],
-            'isolated' => 1
-        ]);
-
-        $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
-        $this->assertValidateMessage('promotions are invalid', $response, $name);
-    }
-
-    /** @test */
-    public function if_isolated_flag_is_passed_then_the_promotion_must_be_isolated_and_only_be_one()
-    {
-        $name = 'promotion_ids';
-        $nonIsolatedPromotion = Promotion::factory(2)->create([
-            'isolated' => true
-        ]);
-
-        $payload = $this->orderAttributes([
-            $name => $nonIsolatedPromotion->pluck('id')->all(),
-            'isolated' => 1
+            $name => [$isolatedPromotion->id, $nonIsolatedPromotion->id]
         ]);
 
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
@@ -217,7 +176,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
         $this->createOrderWithPromotions([$rewardGiftCertificatePromotion->id]);
 
-        $orderId = OrderPromotion::where('promotion_id', $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
+        $orderId = OrderPromotion::where('promotion_id',
+            $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
         $order = Order::find($orderId);
         $this->assertEquals(200, $order->amount);
     }
@@ -229,7 +189,8 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
         $this->createOrderWithPromotions([$signUpPromotion->id, $rewardGiftCertificatePromotion->id]);
 
-        $orderId = OrderPromotion::where('promotion_id', $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
+        $orderId = OrderPromotion::where('promotion_id',
+            $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
         $order = Order::find($orderId);
         $this->assertEquals(100, $order->amount);
     }
@@ -248,7 +209,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->assertValidateMessage('Sorry You are not qualified with these promotions',$response,'promotion_ids');
+        $this->assertValidateMessage('Sorry You are not qualified with these promotions', $response, 'promotion_ids');
     }
 
     /** @test */
@@ -261,7 +222,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $user = User::factory()->create();
 
         $this->createOrder([
-            'promotion_ids' => [$unqualified->id, $unqualified2->id,$signUpPromotion->id],
+            'promotion_ids' => [$unqualified->id, $unqualified2->id, $signUpPromotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
         ]);
