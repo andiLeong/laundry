@@ -2,8 +2,8 @@
 
 namespace Tests;
 
+use App\Models\Enum\UserType;
 use App\Models\User;
-use App\Models\UserType;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase

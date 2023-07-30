@@ -2,16 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\Enum\OrderPayment;
 use App\QueryFilter\Filterable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Order extends Model
 {
     use HasFactory;
     use Filterable;
+
+    protected $casts = [
+        'paid' => 'boolean'
+    ];
+
+    protected function payment(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => OrderPayment::from($value)->name
+        );
+    }
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

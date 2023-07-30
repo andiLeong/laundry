@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\UserType;
 use App\Models\Order;
 use App\Models\OrderPromotion;
 use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
-use App\Models\UserType;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 

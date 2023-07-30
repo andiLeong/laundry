@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,6 +24,8 @@ class OrderFactory extends Factory
             'user_id' => User::factory(),
             'amount' => rand(120,150),
             'creator_id' => User::factory(),
+            'paid' => 1,
+            'payment' => OrderPayment::cash->value,
         ];
     }
 }

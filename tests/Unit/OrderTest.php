@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;
@@ -26,6 +27,8 @@ class OrderTest extends TestCase
         $this->assertEquals(1, $order->user_id);
         $this->assertEquals(2, $order->creator_id);
         $this->assertEquals(2, $order->service_id);
+        $this->assertEquals(OrderPayment::cash->name, $order->payment);
+        $this->assertTrue($order->paid);
     }
 
     /** @test */

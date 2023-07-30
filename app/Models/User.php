@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Enum\UserType;
 use App\QueryFilter\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
