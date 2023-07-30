@@ -7,27 +7,27 @@ use Carbon\Carbon;
 class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
 {
 
-    private $singleMargin;
-
     public function apply(Carbon $dt): mixed
     {
+        $dt = $dt->format($this->format);
         $orders = $this->get();
         $expenses = $this->getExpense();
-        $margins = $this->calculateMargin($orders,$expenses);
-        $dt = $dt->format($this->format);
-        if($margins->has($dt)){
-            return $margins[$dt];
+
+        if (isset($expenses[$dt])) {
+            $monthlyExpense = $expenses[$dt]->total_amount;
+        } else {
+            $monthlyExpense = 0;
         }
 
-        $this->singleMargin = 0;
-        return $this->emptyState($dt);
-    }
+        if (isset($orders[$dt])) {
+            $monthlyIncome = $orders[$dt]->order_total_amount;
+        } else {
+            $monthlyIncome = 0;
+        }
 
-    public function emptyState($dt): array
-    {
         return [
             'dt' => $dt,
-            'margin' => $this->singleMargin,
+            'margin' => $monthlyIncome - $monthlyExpense,
         ];
     }
 
@@ -39,13 +39,5 @@ class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
             ->groupByCreated(...$arg)
             ->get()
             ->keyBy('dt');
-    }
-
-    private function calculateMargin(mixed $orders, $expenses)
-    {
-        return $orders->map(function($order) use($expenses) {
-            $this->singleMargin = $order['order_total_amount'] - $expenses[$order['dt']]->total_amount;
-            return $this->emptyState($order['dt']);
-        });
     }
 }

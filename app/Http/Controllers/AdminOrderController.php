@@ -59,7 +59,7 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->creator_id !== $user->id) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone', 'service:id,name', 'promotions:id,name');
+        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount','productOrder');
         return $order;
     }
 
