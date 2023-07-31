@@ -47,11 +47,6 @@ class AdminCreateOrderValidation
             'service_id' => 'required',
             'promotion_ids' => 'nullable|array|min:1',
             'product_ids' => 'nullable|array',
-//            'isolated' => [
-//                'nullable',
-//                'in:0,1',
-//                Rule::requiredIf($this->shouldValidatePromotionIds())
-//            ],
         ]);
 
         $this
@@ -186,6 +181,21 @@ class AdminCreateOrderValidation
         if ($this->request->has('product_ids')) {
             $productIds = $this->request->get('product_ids');
             $this->products = Product::whereIn('id', array_column($productIds, 'id'))->get();
+
+            if (count($productIds) !== count($this->products)) {
+                $this->exception('product_ids', 'products are invalid');
+            }
+
+            $tem = [];
+            foreach ($this->request->get('product_ids') as $item) {
+               $tem[$item['id']] = $item['quantity'] ?? 1;
+            }
+
+            foreach ($this->products as $product) {
+                if ($product->stock < $tem[$product->id]) {
+                    $this->exception('product_ids', 'stock is not enough');
+                }
+            }
         }
 
         return $this;
@@ -194,13 +204,6 @@ class AdminCreateOrderValidation
     public function hasProducts()
     {
         return !is_null($this->products);
-    }
-
-    private function getTotalAmount()
-    {
-        return $this->hasProducts()
-            ? $this->validated['amount'] + $this->products->sum('price')
-            : $this->validated['amount'];
     }
 
     public function setAmount()

@@ -187,13 +187,40 @@ class AdminCreateOrderTest extends TestCase
     /** @test */
     public function product_id_validation()
     {
-        $this->markTestSkipped();
+        $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $service = $this->getService();
+        $response = $this->createOrder([
+            'service_id' => $service->id,
+            'product_ids' => [
+                ['id' => 888989],
+                ['id' => 99],
+            ],
+        ]);
+
+        $response2 = $this->createOrder([
+            'service_id' => $service->id,
+            'product_ids' => [
+                ['id' => $product1->id],
+                ['id' => 99],
+            ],
+        ]);
+
+        $this->assertValidateMessage('products are invalid', $response,'product_ids');
+        $this->assertValidateMessage('products are invalid', $response2,'product_ids');
     }
 
     /** @test */
     public function product_must_to_have_enough_stocks()
     {
-        $this->markTestSkipped();
+        $product = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $response = $this->createOrder([
+            'service_id' => $this->getService()->id,
+            'product_ids' => [
+                ['id' => $product->id,'quantity' => 100],
+            ],
+        ]);
+
+        $this->assertValidateMessage('stock is not enough', $response,'product_ids');
     }
 
     private function orderAttributes(mixed $overwrites)

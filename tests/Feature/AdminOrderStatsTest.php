@@ -31,6 +31,7 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_get_monthly_order_count_and_total_order_amount_count(): void
     {
+        Carbon::setTestNow('2023-07-10');
         $orders = Order::factory(10)->create(['amount' => 100, 'created_at' => now()->subDays()]);
         Order::factory()->create(['created_at' => now()->subMonths(1)]);
         Order::factory()->create(['created_at' => now()->subMonths(2)]);
@@ -95,6 +96,7 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_see_order_count_and_total_amount_group_by_months_in_pass_x_months(): void
     {
+        Carbon::setTestNow('2023-07-10');
         $month = 6;
         $currentMonth = Order::factory(2)->create(['amount' => 100]);
         $lastMonth = Order::factory()->create(['amount' => 80, 'created_at' => today()->subMonths()]);
@@ -132,6 +134,7 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_see_margin_group_by_months_in_pass_x_months(): void
     {
+        Carbon::setTestNow('2023-07-10');
         $month = 6;
         $currentMonth = Order::factory(2)->create(['amount' => 100]);
         $currentMonthExpense = Expense::factory()->create(['amount' => 50, 'created_at' => now()]);

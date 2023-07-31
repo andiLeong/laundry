@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
 {
+    protected $expenses;
 
     public function apply(Carbon $dt): mixed
     {
@@ -13,17 +14,8 @@ class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
         $orders = $this->get();
         $expenses = $this->getExpense();
 
-        if (isset($expenses[$dt])) {
-            $monthlyExpense = $expenses[$dt]->total_amount;
-        } else {
-            $monthlyExpense = 0;
-        }
-
-        if (isset($orders[$dt])) {
-            $monthlyIncome = $orders[$dt]->order_total_amount;
-        } else {
-            $monthlyIncome = 0;
-        }
+        $monthlyExpense = isset($expenses[$dt]) ? $expenses[$dt]->total_amount : 0;
+        $monthlyIncome = isset($orders[$dt]) ? $orders[$dt]->order_total_amount : 0;
 
         return [
             'dt' => $dt,
@@ -33,9 +25,13 @@ class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
 
     private function getExpense()
     {
+        if ($this->expenses) {
+            return $this->expenses;
+        }
+
         $arg = [$this->start, $this->end->copy()->addMonths()];
 
-        return Expense::query()
+        return $this->expenses = Expense::query()
             ->groupByCreated(...$arg)
             ->get()
             ->keyBy('dt');

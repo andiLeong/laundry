@@ -149,7 +149,7 @@ class AdminReadUserTest extends TestCase
             'service_id' => $service->id,
             'amount' => 220,
             'user_id' => $maggie->id,
-            'created_at' => now()->subDays(30)
+            'created_at' => now()->subMonths(2)
         ]);
 
         $ids = $this->fetchUsersIds(['last_order_this_month' => true]);
