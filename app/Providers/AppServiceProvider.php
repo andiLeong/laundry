@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Http\Validation\AdminCreateOrderValidation;
+use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
+use App\Http\Validation\OrderValidate;
 use App\Models\Promotions\PromotionNotFoundException;
 use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Sms\Contract\Sms as SmsContract;
@@ -28,8 +30,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::unguard();
-        $this->app->bind(AdminCreateOrderValidation::class, function ($app) {
-            return new AdminCreateOrderValidation($app['request']);
+        $this->app->bind(OrderValidate::class, function ($app) {
+            $request = $app['request'];
+            if($request->has('promotion_ids')){
+                return new AdminCreateOrderWithPromotionValidation($request);
+            }
+            return new AdminCreateOrderValidation($request);
         });
 
         $this->app->singleton(SmsContract::class, function ($app) {

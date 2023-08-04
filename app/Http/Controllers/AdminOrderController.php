@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Event\OrderCreated;
-use App\Http\Validation\AdminCreateOrderValidation;
+use App\Http\Validation\OrderValidate;
 use App\Models\Order;
 use App\Models\OrderPromotion;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,11 +59,11 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->creator_id !== $user->id) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount','productOrder');
+        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'productOrder');
         return $order;
     }
 
-    public function store(AdminCreateOrderValidation $validation)
+    public function store(OrderValidate $validation)
     {
         $logInUser = auth()->user();
         $data = $validation->validate();
@@ -71,7 +71,7 @@ class AdminOrderController extends Controller
         return tap(Order::create($data + ['creator_id' => $logInUser->id,]),
             function ($order) use ($validation) {
 
-                if ($validation->shouldValidatePromotionIds()) {
+                if (property_exists($validation, 'promotions')) {
                     $qualifyPromotions = $validation->promotions;
                     OrderPromotion::insertByPromotions($qualifyPromotions, $order);
                 }

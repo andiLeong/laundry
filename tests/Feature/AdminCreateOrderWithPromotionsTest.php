@@ -24,17 +24,13 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->signInAsAdmin()
             ->postJson($this->endpoint, ['promotion_ids' => [$promotion->id]])
             ->assertJsonValidationErrorFor('user_id');
-
-        $this->signInAsAdmin()
-            ->postJson($this->endpoint, ['promotion_ids' => null])
-            ->assertJsonMissingValidationErrors('user_id');
     }
 
     /** @test */
     public function non_existed_promotion_ids_validation()
     {
         $name = 'promotion_ids';
-        $rule = ['nullable', 'array'];
+        $rule = ['required', 'array'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrder($payload)
         );
@@ -97,8 +93,9 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $name = 'promotion_ids';
         $response = $this->createOrder([$name => []]);
-        $this->assertValidateMessage('The promotion ids field must have at least 1 items.', $response, $name);
-        $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name)->assertSuccessful();
+        $this->assertValidateMessage('The promotion ids field is required.', $response, $name);
+        $response = $this->createOrder([$name => null]);
+        $this->assertValidateMessage('The promotion ids field is required.', $response, $name);
     }
 
     /** @test */
