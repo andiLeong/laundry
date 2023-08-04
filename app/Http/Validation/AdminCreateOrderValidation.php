@@ -15,6 +15,12 @@ class AdminCreateOrderValidation implements OrderValidate
     public User|null $user;
     public Collection|null $products = null;
     public array $validated;
+    public array $rules = [
+        'amount' => 'nullable|decimal:0,4',
+        'user_id' => 'nullable',
+        'service_id' => 'required',
+        'product_ids' => 'nullable|array',
+    ];
 
     public function __construct(public Request $request)
     {
@@ -26,13 +32,7 @@ class AdminCreateOrderValidation implements OrderValidate
      */
     public function validate(): array
     {
-        $request = $this->request;
-        $data = $request->validate([
-            'amount' => 'nullable|decimal:0,4',
-            'user_id' => 'nullable',
-            'service_id' => 'required',
-            'product_ids' => 'nullable|array',
-        ]);
+        $data = $this->request->validate($this->rules);
 
         $this
             ->validateService()

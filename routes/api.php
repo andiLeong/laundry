@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AdminBulkOrderController;
 use App\Http\Controllers\AdminExpenseController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
@@ -59,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', LogOutController::class);
 
     Route::middleware('staff.only')->group(function () {
+        Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);
         Route::post('/admin/order', [AdminOrderController::class, 'store']);

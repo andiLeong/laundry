@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
 use App\Http\Validation\OrderValidate;
@@ -36,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
                 return new AdminCreateOrderWithPromotionValidation($request);
             }
             return new AdminCreateOrderValidation($request);
+        });
+
+        $this->app->bind(AdminCreateBulkOrderValidation::class, function ($app) {
+            return new AdminCreateBulkOrderValidation(new AdminCreateOrderValidation($app['request']));
         });
 
         $this->app->singleton(SmsContract::class, function ($app) {
