@@ -77,6 +77,14 @@ class DatabaseSeeder extends Seeder
             'discount' => 0.1,
         ]);
 
+        \App\Models\Promotion::factory(20)->create([
+            'isolated' => 0,
+            'start' => now()->subDay(),
+            'until' => null,
+            'class' => 'App\Models\Promotions\WednesdayWasher',
+            'discount' => 0.1,
+        ]);
+
         $users->each(function ($user) {
             $service = Service::find(rand(1,2));
             Order::factory()->create([

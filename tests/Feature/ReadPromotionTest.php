@@ -19,6 +19,8 @@ class ReadPromotionTest extends TestCase
         $response = $this->getJson($this->endpoint)->json('data')[0];
 
         $this->assertEquals($response['name'], $promotion->name);
+        $this->assertEquals($response['image'], $promotion->image);
+        $this->assertEquals($response['thumbnail'], $promotion->thumbnail);
         $this->assertArrayNotHasKey('class', $response);
     }
 
