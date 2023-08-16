@@ -42,6 +42,9 @@ jobs:
 
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
+          DB_TWILIO_SID: 787897
+          DB_TWILIO_AUTH: sadasdasdasd
+          DB_TWILIO_NUMBER: 09060181787
           DB_USERNAME: root
           DB_DATABASE_TEST: blog-v2-test
           DB_CONNECTION: mysql
