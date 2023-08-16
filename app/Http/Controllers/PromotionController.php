@@ -10,7 +10,7 @@ class PromotionController extends Controller
     public function index(Request $request)
     {
         return Promotion::query()
-            ->select(['id', 'name', 'description', 'start', 'until', 'isolated', 'status'])
+            ->select(['id', 'name', 'description', 'start', 'until', 'isolated', 'status', 'image', 'thumbnail'])
             ->filters([
                 'name' => [
                     'clause' => 'like',

@@ -25,6 +25,8 @@ class PromotionFactory extends Factory
             'until' => today()->addDays(7),
             'discount' => 0.5,
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
+            'image' => fake()->imageUrl(),
+            'thumbnail' => fake()->imageUrl(),
         ];
     }
 }
