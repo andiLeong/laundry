@@ -10,6 +10,7 @@ class PromotionController extends Controller
     public function index(Request $request)
     {
         return Promotion::query()
+            ->enabled()
             ->select(['id', 'name', 'description', 'start', 'until', 'isolated', 'status', 'image', 'thumbnail'])
             ->filters([
                 'name' => [
