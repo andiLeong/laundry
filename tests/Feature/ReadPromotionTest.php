@@ -25,6 +25,17 @@ class ReadPromotionTest extends TestCase
     }
 
     /** @test */
+    public function it_cant_get_inactive_promotions()
+    {
+        $promotion = Promotion::factory()->create(['name' => 'signup']);
+        $promotion2 = Promotion::factory()->create(['name' => 'disabled','status' => false]);
+        $response = $this->getJson($this->endpoint)->collect('data')->pluck('name');
+
+        $this->assertTrue(in_array($promotion->name,$response->all()));
+        $this->assertFalse(in_array($promotion2->name,$response->all()));
+    }
+
+    /** @test */
     public function promotion_can_be_filtered_by_name()
     {
         $foo = Promotion::factory()->create(['name' => 'foo']);
