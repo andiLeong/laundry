@@ -61,7 +61,7 @@ class VerificationTest extends TestCase
         $response = $this->verify($expiredToken);
 
         $this->assertFalse($this->user->fresh()->isVerified());
-        $this->assertValidateMessage('Token is invalid', $response, 'token');
+        $this->assertValidateMessage('Token is expired', $response, 'token');
     }
 
     /** @test */

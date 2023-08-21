@@ -22,9 +22,15 @@ class VerificationController extends Controller
         }
 
         $verification = $user->verification;
-        if (is_null($verification) || $request->token != $verification->token || $verification->expired_at < now()) {
+        if (is_null($verification) || $request->token != $verification->token){
             throw ValidationException::withMessages([
                 'token' => ['Token is invalid'],
+            ]);
+        }
+
+        if ($verification->expired_at < now()) {
+            throw ValidationException::withMessages([
+                'token' => ['Token is expired'],
             ]);
         }
 
