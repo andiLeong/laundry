@@ -14,13 +14,22 @@ class SignUpController extends Controller
     public function store(Request $request, Sms $sms, Template $template)
     {
         $attributes = $request->validate([
-            'phone' => ['required', 'string', 'unique:users,phone', function (string $attribute, mixed $value, Closure $fail) {
+            'phone' => ['required', 'string', function (string $attribute, mixed $value, Closure $fail) {
                 if (is_string($value) && strlen($value) != 11) {
                     $fail("The {$attribute} is invalid.");
                 }
 
                 if (is_string($value) && !str_starts_with($value, '09')) {
                     $fail("The {$attribute} is invalid.");
+                }
+
+                $user = User::withoutGlobalScope('verified')->where('phone',$value)->first();
+                if ($user !== null) {
+                    if($user->isVerified()){
+                        $fail("your account is already signup, you can sign in with your number");
+                    }else{
+                        $fail("we found your record, but you are not verified, please go to verify.");
+                    }
                 }
             }],
             'password' => 'required|string|max:90|min:8',

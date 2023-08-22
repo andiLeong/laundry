@@ -11,7 +11,11 @@ class SendVerificationCodeController extends Controller
 {
     public function store($phone, Sms $sms, Template $template)
     {
-        $user = User::withoutGlobalScope('verified')->where('phone', $phone)->firstOrFail();
+        $user = User::withoutGlobalScope('verified')->where('phone', $phone)->first();
+        if (is_null($user)) {
+            abort(404, 'Phone not found');
+        }
+
         if ($user->isVerified()) {
             abort(403, 'Your phone is verified');
         }

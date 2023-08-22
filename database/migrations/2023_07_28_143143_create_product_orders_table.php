@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('quantity')->default(1);
+
+            $table->unique(['order_id','product_id']);
         });
     }
 
