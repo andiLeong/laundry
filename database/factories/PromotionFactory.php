@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Promotion>
@@ -16,8 +17,10 @@ class PromotionFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->word() . rand(10000,99999);
         return [
-            'name' => fake()->word(),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'description' => fake()->paragraph(2),
             'status' => 1,
             'isolated' => 0,

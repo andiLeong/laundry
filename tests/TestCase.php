@@ -67,4 +67,12 @@ abstract class TestCase extends BaseTestCase
         ));
         return $this;
     }
+
+    public function assertColumnsSame($columns,$result)
+    {
+        sort($columns);
+        sort($result);
+
+        $this->assertEquals($columns,$result);
+    }
 }

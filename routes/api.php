@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/product', [ProductController::class, 'index']);
 Route::get('/promotion', [PromotionController::class, 'index']);
-Route::get('/promotion/{promotion}', [PromotionController::class, 'show']);
+Route::get('/promotion/{slug}', [PromotionController::class, 'show']);
 Route::get('/service', [ServiceController::class, 'index']);
 
 

@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('branch_id')->nullable();
-            $table->string('name',100)->unique();
+            $table->string('name',100);
+            $table->string('slug')->unique();
             $table->text('description');
             $table->unsignedTinyInteger('status')->default(1);
             $table->unsignedTinyInteger('isolated')->default(0);

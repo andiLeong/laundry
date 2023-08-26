@@ -13,30 +13,32 @@ class ReadPromotionTest extends TestCase
     protected $endpoint = '/api/promotion';
 
     /** @test */
-    public function it_can_get_promotion_details_but_exclude_sensitive_column()
+    public function it_can_get_promotions()
     {
         $promotion = Promotion::factory()->create(['name' => 'signup']);
         $response = $this->getJson($this->endpoint)->json('data')[0];
 
-        $this->assertEquals($response['name'], $promotion->name);
-        $this->assertEquals($response['image'], $promotion->image);
-        $this->assertEquals($response['thumbnail'], $promotion->thumbnail);
-        $this->assertArrayNotHasKey('class', $response);
+        $this->assertEquals($promotion->name,$response['name']);
+        $this->assertEquals($promotion->slug,$response['slug']);
+        $this->assertEquals($promotion->description,$response['description']);
+        $this->assertEquals($promotion->image,$response['image']);
+        $this->assertEquals($promotion->thumbnail,$response['thumbnail']);
+        $this->assertColumnsSame(['name','slug','description','image','thumbnail'],array_keys($response));
     }
 
     /** @test */
-    public function it_cant_get_inactive_promotions()
+    public function it_cant_get_disabled_promotions()
     {
         $promotion = Promotion::factory()->create(['name' => 'signup']);
-        $promotion2 = Promotion::factory()->create(['name' => 'disabled','status' => false]);
+        $promotion2 = Promotion::factory()->create(['name' => 'disabled', 'status' => false]);
         $response = $this->getJson($this->endpoint)->collect('data')->pluck('name');
 
-        $this->assertTrue(in_array($promotion->name,$response->all()));
-        $this->assertFalse(in_array($promotion2->name,$response->all()));
+        $this->assertTrue(in_array($promotion->name, $response->all()));
+        $this->assertFalse(in_array($promotion2->name, $response->all()));
     }
 
     /** @test */
-    public function promotion_can_be_filtered_by_name()
+    public function it_can_be_filtered_by_name()
     {
         $foo = Promotion::factory()->create(['name' => 'foo']);
         Promotion::factory()->create(['name' => 'bar']);
@@ -50,25 +52,41 @@ class ReadPromotionTest extends TestCase
     public function it_can_get_a_single_available_promotion_detail()
     {
         $promotion = Promotion::factory()->create();
+        $response = $this->getJson($this->getSinglePromotionEndpoint($promotion->slug))->json();
 
-        $name = $this
-            ->getJson($this->getSinglePromotionEndpoint($promotion->id))
-            ->assertOk()
-            ->json('name');
+        $this->assertEquals($promotion->name,$response['name']);
+        $this->assertEquals($promotion->slug,$response['slug']);
+        $this->assertEquals($promotion->description,$response['description']);
+        $this->assertEquals($promotion->discount,$response['discount']);
+        $this->assertEquals($promotion->isolated,$response['isolated']);
+        $this->assertEquals($promotion->start->toJson(),$response['start']);
+        $this->assertEquals($promotion->until->toJson(),$response['until']);
+        $this->assertEquals($promotion->image,$response['image']);
 
-        $this
-            ->getJson($this->endpoint . '/' . 99999999)
-            ->assertNotFound();
-
-        $this->assertEquals($promotion->name, $name);
+        $this->assertColumnsSame(['name','slug','description','discount','isolated','start','until','image'],array_keys($response));
     }
 
     /** @test */
-    public function sensitive_column_is_hidden_from_read_single_promotion()
+    public function it_get_404_if_promotion_not_exists()
     {
-        $promotion = Promotion::factory()->create();
-        $response = $this->getJson($this->getSinglePromotionEndpoint($promotion->id))->json();
-        $this->assertArrayNotHasKey('class', $response);
+        $message = $this
+            ->getJson($this->endpoint . '/' . 99999999)
+            ->assertNotFound()
+            ->json('message');
+
+        $this->assertEquals('Promotion not found', $message);
+    }
+
+    /** @test */
+    public function it_get_404_if_promotion_is_not_enabled()
+    {
+        $promotion = Promotion::factory()->create(['name' => 'disabled', 'status' => false]);
+        $message = $this
+            ->getJson($this->endpoint . '/' . $promotion->slug)
+            ->assertNotFound()
+            ->json('message');
+
+        $this->assertEquals('Promotion not found', $message);
     }
 
     public function getSinglePromotionEndpoint($id)
