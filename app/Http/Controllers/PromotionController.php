@@ -7,28 +7,20 @@ use Illuminate\Http\Request;
 
 class PromotionController extends Controller
 {
-    /**
-     * @var array|string[]
-     */
-    private array $promotionsColumns;
-
-    /**
-     * @var array|string[]
-     */
-    private array $promotionColumns;
-
-    public function __construct()
-    {
-        $noColumnRestriction = auth()->check() && !auth()->user()->customer();
-        $this->promotionsColumns = $noColumnRestriction ? ['slug', 'name', 'description', 'start', 'until', 'isolated'] : ['slug', 'name', 'description','image','thumbnail'];
-        $this->promotionColumns = $noColumnRestriction ? ['*'] : ['name','slug','description','discount','isolated','start','until','image'];
-    }
-
     public function index(Request $request)
     {
+        $noColumnRestriction = auth()->check() && !auth()->user()->isCustomer();
         return Promotion::query()
             ->enabled()
-            ->select($this->promotionsColumns)
+            ->select($noColumnRestriction ? [
+                'id',
+                'slug',
+                'name',
+                'description',
+                'start',
+                'until',
+                'isolated'
+            ] : ['slug', 'name', 'description', 'image', 'thumbnail'])
             ->filters([
                 'name' => [
                     'clause' => 'like',
@@ -41,13 +33,22 @@ class PromotionController extends Controller
     public function show($slug)
     {
         $promotion = Promotion::query()
-            ->select($this->promotionColumns)
+            ->select([
+                'name',
+                'slug',
+                'description',
+                'discount',
+                'isolated',
+                'start',
+                'until',
+                'image'
+            ])
             ->enabled()
-            ->where('slug',$slug)
+            ->where('slug', $slug)
             ->first();
 
-        if(is_null($promotion)){
-            abort(404,'Promotion not found');
+        if (is_null($promotion)) {
+            abort(404, 'Promotion not found');
         }
         return $promotion;
     }
