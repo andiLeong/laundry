@@ -55,6 +55,8 @@ class DatabaseSeeder extends Seeder
             'until' => null,
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
             'discount' => 0.5,
+            'image' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-4-big.jpeg',
+            'thumbnail' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-4.png',
         ]);
 
         \App\Models\Promotion::factory()->create([
@@ -65,6 +67,8 @@ class DatabaseSeeder extends Seeder
             'until' => null,
             'class' => 'App\\Models\\Promotions\\RewardGiftCertificate',
             'discount' => 0,
+            'image' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-3-big.jpeg',
+            'thumbnail' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-3.png',
         ]);
 
         \App\Models\Promotion::factory()->create([
@@ -75,6 +79,8 @@ class DatabaseSeeder extends Seeder
             'until' => null,
             'class' => 'App\Models\Promotions\WednesdayWasher',
             'discount' => 0.1,
+            'image' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-2-big.jpeg',
+            'thumbnail' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-2.png',
         ]);
 
         \App\Models\Promotion::factory(20)->create([

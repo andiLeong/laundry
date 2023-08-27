@@ -17,6 +17,7 @@ class PromotionFactory extends Factory
      */
     public function definition(): array
     {
+        $imgNumber = rand(1,4);
         $name = fake()->word() . rand(10000,99999);
         return [
             'name' => $name,
@@ -28,8 +29,8 @@ class PromotionFactory extends Factory
             'until' => today()->addDays(7),
             'discount' => 0.5,
             'class' => 'App\\Models\\Promotions\\SignUpDiscount',
-            'image' => fake()->imageUrl(),
-            'thumbnail' => fake()->imageUrl(),
+            'image' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-'.$imgNumber.'-big.jpeg',
+            'thumbnail' => 'https://andiliang.sgp1.cdn.digitaloceanspaces.com/sbin/promotion-'.$imgNumber.'.png',
         ];
     }
 }
