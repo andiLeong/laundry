@@ -22,7 +22,9 @@ class OrderFactory extends Factory
         return [
             'service_id' => Service::factory(),
             'user_id' => User::factory(),
-            'amount' => rand(120,150),
+            'amount' => $amount = rand(120,150),
+            'total_amount' => $amount,
+            'product_amount' => 0,
             'creator_id' => User::factory(),
             'paid' => 1,
             'payment' => OrderPayment::cash->value,

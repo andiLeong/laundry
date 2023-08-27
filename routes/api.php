@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminUserProfileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
+    Route::get('/order', [OrderController::class, 'index']);
     Route::post('/address', [AddressController::class, 'store']);
     Route::patch('/address/{address}', [AddressController::class, 'update']);
     Route::get('/address', [AddressController::class, 'index']);
