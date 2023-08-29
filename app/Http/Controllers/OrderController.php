@@ -17,4 +17,25 @@ class OrderController extends Controller
             ->with('service:name,id')
             ->paginate();
     }
+
+    public function show($id)
+    {
+        $column = ['id','service_id','amount','total_amount','product_amount','paid','payment','created_at','user_id'];
+        $order = Order::select($column)->where('id',$id)->with(['service:id,name','productOrder:name,price'])->first();
+
+        if(is_null($order) ||  $order->user_id !== auth()->id()){
+            abort(404,'Order not found');
+        }
+
+        $order->productOrder->map(function($product){
+            $product['quantity'] = $product->pivot->quantity;
+            unset($product->pivot);
+            return $product;
+        });
+        $order->service_name = $order->service->name;
+        unset($order->service_id);
+        unset($order->service);
+
+        return $order;
+    }
 }

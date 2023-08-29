@@ -80,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/order', [OrderController::class, 'index']);
+    Route::get('/order/{id}', [OrderController::class, 'show']);
     Route::post('/address', [AddressController::class, 'store']);
     Route::patch('/address/{address}', [AddressController::class, 'update']);
     Route::get('/address', [AddressController::class, 'index']);
