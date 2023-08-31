@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Company;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\VerificationToken;
@@ -55,5 +56,27 @@ class UserTest extends TestCase
 
         $this->assertEquals($secondToken->token, $user->verification->token);
         $this->assertEquals($secondToken->user_id, $user->id);
+    }
+
+    /** @test */
+    public function it_belongs_to_a_company()
+    {
+        $fooInc = [
+            'id' => 1,
+            'name' => 'foo inc',
+            'address' => 'manila'
+        ];
+        $customer = $this->customer();
+        $customer2 = $this->customer();
+
+        $company = new Company(config());
+        $company->insert($fooInc);
+        $company->insertUser([
+            'id' => $customer->id,
+            'company_id' => 1,
+        ]);
+
+        $this->assertEquals($customer->company(),$fooInc);
+        $this->assertNull($customer2->company());
     }
 }

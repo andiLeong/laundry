@@ -43,6 +43,16 @@ class User extends Authenticatable
         return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
     }
 
+    public function company()
+    {
+        $company = new Company(config());
+        $companyId = $company->getIdByUser($this->id);
+        if(is_null($companyId)){
+            return null;
+        }
+        return $company->find($companyId['company_id']);
+    }
+
     protected function type(): Attribute
     {
         return Attribute::make(
