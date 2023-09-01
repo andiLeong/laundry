@@ -12,7 +12,7 @@ class OrderController extends Controller
     {
         return Order::query()
             ->select(['id','amount','total_amount','product_amount','created_at','paid','payment','service_id'])
-            ->where('id', Auth::id())
+            ->where('user_id', Auth::id())
             ->orderBy('id', 'desc')
             ->with('service:name,id')
             ->paginate();

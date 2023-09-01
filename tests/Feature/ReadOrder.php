@@ -60,4 +60,19 @@ class ReadOrder extends TestCase
         $this->assertEquals($order->service->name, $firstOrder['service']['name']);
         $this->assertEquals($order->created_at->toJson(), $firstOrder['created_at']);
     }
+
+    /** @test */
+    public function it_can_get_all_auth_user_orders()
+    {
+        $john = $this->customer();
+        $order = Order::factory()->create(['user_id' => $john,'amount' => 10]);
+        $order2 = Order::factory()->create(['user_id' => $john,'amount' => 20]);
+
+        $orders = $this->signIn($john)
+            ->getJson($this->endpoint)
+            ->json('data');
+
+        $this->assertEquals($order2->amount, $orders[0]['amount']);
+        $this->assertEquals($order->amount, $orders[1]['amount']);
+    }
 }
