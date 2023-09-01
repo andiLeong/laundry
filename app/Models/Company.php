@@ -7,9 +7,11 @@ use Illuminate\Config\Repository;
 class Company
 {
 
-    public function __construct(protected Repository $config)
+    public function __construct(protected ?Repository $config = null)
     {
-        //
+        if(is_null($config)){
+            $this->config = config();
+        }
     }
 
     /**

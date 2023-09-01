@@ -13,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, Filterable;
+    use HasApiTokens, HasFactory, Notifiable, Filterable, HasCompany;
 
     protected $hidden = ['password'];
 
@@ -41,16 +41,6 @@ class User extends Authenticatable
     public function verification()
     {
         return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
-    }
-
-    public function company()
-    {
-        $company = new Company(config());
-        $companyId = $company->getIdByUser($this->id);
-        if(is_null($companyId)){
-            return null;
-        }
-        return $company->find($companyId['company_id']);
     }
 
     protected function type(): Attribute

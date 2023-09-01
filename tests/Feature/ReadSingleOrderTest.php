@@ -27,13 +27,10 @@ class ReadSingleOrderTest extends TestCase
             ->each(fn($product) => ProductOrder::associate($order, $product)
             );
 
-
         $response = $this->signIn($john)
             ->getJson($this->endpoint($order->id))
             ->assertSuccessful()
             ->json();
-
-        dump($response);
 
         $this->assertEquals($order->service->name, $response['service_name']);
         $this->assertEquals($order->amount, $response['amount']);
@@ -49,8 +46,6 @@ class ReadSingleOrderTest extends TestCase
             $this->assertColumnsSame(['name', 'price', 'quantity'], array_keys($productOrder));
             $this->assertEquals(1, $productOrder['quantity']);
         }
-
-
     }
 
     /** @test */

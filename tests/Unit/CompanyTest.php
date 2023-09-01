@@ -5,21 +5,30 @@ namespace Tests\Unit;
 
 use App\Models\Company;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\CanCreateCompany;
 use Tests\TestCase;
 
 class CompanyTest extends TestCase
 {
-    use LazilyRefreshDatabase;
+    use LazilyRefreshDatabase, CanCreateCompany;
+
+    private array $fooInc;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fooInc = [
+            'id' => 1,
+            'name' => 'test',
+            'address' => null
+        ];
+    }
 
     /** @test */
     public function it_can_all_company_information(): void
     {
-        $company = new Company(config());
-        $company->insert([
-            'id' => 1,
-            'name' => 'test',
-            'address' => null
-        ]);
+        $company = new Company();
+        $company->insert($this->fooInc);
 
         $this->assertEquals(config('company.company'), $company->all());
         $this->assertTrue(true);
@@ -28,46 +37,14 @@ class CompanyTest extends TestCase
     /** @test */
     public function it_can_get_all_users()
     {
-        $company = new Company(config());
-        $company->insert([
-            'id' => 1,
-            'name' => 'test',
-            'address' => null
-        ]);
-
-        $company->insertUser([
-            'id' => 2,
-            'company_id' => 1,
-        ]);
-
-        $company->insertUser([
-            'id' => 3,
-            'company_id' => 1,
-        ]);
-
+        $company = $this->setupCompanyAndUser([2, 3], $this->fooInc);
         $this->assertEquals(config('company.users'), $company->users());
     }
 
     /** @test */
     public function it_can_get_single_user()
     {
-        $company = new Company(config());
-        $company->insert([
-            'id' => 1,
-            'name' => 'test',
-            'address' => null
-        ]);
-
-        $company->insertUser([
-            'id' => 2,
-            'company_id' => 1,
-        ]);
-
-        $company->insertUser([
-            'id' => 3,
-            'company_id' => 1,
-        ]);
-
+        $company = $this->setupCompanyAndUser([2, 3], $this->fooInc);
         $user = $company->getIdByUser(3);
 
         $this->assertEquals(['id' => 3, 'company_id' => 1], $user);
@@ -81,12 +58,8 @@ class CompanyTest extends TestCase
             'name' => 'test',
             'address' => null
         ];
-        $company = new Company(config());
-        $company->insert([
-            'id' => 1,
-            'name' => 'test',
-            'address' => null
-        ]);
+        $company = new Company();
+        $company->insert($this->fooInc);
 
         $company->insert($target);
 
