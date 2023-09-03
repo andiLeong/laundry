@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
 use App\Http\Controllers\AdminStatController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminUserProfileController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OrderController;
@@ -68,7 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
-        Route::patch('/admin/user/profile', AdminUserProfileController::class);
     });
 
     Route::middleware('admin.only')->group(function () {
@@ -79,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
+    Route::patch('/user/profile', UserProfileController::class);
     Route::get('/order', [OrderController::class, 'index']);
     Route::get('/order/{id}', [OrderController::class, 'show']);
     Route::post('/address', [AddressController::class, 'store']);

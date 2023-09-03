@@ -7,11 +7,11 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 use Tests\Validate;
 
-class AdminUserUpdateProfileTest extends TestCase
+class UserUpdateProfileTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private $endpoint = '/api/admin/user/profile';
+    private $endpoint = '/api/user/profile';
     private $phone;
 
     protected function setUp(): void
@@ -31,16 +31,9 @@ class AdminUserUpdateProfileTest extends TestCase
     }
 
     /** @test */
-    public function it_can_perform_update_if_you_not_sign_in(): void
+    public function only_auth_user_can_perform_update(): void
     {
          $this->patchJson($this->endpoint, [])->assertUnauthorized();
-    }
-
-    /** @test */
-    public function only_staff_or_admin_can_update(): void
-    {
-        $user = User::factory()->create();
-        $this->be($user)->patchJson($this->endpoint, [])->assertForbidden();
     }
 
     /** @test */
