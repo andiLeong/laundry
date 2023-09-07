@@ -107,6 +107,8 @@ class AdminCreateOrderValidation implements OrderValidate
                 if ($product->stock < $tem[$product->id]) {
                     $this->exception('product_ids', 'stock is not enough');
                 }
+
+                $product->quantity = $tem[$product->id];
             }
         }
 

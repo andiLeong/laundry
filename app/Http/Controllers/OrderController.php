@@ -21,17 +21,12 @@ class OrderController extends Controller
     public function show($id)
     {
         $column = ['id','service_id','amount','total_amount','product_amount','paid','payment','created_at','user_id'];
-        $order = Order::select($column)->where('id',$id)->with(['service:id,name','productOrder:name,price'])->first();
+        $order = Order::select($column)->where('id',$id)->with(['service:id,name','products:order_id,name,quantity,price,total_price'])->first();
 
         if(is_null($order) ||  $order->user_id !== auth()->id()){
             abort(404,'Order not found');
         }
 
-        $order->productOrder->map(function($product){
-            $product['quantity'] = $product->pivot->quantity;
-            unset($product->pivot);
-            return $product;
-        });
         $order->service_name = $order->service->name;
         unset($order->service_id);
         unset($order->service);

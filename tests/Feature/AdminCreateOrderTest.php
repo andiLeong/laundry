@@ -2,6 +2,7 @@
 
 
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -119,7 +120,7 @@ class AdminCreateOrderTest extends TestCase
     public function when_create_order_customer_can_create_order_with_product()
     {
         $this->withoutExceptionHandling();
-        $this->assertDatabaseCount('product_orders', 0);
+        $this->assertDatabaseCount('order_products', 0);
 
         $service = Service::factory()->create(['price' => 201]);
         $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
@@ -137,16 +138,22 @@ class AdminCreateOrderTest extends TestCase
         $this->assertEquals($service->price, $order->amount);
         $this->assertEquals($product1->price + $product2->price + $service->price, $order->total_amount);
         $this->assertEquals($product1->price + $product2->price, $order->product_amount);
-        $this->assertDatabaseHas('product_orders', [
+        $this->assertDatabaseHas('order_products', [
             'order_id' => $order->id,
             'product_id' => $product1->id,
             'quantity' => 1,
+            'name' => $product1->name,
+            'price' => $product1->price,
+            'total_price' => $product1->price * 1,
         ]);
 
-        $this->assertDatabaseHas('product_orders', [
+        $this->assertDatabaseHas('order_products', [
             'order_id' => $order->id,
             'product_id' => $product2->id,
             'quantity' => 1,
+            'name' => $product2->name,
+            'price' => $product1->price,
+            'total_price' => $product1->price * 1,
         ]);
 
         $this->assertEquals($product1->stock - 1, $product1->fresh()->stock);
@@ -158,6 +165,7 @@ class AdminCreateOrderTest extends TestCase
     {
         $this->withoutExceptionHandling();
         $quantity = 5;
+        $quantity2 = 3;
         $service = Service::factory()->create(['price' => 201]);
         $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 70, 'stock' => 10]);
@@ -165,21 +173,25 @@ class AdminCreateOrderTest extends TestCase
             'service_id' => $service->id,
             'product_ids' => [
                 ['id' => $product1->id, 'quantity' => $quantity],
-                ['id' => $product2->id, 'quantity' => $quantity],
+                ['id' => $product2->id, 'quantity' => $quantity2],
             ],
             'amount' => null,
         ]);
 
-        $order = Order::with('productOrder')->first();
-        $productAmount = $product1->price * $quantity + $product2->price * $quantity;
-        $this->assertEquals(5, $order->productOrder[0]->pivot->quantity);
+        $order = Order::with('products')->first();
+        $productAmount = $product1->price * $quantity + $product2->price * $quantity2;
+        $this->assertEquals($quantity, $order->products[0]->quantity);
+        $this->assertEquals($quantity2, $order->products[1]->quantity);
         $this->assertEquals($productAmount + $service->price, $order->total_amount);
         $this->assertEquals($productAmount, $order->product_amount);
 
-        $this->assertDatabaseHas('product_orders', [
+        $this->assertDatabaseHas('order_products', [
             'order_id' => $order->id,
             'product_id' => $product1->id,
-            'quantity' => $quantity
+            'quantity' => $quantity,
+            'name' => $product1->name,
+            'price' => $product1->price,
+            'total_price' => $product1->price * $quantity
         ]);
         $this->assertEquals($product1->stock - 5, $product1->fresh()->stock);
     }

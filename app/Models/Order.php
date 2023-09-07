@@ -46,11 +46,9 @@ class Order extends Model
         return $this->belongsToMany(Promotion::class, 'order_promotions', 'order_id', 'promotion_id');
     }
 
-    public function productOrder()
+    public function products()
     {
-        return $this
-            ->belongsToMany(Product::class,'product_orders','order_id','product_id')
-            ->withPivot('quantity');
+        return $this->hasMany(OrderProduct::class,'order_id','id');
     }
 
     public function scopeToday(Builder $query)

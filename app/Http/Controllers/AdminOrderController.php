@@ -59,7 +59,7 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->creator_id !== $user->id) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'productOrder');
+        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'products');
         return $order;
     }
 
@@ -75,7 +75,7 @@ class AdminOrderController extends Controller
                     $qualifyPromotions = $validation->promotions;
                     OrderPromotion::insertByPromotions($qualifyPromotions, $order);
                 }
-                OrderCreated::dispatch($order);
+                OrderCreated::dispatch($order,$validation->products);
             });
     }
 }

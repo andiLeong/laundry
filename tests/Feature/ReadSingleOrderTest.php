@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\ProductOrder;
+use App\Models\OrderProduct;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -19,12 +19,13 @@ class ReadSingleOrderTest extends TestCase
     {
         $john = $this->customer();
         $order = Order::factory()->create(['user_id' => $john]);
-        $product = Product::factory(2)
+        Product::factory(2)
             ->create()
             ->map(function ($product) {
-                return ['id' => $product->id];
+                $product->quantity =1;
+                return $product;
             })
-            ->each(fn($product) => ProductOrder::associate($order, $product)
+            ->each(fn($product) => OrderProduct::associate($order, $product)
             );
 
         $response = $this->signIn($john)
@@ -40,10 +41,10 @@ class ReadSingleOrderTest extends TestCase
         $this->assertEquals($order->payment, $response['payment']);
         $this->assertEquals($order->created_at->toJson(), $response['created_at']);
 
-        $this->assertColumnsSame(['id', 'service_name', 'product_order', 'amount', 'total_amount', 'product_amount', 'paid', 'payment', 'created_at', 'user_id'], array_keys($response));
+        $this->assertColumnsSame(['id', 'service_name', 'products', 'amount', 'total_amount', 'product_amount', 'paid', 'payment', 'created_at', 'user_id'], array_keys($response));
 
-        foreach ($response['product_order'] as $productOrder) {
-            $this->assertColumnsSame(['name', 'price', 'quantity'], array_keys($productOrder));
+        foreach ($response['products'] as $productOrder) {
+            $this->assertColumnsSame(['name', 'price', 'quantity','total_price','order_id'], array_keys($productOrder));
             $this->assertEquals(1, $productOrder['quantity']);
         }
     }

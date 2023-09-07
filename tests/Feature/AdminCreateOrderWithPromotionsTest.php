@@ -233,42 +233,48 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     public function it_can_create_order_when_product_id_is_present()
     {
         $this->withoutExceptionHandling();
+        $quantity = 3;
         $user = User::factory()->create();
         $service = $this->getService();
         $signUpPromotion = $this->getPromotion();
-        $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
+        $product1 = Product::factory()->create(['price' => 20, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 50, 'stock' => 10]);
-        $this->assertDatabaseCount('product_orders', 0);
+        $this->assertDatabaseCount('order_products', 0);
 
         $this->createOrder([
             'promotion_ids' => [$signUpPromotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
             'product_ids' => [
-                ['id' => $product1->id],
+                ['id' => $product1->id,'quantity' => $quantity],
                 ['id' => $product2->id],
             ],
         ]);
 
-
         $order = Order::first();
         $discountedPrice = $service->price * $signUpPromotion->discount;
         $this->assertEquals($discountedPrice, $order->amount);
-        $this->assertEquals($product1->price + $product2->price + $discountedPrice, $order->total_amount);
-        $this->assertEquals($product1->price + $product2->price, $order->product_amount);
-        $this->assertDatabaseHas('product_orders', [
+        $this->assertEquals(($product1->price * $quantity) + $product2->price + $discountedPrice, $order->total_amount);
+        $this->assertEquals(($product1->price * $quantity) + $product2->price, $order->product_amount);
+        $this->assertDatabaseHas('order_products', [
             'order_id' => $order->id,
             'product_id' => $product1->id,
-            'quantity' => 1,
+            'quantity' => $quantity,
+            'name' => $product1->name,
+            'price' => $product1->price,
+            'total_price' => $product1->price * $quantity,
         ]);
 
-        $this->assertDatabaseHas('product_orders', [
+        $this->assertDatabaseHas('order_products', [
             'order_id' => $order->id,
             'product_id' => $product2->id,
             'quantity' => 1,
+            'name' => $product2->name,
+            'price' => $product2->price,
+            'total_price' => $product2->price * 1,
         ]);
 
-        $this->assertEquals($product1->stock - 1, $product1->fresh()->stock);
+        $this->assertEquals($product1->stock - $quantity, $product1->fresh()->stock);
         $this->assertEquals($product2->stock - 1, $product2->fresh()->stock);
     }
 
