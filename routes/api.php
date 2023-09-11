@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
 use App\Http\Controllers\AdminStatController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OrderController;
@@ -17,6 +17,7 @@ use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\TwilioSmsWebhookController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
@@ -61,6 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', LogOutController::class);
 
     Route::middleware('staff.only')->group(function () {
+
+        Route::post('/admin/attendance', [AttendanceController::class, 'store']);
+        Route::get('/admin/attendance', [AttendanceController::class, 'index']);
+
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);

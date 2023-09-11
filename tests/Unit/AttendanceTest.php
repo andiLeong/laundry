@@ -17,7 +17,7 @@ class AttendanceTest extends TestCase
     {
         parent::setUp();
         $this->branch = Branch::factory()->create();
-        $this->user = $this->customer(['branch_id' => $this->branch->id]);
+        $this->user = $this->staff(['branch_id' => $this->branch->id]);
     }
 
     /** @test */

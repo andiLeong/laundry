@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('address');
+            $table->string('longitude');
+            $table->string('latitude');
             $table->timestamp('born_at');
         });
     }

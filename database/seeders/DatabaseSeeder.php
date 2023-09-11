@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Saint paul branch',
             'address' => 'Saint Paul str',
             'born_at' => today(),
+            'latitude' => '14.56590616661546',
+            'longitude' => '121.011513032166',
         ]);
 
         \App\Models\Product::factory()->create([

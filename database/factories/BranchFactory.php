@@ -19,7 +19,9 @@ class BranchFactory extends Factory
         return [
             'name' => fake()->name,
             'address' => fake()->address(),
-            'born_at' => today()->addDays(5)
+            'born_at' => today()->addDays(5),
+            'latitude' => '14.56590616661546',
+            'longitude' => '121.011513032166',
         ];
     }
 }
