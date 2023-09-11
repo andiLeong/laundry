@@ -26,11 +26,11 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    public function customer()
+    public function customer($attributes = [])
     {
-        return User::factory()->create([
+        return User::factory()->create(array_merge([
             'type' => UserType::customer->value,
-        ]);
+        ],$attributes));
     }
 
     public function signInAsAdmin($admin = null)

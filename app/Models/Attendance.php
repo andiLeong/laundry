@@ -19,7 +19,17 @@ class Attendance extends Model
     protected function type(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => AttendanceType::from($value)->name
+            get: fn(string $value) => AttendanceType::from($value)->name
         );
+    }
+
+    public function staff(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'staff_id', 'id');
+    }
+
+    public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

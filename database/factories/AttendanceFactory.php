@@ -2,6 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
+use App\Models\Enum\AttendanceType;
+use App\Models\Enum\UserType;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +20,17 @@ class AttendanceFactory extends Factory
      */
     public function definition(): array
     {
+        $branch = Branch::factory()->create();
+        $staff = User::factory()->create([
+            'type' => UserType::customer->value,
+            'branch_id' => $branch->id,
+        ]);
+
         return [
-            //
+            'branch_id' => $staff->branch_id,
+            'staff_id' => $staff->id,
+            'type' => AttendanceType::in->value,
+            'time' => now(),
         ];
     }
 }

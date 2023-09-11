@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'phone' => '09' . rand(1000,3000) . rand(30001,99999),
             'phone_verified_at' => now(),
+            'branch_id' => null,
             'password' => 'password', // password
         ];
     }
