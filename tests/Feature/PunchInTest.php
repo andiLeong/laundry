@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
+use App\Models\Shift;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -42,6 +43,12 @@ class PunchInTest extends TestCase
     public function it_record_attendance_as_late_if_staff_punch_in_late()
     {
        $this->markTestSkipped();
+       $shift = Shift::factory()->create();
+       dump($shift['days']);
+       dd($shift);
+
+//        $attendance = ;
+//        $this->assertTrue($attendance->late());
     }
 
     /** @test */
