@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Attendance;
 use App\Models\Branch;
+use App\Models\Enum\AttendanceType;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -19,9 +21,9 @@ class PunchInTest extends TestCase
         $this->endpoint = 'api/admin/attendance';
 
         $this->branch = Branch::factory()->create();
-        $this->user = $this->customer(['branch_id' => $this->branch->id]);
+        $this->user = $this->staff(['branch_id' => $this->branch->id]);
         //obtain staff location, and branch location, within 1km only count as valid punch in
-        //staff can punch in once per day
+        //when staff punch in we need to calculate if its a late punch in
     }
 
     /** @test */
@@ -41,15 +43,53 @@ class PunchInTest extends TestCase
     }
 
     /** @test */
+    public function staff_can_only_punch_in_once_a_day()
+    {
+        Attendance::factory()->create([
+            'type' => AttendanceType::in->name,
+            'staff_id' => $this->user->id,
+            'branch_id' => $this->user->branch_id,
+        ]);
+
+        $message = $this->signIn($this->user)->postJson($this->endpoint)->assertStatus(400)->json('message');
+        $this->assertEquals('You had already report to work today', $message);
+    }
+
+    /** @test */
     public function staff_cant_perform_punch_in_if_their_location_its_out_of_range()
     {
         $this->markTestSkipped();
         dump($this->branch->toArray());
 
+//        $length = strlen('tp1qaz2WSX3EDC4rfv');
+//        dump($length);
+//        dump(0 && 0);
+
+        $query = 'select *,
+            ST_Distance(
+                ST_SRID(Point(longitude, latitude), 4326),
+                ST_SRID(Point(121.01361883068033, 14.567702111099415), 4326)
+            ) as distance
+         from `branches`)';
+
+        $res = DB::select($query);
+
+        dd($res);
+
+        $query = Branch::query();
 
         $distance = 1; // user input distance
         $user_latitude = '14.567702111099415'; // user input latitude
         $user_longitude = '121.01361883068033'; // user input logtitude
+
+        $query->select('*')->selectRaw('
+            ST_Distance(
+               ST_SRID(Point(longitude, latitude), 4326),
+               ST_SRID(Point(?, ?), 4326)
+            ) as distance
+        ', [$user_longitude, $user_latitude]);
+
+        dd($query->get());
 
         $sql = "SELECT ROUND(6371 * acos (cos ( radians($user_latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($user_longitude) ) + sin ( radians($user_latitude) ) * sin( radians( latitude ) ))) AS distance,
        branches.*
@@ -59,7 +99,6 @@ where id = 1 HAVING distance <= $distance";
         $res = DB::select($sql);
 
         dd($res);
-
 
     }
 }
