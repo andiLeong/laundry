@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Order;
+use App\Models\Shift;
 use App\Models\User;
 use App\Models\VerificationToken;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -124,5 +125,16 @@ class UserTest extends TestCase
 
         $this->assertTrue($customer->isComportedAccount());
         $this->assertFalse($customer2->isComportedAccount());
+    }
+
+    /** @test */
+    public function it_has_one_shift()
+    {
+        $staff = $this->staff();
+        $shift = Shift::factory()->create([
+            'staff_id' => $staff->id
+        ]);
+
+        $this->assertEquals($staff->shift->id, $shift->id);
     }
 }

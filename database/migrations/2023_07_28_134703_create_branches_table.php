@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('address');
             $table->decimal('longitude', 11, 8);
             $table->decimal('latitude', 11, 8);
-            $table->timestamp('born_at');
+            $table->datetime('born_at');
         });
     }
 

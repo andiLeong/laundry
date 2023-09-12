@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     public function shift()
     {
-        return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
+        return $this->hasOne(Shift::class,'staff_id','id');
     }
 
     protected function type(): Attribute
