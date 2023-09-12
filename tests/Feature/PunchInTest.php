@@ -8,6 +8,7 @@ use App\Models\Enum\AttendanceType;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use Tests\Validate;
 
 class PunchInTest extends TestCase
 {
@@ -46,12 +47,12 @@ class PunchInTest extends TestCase
     public function staff_can_only_punch_in_once_a_day()
     {
         Attendance::factory()->create([
-            'type' => AttendanceType::in->name,
+            'type' => AttendanceType::in->value,
             'staff_id' => $this->user->id,
             'branch_id' => $this->user->branch_id,
         ]);
 
-        $message = $this->signIn($this->user)->postJson($this->endpoint)->assertStatus(400)->json('message');
+        $message = $this->punchIn()->assertStatus(400)->json('message');
         $this->assertEquals('You had already report to work today', $message);
     }
 
@@ -100,5 +101,45 @@ where id = 1 HAVING distance <= $distance";
 
         dd($res);
 
+    }
+
+    /** @test */
+    public function amount_must_be_valid()
+    {
+        $name = 'type';
+        $rule = ['required', 'in:0,1'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->punchIn($payload)
+        );
+    }
+
+    /** @test */
+    public function latitude_must_be_valid()
+    {
+        $name = 'latitude';
+        $rule = ['required'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->punchIn($payload)
+        );
+    }
+
+    /** @test */
+    public function longitude_must_be_valid()
+    {
+        $name = 'longitude';
+        $rule = ['required'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->punchIn($payload)
+        );
+    }
+
+    public function punchIn($payload = [])
+    {
+        $attributes = Attendance::factory()->make()->toArray();
+        $attributes['type'] = AttendanceType::in->value;
+        $attributes['longitude'] = 999;
+        $attributes['latitude'] = 222;
+        $payload = array_merge($attributes, $payload);
+        return $this->signIn($this->user)->postJson($this->endpoint, $payload);
     }
 }

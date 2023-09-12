@@ -42,11 +42,18 @@ class AttendanceController extends Controller
             });
     }
 
-    public function store()
+    public function store(Request $request)
     {
+        $validated = $request->validate([
+            'type' => 'required|in:'.AttendanceType::in->value.','.AttendanceType::out->value,
+            'longitude' => 'required',
+            'latitude' => 'required',
+        ]);
+
+//        dd($validated);
         $attendance = Attendance::query()
             ->where('staff_id', auth()->id())
-            ->where('type', AttendanceType::in->value)
+            ->where('type', $validated['type'])
             ->whereBetween('time', [today(), today()->endOfDay()])
             ->first();
 

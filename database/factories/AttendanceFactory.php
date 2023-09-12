@@ -22,7 +22,7 @@ class AttendanceFactory extends Factory
     {
         $branch = Branch::factory()->create();
         $staff = User::factory()->create([
-            'type' => UserType::customer->value,
+            'type' => UserType::employee->value,
             'branch_id' => $branch->id,
         ]);
 
