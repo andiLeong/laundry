@@ -30,10 +30,18 @@ class PunchInTest extends TestCase
     /** @test */
     public function staff_can_punch_in(): void
     {
-        $this->markTestSkipped();
-        $response = $this->get('/');
+        $this->assertDatabaseCount('attendances', 0);
+        $this->assertNull(Attendance::firstForToday($this->user->id, AttendanceType::in->value));
+        $this->punchIn()->assertSuccessful();
 
-        $response->assertStatus(200);
+        $this->assertNotNull(Attendance::firstForToday($this->user->id, AttendanceType::in->value));
+        $this->assertDatabaseCount('attendances', 1);
+    }
+
+    /** @test */
+    public function it_record_attendance_as_late_if_staff_punch_in_late()
+    {
+       $this->markTestSkipped();
     }
 
     /** @test */

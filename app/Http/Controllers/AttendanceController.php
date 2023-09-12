@@ -45,21 +45,27 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:'.AttendanceType::in->value.','.AttendanceType::out->value,
+            'type' => 'required|in:' . AttendanceType::in->value . ',' . AttendanceType::out->value,
             'longitude' => 'required',
             'latitude' => 'required',
         ]);
 
-//        dd($validated);
-        $attendance = Attendance::query()
-            ->where('staff_id', auth()->id())
-            ->where('type', $validated['type'])
-            ->whereBetween('time', [today(), today()->endOfDay()])
-            ->first();
+        $staff = auth()->user();
+        $attendance = Attendance::firstForToday($staff->id, $validated['type']);
 
         if ($attendance !== null) {
-            abort(400,'You had already report to work today');
+            abort(400, 'You had already report to work today');
         }
 
+        if (Attendance::outOfRange($validated['latitude'], $validated['longitude'])) {
+            abort(400, 'Your location seems too far from your branch');
+        }
+
+        return Attendance::create([
+            'staff_id' => $staff->id,
+            'time' => now(),
+            'type' => $validated['type'],
+            'branch_id' => $staff->branch_id,
+        ]);
     }
 }

@@ -32,4 +32,19 @@ class Attendance extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public static function firstForToday($staffId, $type)
+    {
+        return static::query()
+            ->where('staff_id', $staffId)
+            ->where('type', $type)
+            ->whereBetween('time', [today(), today()->endOfDay()])
+            ->first();
+    }
+
+    public static function outOfRange($lat, $log): bool
+    {
+
+        return false;
+    }
 }
