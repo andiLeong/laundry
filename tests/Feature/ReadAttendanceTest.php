@@ -107,8 +107,8 @@ class ReadAttendanceTest extends TestCase
         $this->assertEquals($attendance->staff->middle_name, $response['staff']['middle_name']);
         $this->assertEquals($attendance->staff->last_name, $response['staff']['last_name']);
         $this->assertEquals($attendance->branch->name, $response['branch_name']);
-        $this->assertColumnsSame(['id', 'type', 'time', 'branch_name', 'staff'], array_keys($response));
-        $this->assertColumnsSame(['first_name','middle_name','last_name'], array_keys($response['staff']));
+        $this->assertColumnsSame(['id', 'type', 'time', 'branch_name', 'staff', 'is_late'], array_keys($response));
+        $this->assertColumnsSame(['first_name', 'middle_name', 'last_name'], array_keys($response['staff']));
     }
 
     protected function attendance($count = null, $attributes = [])

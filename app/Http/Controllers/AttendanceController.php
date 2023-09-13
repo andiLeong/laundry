@@ -61,11 +61,15 @@ class AttendanceController extends Controller
             abort(400, 'Your location seems too far from your branch');
         }
 
+        $now = now();
+        $late = $staff->shift->lateOn($now);
+
         return Attendance::create([
             'staff_id' => $staff->id,
-            'time' => now(),
+            'time' => $now,
             'type' => $validated['type'],
             'branch_id' => $staff->branch_id,
+            'is_late' => $late,
         ]);
     }
 }

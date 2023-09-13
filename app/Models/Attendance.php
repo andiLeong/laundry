@@ -13,7 +13,8 @@ class Attendance extends Model
 
     public $timestamps = false;
     protected $casts = [
-        'time' => 'datetime'
+        'time' => 'datetime',
+        'is_late' => 'boolean',
     ];
 
     protected function type(): Attribute

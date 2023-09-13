@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('staff_id');
             $table->unsignedBigInteger('branch_id');
             $table->unsignedTinyInteger('type');
+            $table->boolean('is_late')->default(false);
             $table->timestamp('time');
         });
     }
