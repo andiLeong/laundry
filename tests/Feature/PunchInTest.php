@@ -111,6 +111,14 @@ class PunchInTest extends TestCase
     }
 
     /** @test */
+    public function staff_cant_punch_in_if_there_is_no_shift_associate()
+    {
+        Shift::where('staff_id',$this->user->id)->delete();
+        $message = $this->punchIn()->assertStatus(400)->json('message');
+        $this->assertEquals('Opps You do not have shift associate', $message);
+    }
+
+    /** @test */
     public function staff_cant_perform_punch_in_if_their_location_its_out_of_range()
     {
         $this->markTestSkipped();

@@ -50,6 +50,10 @@ class AttendanceController extends Controller
             'latitude' => 'required',
         ]);
 
+        if (Attendance::outOfRange($validated['latitude'], $validated['longitude'])) {
+            abort(400, 'Your location seems too far from your branch');
+        }
+
         $staff = auth()->user();
         $attendance = Attendance::firstForToday($staff->id, $validated['type']);
 
@@ -57,19 +61,18 @@ class AttendanceController extends Controller
             abort(400, 'You had already report to work today');
         }
 
-        if (Attendance::outOfRange($validated['latitude'], $validated['longitude'])) {
-            abort(400, 'Your location seems too far from your branch');
+        $shift = $staff->shift;
+        if (is_null($shift)) {
+            abort(400, 'Opps You do not have shift associate');
         }
 
         $now = now();
-        $late = $staff->shift->lateOn($now);
-
         return Attendance::create([
             'staff_id' => $staff->id,
             'time' => $now,
             'type' => $validated['type'],
             'branch_id' => $staff->branch_id,
-            'is_late' => $late,
+            'is_late' => $shift->lateOn($now),
         ]);
     }
 }
