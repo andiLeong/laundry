@@ -12,8 +12,9 @@ class Shift extends Model
     public $timestamps = false;
 
     protected $casts = [
-        'days' => 'array',
-        'off' => 'array',
+        'from' => 'datetime',
+        'to' => 'datetime',
+        'date' => 'date:Y-m-d',
     ];
 
     /**

@@ -18,14 +18,16 @@ class ShiftFactory extends Factory
      */
     public function definition(): array
     {
+        $staff = User::factory()->create([
+            'type' => UserType::employee->value
+        ]);
+        $date = now();
         return [
-            'staff_id' => User::factory()->create([
-                'type' => UserType::employee->value
-            ])->id,
-            'from' => '09:00',
-            'to' => '18:00',
-            'days' => [1, 2, 3, 4, 5],
-            'off' => [6, 7],
+            'staff_id' => $staff->id,
+            'branch_id' => $staff->branch_id,
+            'from' => $date->copy()->hour('09:00')->minute("00")->second(0),
+            'to' => $date->copy()->hour('18:00')->minute("00")->second(0),
+            'date' => $date->toDateString(),
         ];
     }
 }

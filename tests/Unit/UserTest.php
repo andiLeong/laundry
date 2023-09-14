@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\Shift;
 use App\Models\User;
@@ -128,13 +129,15 @@ class UserTest extends TestCase
     }
 
     /** @test */
-    public function it_has_one_shift()
+    public function it_has_many_shift()
     {
-        $staff = $this->staff();
+        $branch = Branch::factory()->create();
+        $staff = $this->staff(['branch_id' => $branch->id]);
         $shift = Shift::factory()->create([
-            'staff_id' => $staff->id
+            'staff_id' => $staff->id,
+            'branch_id' => $staff->branch_id
         ]);
 
-        $this->assertEquals($staff->shift->id, $shift->id);
+        $this->assertEquals($staff->shift[0]->id, $shift->id);
     }
 }
