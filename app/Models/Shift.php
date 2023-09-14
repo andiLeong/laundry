@@ -15,6 +15,10 @@ class Shift extends Model
         'from' => 'datetime',
         'to' => 'datetime',
         'date' => 'date:Y-m-d',
+        'late' => 'boolean',
+        'absence' => 'boolean',
+        'early_leave' => 'boolean',
+        'calculated' => 'boolean',
     ];
 
     /**

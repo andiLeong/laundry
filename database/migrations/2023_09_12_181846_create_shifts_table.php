@@ -17,6 +17,10 @@ return new class extends Migration {
             $table->dateTime('from');
             $table->dateTime('to');
             $table->date('date');
+            $table->boolean('late')->default(false);
+            $table->boolean('absence')->default(false);
+            $table->boolean('early_leave')->default(false);
+            $table->boolean('calculated')->default(false);
         });
 
         // 2023-09-12 22:00 - 6:00
