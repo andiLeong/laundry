@@ -55,15 +55,10 @@ class AttendanceController extends Controller
         }
 
         $staff = auth()->user();
-        $shift = $staff->shift;
-        if (is_null($shift)) {
-            abort(400, 'Opps You do not have shift associate');
-        }
 
-        $now = now();
         return Attendance::create([
             'staff_id' => $staff->id,
-            'time' => $now,
+            'time' => now(),
             'type' => $validated['type'],
             'branch_id' => $staff->branch_id,
         ]);

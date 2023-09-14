@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
 use App\Models\Enum\UserType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -18,8 +19,10 @@ class ShiftFactory extends Factory
      */
     public function definition(): array
     {
+        $branch = Branch::factory()->create();
         $staff = User::factory()->create([
-            'type' => UserType::employee->value
+            'type' => UserType::employee->value,
+            'branch_id' => $branch->id
         ]);
         $date = now();
         return [

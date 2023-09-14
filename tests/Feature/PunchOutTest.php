@@ -20,21 +20,11 @@ class PunchOutTest extends PunchInTest
         $this->assertDatabaseCount('attendances', 0);
         $this->punchOut()->assertSuccessful();
 
-        $this->assertNotNull(Attendance::firstForToday($this->user->id, $this->type));
         $this->assertDatabaseHas('attendances',[
             'staff_id' => $this->user->id,
             'type' => $this->type,
-            'is_late' => false
         ]);
         $this->assertDatabaseCount('attendances', 1);
-    }
-
-    /** @test */
-    public function staff_cant_punch_out_if_there_is_no_shift_associate()
-    {
-        Shift::where('staff_id',$this->user->id)->delete();
-        $message = $this->punchOut()->assertStatus(400)->json('message');
-        $this->assertEquals('Opps You do not have shift associate', $message);
     }
 
     /** @test */

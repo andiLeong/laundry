@@ -36,8 +36,6 @@ class PunchInTest extends TestCase
     {
         $this->assertDatabaseCount('attendances', 0);
         $this->punchIn()->assertSuccessful();
-
-        $this->assertNotNull(Attendance::firstForToday($this->user->id, $this->type));
         $this->assertDatabaseCount('attendances', 1);
     }
 
@@ -46,14 +44,6 @@ class PunchInTest extends TestCase
     {
         $this->postJson($this->endpoint)->assertUnauthorized();
         $this->signIn($this->customer())->postJson($this->endpoint)->assertForbidden();
-    }
-
-    /** @test */
-    public function staff_cant_punch_in_if_there_is_no_shift_associate()
-    {
-        Shift::where('staff_id',$this->user->id)->delete();
-        $message = $this->punchIn()->assertStatus(400)->json('message');
-        $this->assertEquals('Opps You do not have shift associate', $message);
     }
 
     /** @test */
