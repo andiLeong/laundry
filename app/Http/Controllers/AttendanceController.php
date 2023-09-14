@@ -55,12 +55,6 @@ class AttendanceController extends Controller
         }
 
         $staff = auth()->user();
-        $attendance = Attendance::firstForToday($staff->id, $validated['type']);
-
-        if ($attendance !== null) {
-            abort(400, 'You had already report to work today');
-        }
-
         $shift = $staff->shift;
         if (is_null($shift)) {
             abort(400, 'Opps You do not have shift associate');
@@ -72,7 +66,6 @@ class AttendanceController extends Controller
             'time' => $now,
             'type' => $validated['type'],
             'branch_id' => $staff->branch_id,
-            'is_late' => $shift->lateOn($now),
         ]);
     }
 }

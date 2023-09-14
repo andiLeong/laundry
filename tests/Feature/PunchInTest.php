@@ -7,7 +7,6 @@ use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
 use App\Models\Shift;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Tests\Validate;
@@ -28,6 +27,7 @@ class PunchInTest extends TestCase
         $this->shift = Shift::factory()->create([
             'staff_id' => $this->user->id,
         ]);
+        $this->type = AttendanceType::in->value;
         //obtain staff location, and branch location, within 1km only count as valid punch in
     }
 
@@ -37,57 +37,8 @@ class PunchInTest extends TestCase
         $this->assertDatabaseCount('attendances', 0);
         $this->punchIn()->assertSuccessful();
 
-        $this->assertNotNull(Attendance::firstForToday($this->user->id, AttendanceType::in->value));
+        $this->assertNotNull(Attendance::firstForToday($this->user->id, $this->type));
         $this->assertDatabaseCount('attendances', 1);
-    }
-
-    /** @test */
-    public function it_record_attendance_as_late_if_staff_punch_in_late()
-    {
-        $this->assertDatabaseCount('attendances', 0);
-        //set to sunday
-        Carbon::setTestNow(Carbon::parse('2023-09-10 09:10'));
-        $this->shift->update([
-            'days' => [7]
-        ]);
-        $this->punchIn()->assertSuccessful();
-
-        $this->assertDatabaseCount('attendances', 1);
-        $this->assertTrue(Attendance::first()->is_late);
-    }
-
-    /** @test */
-    public function it_record_attendance_as_not_late_if_staff_punch_in_on_time()
-    {
-        $this->assertDatabaseCount('attendances', 0);
-        //set to monday
-        Carbon::setTestNow(Carbon::parse('2023-09-11 09:00'));
-
-        $this->punchIn()->assertSuccessful();
-
-        $this->assertDatabaseCount('attendances', 1);
-        $this->assertFalse(Attendance::first()->is_late);
-    }
-
-    /** @test */
-    public function it_record_attendance_as_not_late_if_staff_punch_in_earlier_than_start_work_time()
-    {
-        $this->assertDatabaseCount('attendances', 0);
-        //set to monday
-        Carbon::setTestNow(Carbon::parse('2023-09-11 08:55'));
-        $this->punchIn()->assertSuccessful();
-
-        $this->assertDatabaseCount('attendances', 1);
-        $this->assertFalse(Attendance::first()->is_late);
-    }
-
-    /** @test */
-    public function it_record_attendance_as_not_late_if_staff_punch_in_on_a_date_that_he_is_not_on_duty()
-    {
-        //set to sunday
-        Carbon::setTestNow(Carbon::parse('2023-09-10 10:55'));
-        $this->punchIn()->assertSuccessful();
-        $this->assertFalse(Attendance::first()->is_late);
     }
 
     /** @test */
@@ -95,19 +46,6 @@ class PunchInTest extends TestCase
     {
         $this->postJson($this->endpoint)->assertUnauthorized();
         $this->signIn($this->customer())->postJson($this->endpoint)->assertForbidden();
-    }
-
-    /** @test */
-    public function staff_can_only_punch_in_once_a_day()
-    {
-        Attendance::factory()->create([
-            'type' => AttendanceType::in->value,
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id,
-        ]);
-
-        $message = $this->punchIn()->assertStatus(400)->json('message');
-        $this->assertEquals('You had already report to work today', $message);
     }
 
     /** @test */
@@ -198,7 +136,7 @@ where id = 1 HAVING distance <= $distance";
     public function punchIn($payload = [])
     {
         $attributes = Attendance::factory()->make()->toArray();
-        $attributes['type'] = AttendanceType::in->value;
+        $attributes['type'] = $this->type;
         $attributes['longitude'] = 999;
         $attributes['latitude'] = 222;
         $payload = array_merge($attributes, $payload);
