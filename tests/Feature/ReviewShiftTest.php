@@ -29,22 +29,17 @@ class ReviewShiftTest extends TestCase
     }
 
     /** @test */
-    public function it_can_mark_shift_as_late(): void
+    public function it_punch_in_between_shift_and_no_punch_in_prior_shift_mark_as_late(): void
     {
         $this->assertFalse($this->shift->late);
-        Carbon::setTestNow($this->shift->from->addMinutes());
-        Attendance::factory()->create([
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id
-        ]);
-
+        $this->attendance($this->shift->from->addMinutes());
         $this->artisan('shift:review');
 
         $this->assertTrue($this->shift->fresh()->late);
     }
 
     /** @test */
-    public function it_is_not_late_if_punch_in_before_shift_and_punch_in_between_shift()
+    public function if_punch_in_prior_shift_and_punch_in_between_shift_consider_not_late()
     {
         $this->assertFalse($this->shift->late);
         $this->attendance($this->shift->from->addHours());
@@ -56,18 +51,10 @@ class ReviewShiftTest extends TestCase
     }
 
     /** @test */
-    public function if_current_punch_in_late_and_yesterday_got_shift_and_there_no_punch_in_after_yesterday_end_shift_and_it_should_mark_late()
+    public function if_current_punch_in_late_and_the_last_punch_in_from_the_shift_start_is_over_3_hour_consider_late()
     {
         $this->assertFalse($this->shift->late);
-        $date = today()->subDay();
-        $shift = Shift::factory()->create([
-            'staff_id' => $this->user->id,
-            'from' => $date->copy()->hour('09:00')->minute("00")->second(0),
-            'to' => $date->copy()->hour('18:00')->minute("00")->second(0),
-            'date' => $date->toDateString(),
-        ]);
-
-        $this->attendance($shift->from);
+        $this->attendance($this->shift->from->subHours(4));
         $this->attendance($this->shift->from->addMinutes());
 
         $this->artisan('shift:review');
@@ -76,14 +63,45 @@ class ReviewShiftTest extends TestCase
     }
 
     /** @test */
-    public function if_current_punch_in_late_and_yesterday_does_not_work_it_should_mark_as_late()
+    public function if_current_punch_in_is_3_hour_less_than_shift_starts_it_consider_not_late()
     {
         $this->assertFalse($this->shift->late);
+        $this->attendance($this->shift->from->subHours(3));
         $this->attendance($this->shift->from->addMinutes());
 
         $this->artisan('shift:review');
 
-        $this->assertTrue($this->shift->fresh()->late);
+        $this->assertFalse($this->shift->fresh()->late);
+    }
+
+    /** @test */
+    public function if_no_punch_in_during_shift_and_no_punch_in_3_hours_before_shift_start_consider_absence()
+    {
+        $this->assertFalse($this->shift->absence);
+        $this->artisan('shift:review');
+        $this->assertTrue($this->shift->fresh()->absence);
+    }
+
+    /** @test */
+    public function if_a_shift_is_review_it_cant_be_review_again(): void
+    {
+        $this->assertFalse($this->shift->late);
+        $this->assertFalse($this->shift->reviewed);
+        $this->shift->update(['reviewed' => true]);
+        $this->assertTrue($this->shift->fresh()->reviewed);
+
+        $this->attendance($this->shift->from->addMinutes());
+        $this->artisan('shift:review');
+
+        $this->assertFalse($this->shift->fresh()->late);
+    }
+
+    /** @test */
+    public function shift_is_reviewed_after_each_reviewed(): void
+    {
+        $this->assertFalse($this->shift->reviewed);
+        $this->artisan('shift:review');
+        $this->assertTrue($this->shift->fresh()->reviewed);
     }
 
     public function attendance($time = null)

@@ -18,8 +18,13 @@ class Shift extends Model
         'late' => 'boolean',
         'absence' => 'boolean',
         'early_leave' => 'boolean',
-        'calculated' => 'boolean',
+        'reviewed' => 'boolean',
     ];
+
+    public function scopeUnreviewed($query)
+    {
+        return $query->where('reviewed', false);
+    }
 
     /**
      * check a shift is late

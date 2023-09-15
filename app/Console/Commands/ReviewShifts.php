@@ -29,37 +29,34 @@ class ReviewShifts extends Command
     public function handle()
     {
 
-        $shifts = Shift::get();
+        $shifts = Shift::unreviewed()->get();
 
         foreach ($shifts as $index => $shift) {
 
-            $attendance = Attendance::where('staff_id', $shift->staff_id)
+            $punchInDuringShift = Attendance::where('staff_id', $shift->staff_id)
                 ->where('type', AttendanceType::in->value)
-                ->whereBetween('time', [$shift->from, $shift->end])
+                ->whereBetween('time', [$shift->from, $shift->to])
                 ->get();
 
-            $lastShiftEnd = $shift->date->subDay();
-            $lastShift = Shift::where('date',$lastShiftEnd->toDateString())->first();
-            if($lastShift !== null){
-                $lastShiftEnd = $lastShift->to;
-            }
-//            dump($lastShiftEnd);
-            $beforeAttendance = Attendance::where('staff_id', $shift->staff_id)
+            $punchInBeforeShift = Attendance::where('staff_id', $shift->staff_id)
                 ->where('type', AttendanceType::in->value)
                 ->where('time', '<=', $shift->from)
-                ->where('time', '>=', $lastShiftEnd)
+                ->where('time', '>=', $shift->from->copy()->subHours(3))
                 ->get();
 
-            $beforeShiftStart = false;
-            if($beforeAttendance->isNotEmpty()){
-                $beforeShiftStart = true;
+            $updates = [];
+            if ($punchInBeforeShift->isEmpty()) {
+                if ($punchInDuringShift->isEmpty()) {
+                    $updates['absence'] = true;
+                } else {
+                    $updates['late'] = true;
+                }
             }
-            if(!empty($attendance) && $beforeShiftStart === false){
-                $shift->update(['late' => true]);
-            }
-        }
 
-//        dd($shifts);
+            $shift->update(array_merge(
+                ['reviewed' => true], $updates
+            ));
+        }
 
     }
 }
