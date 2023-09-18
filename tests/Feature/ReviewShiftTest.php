@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Attendance;
 use App\Models\Branch;
+use App\Models\Enum\AttendanceType;
 use App\Models\Shift;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -29,7 +30,7 @@ class ReviewShiftTest extends TestCase
     }
 
     /** @test */
-    public function it_punch_in_between_shift_and_no_punch_in_prior_shift_mark_as_late(): void
+    public function if_punch_in_between_shift_and_no_punch_in_prior_shift_mark_as_late(): void
     {
         $this->assertFalse($this->shift->late);
         $this->attendance($this->shift->from->addMinutes());
@@ -83,6 +84,52 @@ class ReviewShiftTest extends TestCase
     }
 
     /** @test */
+    public function if_punch_out_early_and_no_punch_out_after_shift_mark_as_early_leave(): void
+    {
+        $this->assertFalse($this->shift->early_leave);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
+        $this->artisan('shift:review');
+
+        $this->assertTrue($this->shift->fresh()->early_leave);
+    }
+
+    /** @test */
+    public function if_punch_out_after_shift_and_punch_out_between_shift_consider_not_leave_early()
+    {
+        $this->assertFalse($this->shift->early_leave);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
+        $this->attendance($this->shift->to->addHours(), AttendanceType::out);
+
+        $this->artisan('shift:review');
+
+        $this->assertFalse($this->shift->fresh()->early_leave);
+    }
+
+    /** @test */
+    public function if_punch_out_early_and_the_latest_punch_out_from_the_shift_end_is_over_3_hour_consider_early_out()
+    {
+        $this->assertFalse($this->shift->early_leave);
+        $this->attendance($this->shift->to->subHour(), AttendanceType::out);
+        $this->attendance($this->shift->to->addHours(4), AttendanceType::out);
+
+        $this->artisan('shift:review');
+
+        $this->assertTrue($this->shift->fresh()->early_leave);
+    }
+
+    /** @test */
+    public function if_punch_out_is_3_hour_less_than_shift_end_it_consider_not_early_leave()
+    {
+        $this->assertFalse($this->shift->late);
+        $this->attendance($this->shift->to->subHours(3), AttendanceType::out);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
+
+        $this->artisan('shift:review');
+
+        $this->assertFalse($this->shift->fresh()->late);
+    }
+
+    /** @test */
     public function if_a_shift_is_review_it_cant_be_review_again(): void
     {
         $this->assertFalse($this->shift->late);
@@ -104,12 +151,13 @@ class ReviewShiftTest extends TestCase
         $this->assertTrue($this->shift->fresh()->reviewed);
     }
 
-    public function attendance($time = null)
+    public function attendance($time = null, $type = AttendanceType::in)
     {
         return Attendance::factory()->create([
             'staff_id' => $this->user->id,
             'branch_id' => $this->user->branch_id,
-            'time' => $time ?? now()
+            'time' => $time ?? now(),
+            'type' => $type->value,
         ]);
     }
 }

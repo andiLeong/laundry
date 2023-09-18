@@ -31,17 +31,26 @@ class ReviewShifts extends Command
 
         $shifts = Shift::unreviewed()->get();
 
-        foreach ($shifts as $index => $shift) {
+        foreach ($shifts as $shift) {
 
-            $punchInDuringShift = Attendance::where('staff_id', $shift->staff_id)
-                ->where('type', AttendanceType::in->value)
+            $punchDuringShift = Attendance::where('staff_id', $shift->staff_id)
                 ->whereBetween('time', [$shift->from, $shift->to])
                 ->get();
+
+            [$punchInDuringShift, $punchOutDuringShift] = $punchDuringShift->partition(function ($punch) {
+                return $punch->type === AttendanceType::in->name;
+            });
 
             $punchInBeforeShift = Attendance::where('staff_id', $shift->staff_id)
                 ->where('type', AttendanceType::in->value)
                 ->where('time', '<=', $shift->from)
-                ->where('time', '>=', $shift->from->copy()->subHours(3))
+                ->where('time', '>=', $shift->from->copy()->subHours(Shift::TIME_SPAN))
+                ->get();
+
+            $punchOutAfterShift = Attendance::where('staff_id', $shift->staff_id)
+                ->where('type', AttendanceType::out->value)
+                ->where('time', '>=', $shift->to)
+                ->where('time', '<=', $shift->to->copy()->addHours(Shift::TIME_SPAN))
                 ->get();
 
             $updates = [];
@@ -51,6 +60,10 @@ class ReviewShifts extends Command
                 } else {
                     $updates['late'] = true;
                 }
+            }
+
+            if ($punchOutDuringShift->isNotEmpty() && $punchOutAfterShift->isEmpty()) {
+                $updates['early_leave'] = true;
             }
 
             $shift->update(array_merge(
