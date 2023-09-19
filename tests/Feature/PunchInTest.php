@@ -7,7 +7,6 @@ use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
 use App\Models\Shift;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Tests\Validate;
 
@@ -49,48 +48,22 @@ class PunchInTest extends TestCase
     /** @test */
     public function staff_cant_perform_punch_in_if_their_location_its_out_of_range()
     {
-        $this->markTestSkipped();
-        dump($this->branch->toArray());
+        if(config('database.connections.mysql.host') == '127.0.0.1'){
+            $this->markTestSkipped();
+        }
+        $this->punchIn([
+            'longitude' => 121.01346781509143,
+            'latitude' => 14.566808896873289
+        ])->assertStatus(400);
+    }
 
-//        $length = strlen('tp1qaz2WSX3EDC4rfv');
-//        dump($length);
-//        dump(0 && 0);
-
-        $query = 'select *,
-            ST_Distance(
-                ST_SRID(Point(longitude, latitude), 4326),
-                ST_SRID(Point(121.01361883068033, 14.567702111099415), 4326)
-            ) as distance
-         from `branches`)';
-
-        $res = DB::select($query);
-
-        dd($res);
-
-        $query = Branch::query();
-
-        $distance = 1; // user input distance
-        $user_latitude = '14.567702111099415'; // user input latitude
-        $user_longitude = '121.01361883068033'; // user input logtitude
-
-        $query->select('*')->selectRaw('
-            ST_Distance(
-               ST_SRID(Point(longitude, latitude), 4326),
-               ST_SRID(Point(?, ?), 4326)
-            ) as distance
-        ', [$user_longitude, $user_latitude]);
-
-        dd($query->get());
-
-        $sql = "SELECT ROUND(6371 * acos (cos ( radians($user_latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians($user_longitude) ) + sin ( radians($user_latitude) ) * sin( radians( latitude ) ))) AS distance,
-       branches.*
-FROM branches
-where id = 1 HAVING distance <= $distance";
-
-        $res = DB::select($sql);
-
-        dd($res);
-
+    /** @test */
+    public function staff_can_perform_punch_in_if_their_location_its_within_range()
+    {
+        $this->punchIn([
+            'longitude' => 121.0113987195058,
+            'latitude' => 14.565564037755626
+        ])->assertSuccessful();
     }
 
     /** @test */

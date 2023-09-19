@@ -17,6 +17,8 @@ class Attendance extends Model
         'is_late' => 'boolean',
     ];
 
+    const PASSING_RANGE = 200;
+
     protected function type(): Attribute
     {
         return Attribute::make(
@@ -34,9 +36,21 @@ class Attendance extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public static function outOfRange($lat, $log): bool
+    public static function outOfRange($lat, $long, $branchId): bool
     {
+        if(config('database.connections.mysql.host') == '127.0.0.1'){
+           return false;
+        }
 
-        return false;
+        $distance = Branch::query()
+            ->selectRaw('ST_Distance(
+                   ST_SRID(Point(longitude, latitude), 4326),
+                   ST_SRID(Point(?, ?), 4326)
+                ) as distance', [$long, $lat]
+            )
+            ->where('id', $branchId)
+            ->first()['distance'];
+
+        return $distance >= static::PASSING_RANGE;
     }
 }

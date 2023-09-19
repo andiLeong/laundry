@@ -50,11 +50,12 @@ class AttendanceController extends Controller
             'latitude' => 'required',
         ]);
 
-        if (Attendance::outOfRange($validated['latitude'], $validated['longitude'])) {
+        $staff = auth()->user();
+
+        if (Attendance::outOfRange($validated['latitude'], $validated['longitude'], $staff->branch_id)) {
             abort(400, 'Your location seems too far from your branch');
         }
 
-        $staff = auth()->user();
 
         return Attendance::create([
             'staff_id' => $staff->id,
