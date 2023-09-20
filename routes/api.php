@@ -7,7 +7,7 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
 use App\Http\Controllers\AdminStatController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OrderController;
@@ -17,6 +17,7 @@ use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\TwilioSmsWebhookController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
@@ -31,11 +32,9 @@ use Illuminate\Support\Facades\Route;
 // 5 implement logic to check what date/time is available for pickup
 
 // employee ordering
-// 1 for walk-in customer, employee can make order/bulk order for him. (can apply promotion)
 
 // future feature
-// 1 employee management (payroll, work hour, punch in/out)
-// 2 product concept, there is some cases customer will buy washing product when order
+// 1 employee management (payroll)
 // 3 branch concept
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -61,6 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', LogOutController::class);
 
     Route::middleware('staff.only')->group(function () {
+
+        Route::post('/admin/attendance', [AttendanceController::class, 'store']);
+        Route::get('/admin/attendance', [AttendanceController::class, 'index']);
+
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);

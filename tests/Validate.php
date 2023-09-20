@@ -155,6 +155,20 @@ class Validate
     /**
      * @throws \Exception
      */
+    public function in($in)
+    {
+        $in = explode(',', $in);
+        $invalids = array_map(fn($in) => [
+            $this->name => $in . '-',
+        ], $in);
+
+        $this->currentRule = 'in';
+        $this->trigger($invalids);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function unique($column, $model, $value = null)
     {
         $attributes = $value ? [$column => $value] : [];

@@ -19,18 +19,18 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    public function staff()
+    public function staff($attributes = [])
     {
-        return User::factory()->create([
+        return User::factory()->create(array_merge([
             'type' => UserType::employee->value,
-        ]);
+        ], $attributes));
     }
 
-    public function customer()
+    public function customer($attributes = [])
     {
-        return User::factory()->create([
+        return User::factory()->create(array_merge([
             'type' => UserType::customer->value,
-        ]);
+        ], $attributes));
     }
 
     public function signInAsAdmin($admin = null)
@@ -75,11 +75,11 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
-    public function assertColumnsSame($columns,$result)
+    public function assertColumnsSame($columns, $result)
     {
         sort($columns);
         sort($result);
 
-        $this->assertEquals($columns,$result);
+        $this->assertEquals($columns, $result);
     }
 }

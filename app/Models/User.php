@@ -43,6 +43,11 @@ class User extends Authenticatable
         return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
     }
 
+    public function shift()
+    {
+        return $this->hasMany(Shift::class,'staff_id','id');
+    }
+
     protected function type(): Attribute
     {
         return Attribute::make(
