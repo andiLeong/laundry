@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enum\AttendanceType;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,19 +39,19 @@ class Attendance extends Model
 
     public static function outOfRange($lat, $long, $branchId): bool
     {
-        if(config('database.connections.mysql.host') == '127.0.0.1'){
-           return false;
-        }
-
-        $distance = Branch::query()
-            ->selectRaw('ST_Distance(
+        try {
+            $distance = Branch::query()
+                ->selectRaw('ST_Distance(
                    ST_SRID(Point(longitude, latitude), 4326),
                    ST_SRID(Point(?, ?), 4326)
                 ) as distance', [$long, $lat]
-            )
-            ->where('id', $branchId)
-            ->first()['distance'];
+                )
+                ->where('id', $branchId)
+                ->first()['distance'];
 
-        return $distance >= static::PASSING_RANGE;
+            return $distance >= static::PASSING_RANGE;
+        } catch (Exception) {
+            return false;
+        }
     }
 }

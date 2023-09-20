@@ -32,11 +32,9 @@ use Illuminate\Support\Facades\Route;
 // 5 implement logic to check what date/time is available for pickup
 
 // employee ordering
-// 1 for walk-in customer, employee can make order/bulk order for him. (can apply promotion)
 
 // future feature
-// 1 employee management (payroll, work hour, punch in/out)
-// 2 product concept, there is some cases customer will buy washing product when order
+// 1 employee management (payroll)
 // 3 branch concept
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
