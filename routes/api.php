@@ -17,6 +17,7 @@ use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\TwilioSmsWebhookController;
+use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserQualifiedPromotionController;
 use App\Http\Controllers\VerificationController;
@@ -82,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::patch('/user/profile', UserProfileController::class);
+    Route::patch('/user/password', UserPasswordController::class);
     Route::get('/order', [OrderController::class, 'index']);
     Route::get('/order/{id}', [OrderController::class, 'show']);
     Route::post('/address', [AddressController::class, 'store']);
