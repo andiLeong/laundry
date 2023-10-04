@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;

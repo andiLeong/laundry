@@ -1,8 +1,8 @@
 <?php
 
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
-use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -65,6 +65,16 @@ class AdminCreateOrderTest extends TestCase
         $name = 'user_id';
         $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
         $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name);
+    }
+
+    /** @test */
+    public function payment_must_be_valid()
+    {
+        $name = 'payment';
+        $rule = ['required', 'in:1,2'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
     }
 
     /** @test */
@@ -217,8 +227,8 @@ class AdminCreateOrderTest extends TestCase
             ],
         ]);
 
-        $this->assertValidateMessage('products are invalid', $response,'product_ids');
-        $this->assertValidateMessage('products are invalid', $response2,'product_ids');
+        $this->assertValidateMessage('products are invalid', $response, 'product_ids');
+        $this->assertValidateMessage('products are invalid', $response2, 'product_ids');
     }
 
     /** @test */
@@ -228,16 +238,39 @@ class AdminCreateOrderTest extends TestCase
         $response = $this->createOrder([
             'service_id' => $this->getService()->id,
             'product_ids' => [
-                ['id' => $product->id,'quantity' => 100],
+                ['id' => $product->id, 'quantity' => 100],
             ],
         ]);
 
-        $this->assertValidateMessage('stock is not enough', $response,'product_ids');
+        $this->assertValidateMessage('stock is not enough', $response, 'product_ids');
+    }
+
+    /** @test */
+    public function its_default_payment_is_cash()
+    {
+        $this->assertDatabaseCount('orders', 0);
+        $this->createOrder();
+        $this->assertDatabaseCount('orders', 1);
+        $order = Order::first();
+        $this->assertEquals(OrderPayment::cash->name, $order->payment);
+    }
+
+    /** @test */
+    public function it_can_create_order_via_gcash_payment()
+    {
+        $this->assertDatabaseCount('orders', 0);
+        $this->createOrder([
+            'payment' => OrderPayment::gcash->value
+        ]);
+        $this->assertDatabaseCount('orders', 1);
+        $order = Order::first();
+        $this->assertEquals(OrderPayment::gcash->name, $order->payment);
     }
 
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
+        $attributes['payment'] = OrderPayment::cash->value;
         return array_merge($attributes, $overwrites);
     }
 }

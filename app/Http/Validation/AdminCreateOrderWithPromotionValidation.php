@@ -26,6 +26,7 @@ class AdminCreateOrderWithPromotionValidation extends AdminCreateOrderValidation
         $data = $this->request->validate([
             'user_id' => 'required',
             'service_id' => 'required',
+            'payment' => 'required|in:1,2',
             'promotion_ids' => 'required|array|min:1',
             'product_ids' => 'nullable|array',
         ]);

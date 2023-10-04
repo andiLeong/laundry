@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\OrderPromotion;
 use App\Models\Product;
@@ -24,6 +25,16 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->signInAsAdmin()
             ->postJson($this->endpoint, ['promotion_ids' => [$promotion->id]])
             ->assertJsonValidationErrorFor('user_id');
+    }
+
+    /** @test */
+    public function payment_must_be_valid()
+    {
+        $name = 'payment';
+        $rule = ['required', 'in:1,2'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
     }
 
     /** @test */
@@ -111,6 +122,13 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         ]);
         $response = $this->signInAsAdmin()->postJson($this->endpoint, $payload);
         $this->assertValidateMessage('promotion is not implemented', $response, $name);
+    }
+
+    /** @test */
+    public function service_id_must_valid()
+    {
+        $name = 'service_id';
+        $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
     }
 
     /** @test */
@@ -246,7 +264,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
             'service_id' => $service->id,
             'user_id' => $user->id,
             'product_ids' => [
-                ['id' => $product1->id,'quantity' => $quantity],
+                ['id' => $product1->id, 'quantity' => $quantity],
                 ['id' => $product2->id],
             ],
         ]);
@@ -276,6 +294,49 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
 
         $this->assertEquals($product1->stock - $quantity, $product1->fresh()->stock);
         $this->assertEquals($product2->stock - 1, $product2->fresh()->stock);
+    }
+
+    /** @test */
+    public function its_default_payment_is_cash()
+    {
+        $signUpPromotion = $this->getPromotion();
+        $service = $this->getService();
+        $this->assertDatabaseCount('orders', 0);
+        $this->createOrder([
+            'promotion_ids' => [$signUpPromotion->id],
+            'service_id' => $service->id,
+            'user_id' => $this->customer()->id
+        ]);
+
+        $order = Order::first();
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertEquals(OrderPayment::cash->name, $order->payment);
+    }
+
+    /** @test */
+    public function it_can_create_order_via_gcash_payment()
+    {
+        $signUpPromotion = $this->getPromotion();
+        $service = $this->getService();
+        $this->assertDatabaseCount('orders', 0);
+        $this->createOrder([
+            'promotion_ids' => [$signUpPromotion->id],
+            'service_id' => $service->id,
+            'payment' => OrderPayment::gcash->value,
+            'user_id' => $this->customer()->id
+        ]);
+
+        $order = Order::first();
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertEquals(OrderPayment::gcash->name, $order->payment);
+    }
+
+    private function orderAttributes(mixed $overwrites)
+    {
+        $attributes = Order::factory()->make()->toArray();
+        $attributes['payment'] = OrderPayment::cash->value;
+        $attributes['promotion_ids'] = [1];
+        return array_merge($attributes, $overwrites);
     }
 
 }

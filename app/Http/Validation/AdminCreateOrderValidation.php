@@ -17,6 +17,7 @@ class AdminCreateOrderValidation implements OrderValidate
     public array $validated;
     public array $rules = [
         'amount' => 'nullable|decimal:0,4',
+        'payment' => 'required|in:1,2',
         'user_id' => 'nullable',
         'service_id' => 'required',
         'product_ids' => 'nullable|array',
