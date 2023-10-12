@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\Promotion;
 use App\Models\Service;
@@ -22,7 +23,7 @@ trait OrderCanBeCreated
     protected function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
-        $attributes = $attributes + ['isolated' => 0];
+        $attributes['payment'] = OrderPayment::cash->value;
         return array_merge($attributes, $overwrites);
     }
 
