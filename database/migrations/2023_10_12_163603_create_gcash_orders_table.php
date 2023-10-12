@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('gcash_orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->string('reference_number');
-
-            $table->unique(['order_id','reference_number']);
+            $table->unsignedBigInteger('order_id')->unique();
+            $table->string('reference_number')->unique();
         });
     }
 

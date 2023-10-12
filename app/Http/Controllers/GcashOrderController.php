@@ -12,8 +12,12 @@ class GcashOrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'order_id' => ['required', Rule::exists('orders', 'id')->where('payment', OrderPayment::gcash->value)],
-            'reference_number' => 'required|string',
+            'order_id' => [
+                'required',
+                Rule::exists('orders', 'id')->where('payment', OrderPayment::gcash->value),
+                'unique:gcash_orders'
+            ],
+            'reference_number' => 'required|string|unique:gcash_orders',
         ]);
 
         return GcashOrder::create($validated);
