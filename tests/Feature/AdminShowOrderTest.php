@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Enum\UserType;
 use App\Models\Order;
 use App\Models\OrderPromotion;
@@ -24,11 +25,11 @@ class AdminShowOrderTest extends TestCase
         $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
         $employeeOrder2 = Order::factory()->create(['creator_id' => $employee2->id]);
 
-        $this->fetch($employeeOrder->id,$employee)->assertOk();
-        $this->fetch($employeeOrder->id,$employee2)->assertForbidden();
+        $this->fetch($employeeOrder->id, $employee)->assertOk();
+        $this->fetch($employeeOrder->id, $employee2)->assertForbidden();
 
-        $this->fetch($employeeOrder2->id,$employee)->assertForbidden();
-        $this->fetch($employeeOrder2->id,$employee2)->assertOk();
+        $this->fetch($employeeOrder2->id, $employee)->assertForbidden();
+        $this->fetch($employeeOrder2->id, $employee2)->assertOk();
     }
 
     /** @test */
@@ -40,8 +41,8 @@ class AdminShowOrderTest extends TestCase
         $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
         $employeeOrder2 = Order::factory()->create(['creator_id' => $employee2->id]);
 
-        $this->fetch($employeeOrder2->id,$admin)->assertOk();
-        $this->fetch($employeeOrder->id,$admin)->assertOk();
+        $this->fetch($employeeOrder2->id, $admin)->assertOk();
+        $this->fetch($employeeOrder->id, $admin)->assertOk();
     }
 
     /** @test */
@@ -58,9 +59,22 @@ class AdminShowOrderTest extends TestCase
         $this->assertEquals($user->phone, $order['user']['phone']);
         $this->assertEquals($user->first_name, $order['user']['first_name']);
         $this->assertEquals($service->name, $order['service']['name']);
+        $this->assertArrayHasKey('gcash', $order->json());
 
         $this->assertTrue(in_array($promotions[1]->name, $orderPromotion));
         $this->assertTrue(in_array($promotions[0]->name, $orderPromotion));
+    }
+
+    /** @test */
+    public function if_order_is_gcash_payment_it_can_get_gcash_reference_number(): void
+    {
+        $order = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        \App\Models\GcashOrder::create([
+            'order_id' => $order->id,
+            'reference_number' => 'xxx',
+        ]);
+        $order = $this->fetch($order->id);
+        $this->assertEquals('xxx', $order['gcash']['reference_number']);
     }
 
     /** @test */

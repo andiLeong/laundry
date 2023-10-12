@@ -51,6 +51,11 @@ class Order extends Model
         return $this->hasMany(OrderProduct::class,'order_id','id');
     }
 
+    public function gcash()
+    {
+       return $this->hasOne(GcashOrder::class);
+    }
+
     public function scopeToday(Builder $query)
     {
         return $query->where('created_at', '>', today()->startOfDay())
