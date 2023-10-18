@@ -20,6 +20,9 @@ class ServiceFactory extends Factory
         $name = fake()->word() . rand(10000,99999);
         return [
             'name' => $name,
+            'full_service' => 1,
+            'primary' => 1,
+            'up_to' => 8,
             'slug' => Str::slug($name),
             'description' => fake()->paragraph(1),
             'price' => rand(100,300)

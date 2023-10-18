@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->unsignedTinyInteger('full_service')->default(1);
+            $table->unsignedTinyInteger('primary')->default(1);
+            $table->unsignedTinyInteger('up_to')->default(8);
             $table->string('description');
             $table->unsignedInteger('price');
-            $table->timestamps();
         });
     }
 
