@@ -23,6 +23,6 @@ class Service extends Model
 
     public function isFull()
     {
-        return $this->id === 1 || str_contains($this->name, 'full');
+        return $this->full_service;
     }
 }

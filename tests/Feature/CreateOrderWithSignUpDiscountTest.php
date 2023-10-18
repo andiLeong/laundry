@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;
@@ -51,14 +50,14 @@ class CreateOrderWithSignUpDiscountTest extends TestCase
     public function it_cant_create_order_if_service_is_not_full_service(): void
     {
         $this->getPromotion();
-        $services = Service::factory(2)->create();
+        $service = Service::factory()->create(['full_service' => false]);
 
         $this->assertDatabaseCount('order_promotions', 0);
         $this->assertDatabaseCount('orders', 0);
 
         $response = $this->createOrder([
             'promotion_ids' => [$this->promotion->id],
-            'service_id' => $services[1]->id,
+            'service_id' => $service->id,
             'user_id' => User::factory()->create()->id,
         ]);
 

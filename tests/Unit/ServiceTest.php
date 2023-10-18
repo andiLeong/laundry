@@ -27,10 +27,10 @@ class ServiceTest extends TestCase
     /** @test */
     public function it_can_determine_if_a_service_is_full(): void
     {
-        Service::truncate();
-        $services = Service::factory(2)->create();
+        $service = Service::factory()->create();
+        $service2 = Service::factory()->create(['full_service' => false]);
 
-        $this->assertTrue($services[0]->isFull());
-        $this->assertFalse($services[1]->isFull());
+        $this->assertTrue($service->isFull());
+        $this->assertFalse($service2->isFull());
     }
 }
