@@ -16,7 +16,8 @@ class Order extends Model
     use Filterable;
 
     protected $casts = [
-        'paid' => 'boolean'
+        'paid' => 'boolean',
+        'issued_invoice' => 'boolean'
     ];
 
     protected function payment(): Attribute

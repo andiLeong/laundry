@@ -19,8 +19,9 @@ return new class extends Migration
             $table->unsigneddecimal('amount');
             $table->unsigneddecimal('total_amount');
             $table->unsignedBigInteger('product_amount')->default(0);
-            $table->tinyInteger('paid')->default(1);
-            $table->tinyInteger('payment')->default(1);
+            $table->unsignedTinyInteger('paid')->default(1);
+            $table->unsignedTinyInteger('payment')->default(1);
+            $table->unsignedTinyInteger('issued_invoice')->default(0);
             $table->unsignedBigInteger('creator_id');
             $table->timestamps();
         });
