@@ -39,15 +39,8 @@ class DatabaseSeeder extends Seeder
         \App\Models\Product::factory(10)->create();
         $users = \App\Models\User::factory(200)->create();
         User::first()->update(['phone' => '09272714285']);
-        \App\Models\Service::factory()->create([
-            'name' => 'Full service',
-            'price' => 200
-        ]);
 
-        \App\Models\Service::factory()->create([
-            'name' => 'Washer',
-            'price' => 65
-        ]);
+        $this->call(ServiceSeeder::class);
 
         \App\Models\Promotion::factory()->create([
             'name' => 'Welcome Discount',
