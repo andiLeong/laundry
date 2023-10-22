@@ -45,4 +45,18 @@ class ReadServiceTest extends TestCase
         $this->assertTrue($body->contains($full->name));
         Cache::flush();
     }
+
+    /** @test */
+    public function only_certain_columns_is_return(): void
+    {
+        Service::factory()->create([
+            'name' => 'full service',
+            'description' => 'description',
+            'price' => 200
+        ]);
+        $body = $this->getJson('/api/service')->json()[0];
+
+        $this->assertColumnsSame(['name','price','description'],array_keys($body));
+        Cache::flush();
+    }
 }

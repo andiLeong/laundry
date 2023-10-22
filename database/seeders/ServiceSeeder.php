@@ -14,7 +14,7 @@ class ServiceSeeder extends Seeder
     public function run(): void
     {
         Service::factory()->create([
-            'name' => 'full service up to 8kg',
+            'name' => 'Full service up to 8kg',
             'slug' => Str::slug('full service up to 8kg'),
             'price' => 170,
             'full_service' => 1,
@@ -23,7 +23,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'full service up to 10kg',
+            'name' => 'Full service up to 10kg',
             'slug' => Str::slug('full service up to 10kg'),
             'price' => 210,
             'full_service' => 1,
@@ -32,7 +32,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'full service up to 7kg',
+            'name' => 'Full service up to 7kg',
             'slug' => Str::slug('full service up to 7kg'),
             'price' => 160,
             'full_service' => 1,
@@ -41,7 +41,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'wash up to 8kg',
+            'name' => 'Self service wash up to 8kg',
             'slug' => Str::slug('wash up to 8kg'),
             'price' => 60,
             'full_service' => 0,
@@ -50,7 +50,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'dry up to 8kg',
+            'name' => 'Self service dry up to 8kg',
             'slug' => Str::slug('dry up to 8kg'),
             'price' => 60,
             'full_service' => 0,
@@ -59,7 +59,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'wash up to 10kg',
+            'name' => 'Self service wash up to 10kg',
             'slug' => Str::slug('wash up to 10kg'),
             'price' => 80,
             'full_service' => 0,
@@ -68,7 +68,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'dry up to 10kg',
+            'name' => 'Self service dry up to 10kg',
             'slug' => Str::slug('dry up to 10kg'),
             'price' => 80,
             'full_service' => 0,

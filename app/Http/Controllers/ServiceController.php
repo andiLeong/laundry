@@ -12,7 +12,7 @@ class ServiceController extends Controller
          return Cache::remember(
              'services',
              now()->addDays(30),
-             fn() => Service::all()
+             fn() => Service::select(['name','description','price'])->get()
          );
     }
 }
