@@ -32,12 +32,12 @@ class ServiceSeeder extends Seeder
         ]);
 
         Service::factory()->create([
-            'name' => 'Full service up to 7kg',
-            'slug' => Str::slug('full service up to 7kg'),
+            'name' => 'Full service up to 4kg',
+            'slug' => Str::slug('full service up to 4kg'),
             'price' => 160,
             'full_service' => 1,
             'up_to' => 7,
-            'description' => 'Don\'t always get 8kg to wash, no worry, we are 10 peso off if your clothes is lower than 8kg',
+            'description' => 'Don\'t always get 8kg to wash, no worry, we are 10 peso off if your clothes is lower than 4kg',
         ]);
 
         Service::factory()->create([
