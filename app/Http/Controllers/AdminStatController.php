@@ -14,7 +14,7 @@ class AdminStatController extends Controller
         return [
             'user_count' => User::count(),
             'order_count' => $orderCount = Order::count(),
-            'total_order_amount' => Order::sum('amount'),
+            'total_order_amount' => Order::sum('total_amount'),
             'order_promotion_rate' => $orderCount > 0
                 ? round(OrderPromotion::count() / $orderCount,2) * 100
                 : 0,

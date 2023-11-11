@@ -69,13 +69,13 @@ class AdminStatsTest extends TestCase
     /** @test */
     public function it_can_get_total_order_amount(): void
     {
-        $order1 = Order::factory()->create(['amount' => 200]);
-        $order2 = Order::factory()->create(['amount' => 70]);
-        $order3 = Order::factory()->create(['amount' => 120]);
-        $order4 = Order::factory()->create(['amount' => 100.56]);
+        $order1 = Order::factory()->create(['total_amount' => 200]);
+        $order2 = Order::factory()->create(['total_amount' => 70]);
+        $order3 = Order::factory()->create(['total_amount' => 120]);
+        $order4 = Order::factory()->create(['total_amount' => 100.56]);
         $response = $this->fetch();
         $this->assertEquals(
-            $order1->amount + $order2->amount + $order3->amount + $order4->amount,
+            $order1->total_amount + $order2->total_amount + $order3->total_amount + $order4->total_amount,
             $response['total_order_amount']
         );
     }
