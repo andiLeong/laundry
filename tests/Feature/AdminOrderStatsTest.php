@@ -61,14 +61,13 @@ class AdminOrderStatsTest extends TestCase
     /** @test */
     public function it_can_see_order_count_and_total_amount_group_by_days_in_pass_x_days(): void
     {
-        $this->withoutExceptionHandling();
         $days = 5;
-        $today = Order::factory()->create(['amount' => 100, 'created_at' => today()->addHours()]);
-        $today2 = Order::factory()->create(['amount' => 200, 'created_at' => today()->addHours(2)]);
-        $yesterday = Order::factory()->create(['amount' => 90, 'created_at' => now()->subDays()]);
+        $today = Order::factory()->create(['total_amount' => 100, 'created_at' => today()->addHours()]);
+        $today2 = Order::factory()->create(['total_amount' => 200, 'created_at' => today()->addHours(2)]);
+        $yesterday = Order::factory()->create(['total_amount' => 90, 'created_at' => now()->subDays()]);
 
-        $tomorrow = Order::factory()->create(['amount' => 100, 'created_at' => now()->addDay()]);
-        $lastDayOfWeek = Order::factory()->create(['amount' => 100, 'created_at' => now()->subDays(31)]);
+        $tomorrow = Order::factory()->create(['total_amount' => 100, 'created_at' => now()->addDay()]);
+        $lastDayOfWeek = Order::factory()->create(['total_amount' => 100, 'created_at' => now()->subDays(31)]);
 
         $dates = array_map(
             fn($dt) => $dt->format('Y-m-d'),
@@ -79,11 +78,11 @@ class AdminOrderStatsTest extends TestCase
 
         $this->assertEquals($dates, $response->pluck('dt')->values()->all());
         $this->assertEquals(
-            $today->amount + $today2->amount,
+            $today->total_amount + $today2->total_amount,
             $response[today()->format('Y-m-d')]['order_total_amount']
         );
         $this->assertEquals(
-            $yesterday->amount,
+            $yesterday->total_amount,
             $response[today()->subDays()->format('Y-m-d')]['order_total_amount']
         );
 
@@ -98,12 +97,12 @@ class AdminOrderStatsTest extends TestCase
     {
         Carbon::setTestNow('2023-07-10');
         $month = 6;
-        $currentMonth = Order::factory(2)->create(['amount' => 100]);
-        $lastMonth = Order::factory()->create(['amount' => 80, 'created_at' => today()->subMonths()]);
-        $twoMonthsAgo = Order::factory()->create(['amount' => 90, 'created_at' => today()->subMonths(2)]);
+        $currentMonth = Order::factory(2)->create(['total_amount' => 100]);
+        $lastMonth = Order::factory()->create(['total_amount' => 80, 'created_at' => today()->subMonths()]);
+        $twoMonthsAgo = Order::factory()->create(['total_amount' => 90, 'created_at' => today()->subMonths(2)]);
 
-        $lastYear = Order::factory()->create(['amount' => 100, 'created_at' => today()->subYears()]);
-        $nextMonth = Order::factory()->create(['amount' => 100, 'created_at' => today()->addMonths()]);
+        $lastYear = Order::factory()->create(['total_amount' => 100, 'created_at' => today()->subYears()]);
+        $nextMonth = Order::factory()->create(['total_amount' => 100, 'created_at' => today()->addMonths()]);
 
         $dates = array_map(
             fn($dt) => $dt->format('Y-m'),
@@ -113,16 +112,16 @@ class AdminOrderStatsTest extends TestCase
 
         $this->assertEquals($dates, $response->pluck('dt')->values()->all());
         $this->assertEquals(
-            $currentMonth->sum('amount'),
+            $currentMonth->sum('total_amount'),
             $response[today()->format('Y-m')]['order_total_amount']
         );
         $this->assertEquals(
-            $lastMonth->amount,
+            $lastMonth->total_amount,
             $response[today()->subMonths()->format('Y-m')]['order_total_amount']
         );
 
         $this->assertEquals(
-            $twoMonthsAgo->amount,
+            $twoMonthsAgo->total_amount,
             $response[today()->subMonths(2)->format('Y-m')]['order_total_amount']
         );
         $this->assertEquals(2, $response[today()->format('Y-m')]['order_count'] );
@@ -136,19 +135,18 @@ class AdminOrderStatsTest extends TestCase
     {
         Carbon::setTestNow('2023-07-10');
         $month = 6;
-        $currentMonth = Order::factory(2)->create(['amount' => 100]);
+        $currentMonth = Order::factory(2)->create(['total_amount' => 100]);
         $currentMonthExpense = Expense::factory()->create(['amount' => 50, 'created_at' => now()]);
-        $lastMonth = Order::factory()->create(['amount' => 80, 'created_at' => today()->subMonths()]);
+        $lastMonth = Order::factory()->create(['total_amount' => 80, 'created_at' => today()->subMonths()]);
         $lastMonthExpense = Expense::factory()->create(['amount' => 800, 'created_at' => today()->subMonths()]);
-        $currentMonthMargin = $currentMonth->sum('amount') - $currentMonthExpense->amount;
-        $lastMonthMargin = $lastMonth->amount - $lastMonthExpense->amount;
+        $currentMonthMargin = $currentMonth->sum('total_amount') - $currentMonthExpense->amount;
+        $lastMonthMargin = $lastMonth->total_amount - $lastMonthExpense->amount;
 
         $dates = array_map(
             fn($dt) => $dt->format('Y-m'),
             CarbonPeriod::create(now()->startOfMonth()->subMonths($month - 1), '1 month', now()->startOfMonth())->toArray()
         );
         $response = $this->fetch(['margin_group_by_months' => $month])->keyBy('dt');
-        $this->withoutExceptionHandling();
 
         $this->assertEquals($dates, $response->pluck('dt')->values()->all());
         $this->assertEquals(
