@@ -83,7 +83,7 @@ class Order extends Model
             ->select(
                 DB::raw("DATE_FORMAT(created_at, '$format') as dt"),
                 DB::raw('count(id) as order_count'),
-                DB::raw('sum(amount) as order_total_amount')
+                DB::raw('sum(total_amount) as order_total_amount')
             )
             ->where('created_at', '>', $start)
             ->where('created_at', '<', $end)
