@@ -56,7 +56,7 @@ class ReadServiceTest extends TestCase
         ]);
         $body = $this->getJson('/api/service')->json()[0];
 
-        $this->assertColumnsSame(['name','price','description'],array_keys($body));
+        $this->assertColumnsSame(['id','name','price','description'],array_keys($body));
         Cache::flush();
     }
 }
