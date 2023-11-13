@@ -14,7 +14,7 @@ class AdminUserController extends Controller
             ->leftJoin('orders', 'orders.user_id', '=', 'users.id')
             ->select('users.*',
                 DB::raw('max(orders.created_at) as last_order_date'),
-                DB::raw('sum(orders.amount) as total_order_amount')
+                DB::raw('sum(orders.total_amount) as total_order_amount')
             )
             ->filters([
                 'phone' => [],

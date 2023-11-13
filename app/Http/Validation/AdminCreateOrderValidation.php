@@ -21,6 +21,9 @@ class AdminCreateOrderValidation implements OrderValidate
         'user_id' => 'nullable',
         'service_id' => 'required',
         'product_ids' => 'nullable|array',
+        'issued_invoice' => 'required|boolean',
+        'paid' => 'required|boolean',
+        'company_id' => 'nullable|in:1',
     ];
 
     public function __construct(public Request $request)

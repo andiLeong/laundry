@@ -28,6 +28,7 @@ class OrderFactory extends Factory
             'creator_id' => User::factory(),
             'paid' => 1,
             'issued_invoice' => 0,
+            'company_id' => null,
             'payment' => OrderPayment::cash->value,
         ];
     }

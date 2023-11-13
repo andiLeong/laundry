@@ -37,12 +37,14 @@ class AdminReadUserTest extends TestCase
         Order::factory()->create([
             'service_id' => $service->id,
             'amount' => 100,
+            'total_amount' => 100,
             'user_id' => $users[1]->id,
         ]);
 
         Order::factory()->create([
             'service_id' => $service->id,
             'amount' => 220,
+            'total_amount' => 220,
             'user_id' => $users[1]->id,
         ]);
 

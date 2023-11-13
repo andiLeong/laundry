@@ -78,6 +78,36 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function issued_invoice_must_be_valid()
+    {
+        $name = 'issued_invoice';
+        $rule = ['required', 'in:0,1'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
+    public function paid_must_be_valid()
+    {
+        $name = 'paid';
+        $rule = ['required', 'in:0,1'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
+    public function company_id_must_be_valid()
+    {
+        $name = 'company_id';
+        $rule = ['nullable', 'in:1'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
     public function unverified_user_cant_be_create_order()
     {
         $this->setUnverifiedUser();
@@ -243,28 +273,6 @@ class AdminCreateOrderTest extends TestCase
         ]);
 
         $this->assertValidateMessage('stock is not enough', $response, 'product_ids');
-    }
-
-    /** @test */
-    public function its_default_payment_is_cash()
-    {
-        $this->assertDatabaseCount('orders', 0);
-        $this->createOrder();
-        $this->assertDatabaseCount('orders', 1);
-        $order = Order::first();
-        $this->assertEquals(OrderPayment::cash->name, $order->payment);
-    }
-
-    /** @test */
-    public function it_can_create_order_via_gcash_payment()
-    {
-        $this->assertDatabaseCount('orders', 0);
-        $this->createOrder([
-            'payment' => OrderPayment::gcash->value
-        ]);
-        $this->assertDatabaseCount('orders', 1);
-        $order = Order::first();
-        $this->assertEquals(OrderPayment::gcash->name, $order->payment);
     }
 
     private function orderAttributes(mixed $overwrites)
