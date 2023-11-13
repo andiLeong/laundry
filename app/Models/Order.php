@@ -89,4 +89,24 @@ class Order extends Model
             ->where('created_at', '<', $end)
             ->groupBy('dt');
     }
+
+    public function paid()
+    {
+        $this->update(['paid' => true]);
+    }
+
+    public function unpaid()
+    {
+        $this->update(['paid' => false]);
+    }
+
+    public function issueInvoice()
+    {
+        $this->update(['issued_invoice' => true]);
+    }
+
+    public function unissueInvoice()
+    {
+        $this->update(['issued_invoice' => false]);
+    }
 }

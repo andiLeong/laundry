@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminExpenseController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminOrderStatController;
 use App\Http\Controllers\AdminStatController;
+use App\Http\Controllers\AdminUpdateOrderController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GcashOrderController;
@@ -71,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
         Route::get('/admin/order/{order}', [AdminOrderController::class, 'show']);
         Route::post('/admin/order', [AdminOrderController::class, 'store']);
+        Route::patch('/admin/order/{id}/{column}', [AdminUpdateOrderController::class, 'update']);
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
