@@ -8,6 +8,11 @@ class MarginGroupByMonthCollection extends OrderGroupByDatesCollection
 {
     protected $expenses;
 
+    public function __invoke()
+    {
+        return collect($this->getDates())->map(fn($dt) => $this->apply($dt));
+    }
+
     public function apply(Carbon $dt): mixed
     {
         $dt = $dt->format($this->format);

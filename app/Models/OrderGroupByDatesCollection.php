@@ -27,7 +27,12 @@ class OrderGroupByDatesCollection
 
     public function __invoke()
     {
-        return collect($this->getDates())->map(fn($dt) => $this->apply($dt));
+        $collection = collect($this->getDates())->map(fn($dt) => $this->apply($dt));
+        return [
+            'data' => $collection,
+            'order_avg' => round($collection->avg('order_count'),2),
+            'amount_avg' => round($collection->avg('order_total_amount'),2),
+        ];
     }
 
     /**
@@ -84,7 +89,7 @@ class OrderGroupByDatesCollection
             $arg = [$this->start, $this->end->copy()->addMonths()];
         }
 
-        if(is_null($this->collection)){
+        if (is_null($this->collection)) {
             return $this->collection = Order::query()
                 ->groupByCreated(...$arg)
                 ->get()

@@ -74,7 +74,7 @@ class AdminOrderStatsTest extends TestCase
             CarbonPeriod::create(today()->subDays($days - 1), today())->toArray()
         );
 
-        $response = $this->fetch(['group_by_days' => $days])->keyBy('dt');
+        $response = collect($this->fetch(['group_by_days' => $days])->get('data'))->keyBy('dt');
 
         $this->assertEquals($dates, $response->pluck('dt')->values()->all());
         $this->assertEquals(
@@ -86,10 +86,29 @@ class AdminOrderStatsTest extends TestCase
             $response[today()->subDays()->format('Y-m-d')]['order_total_amount']
         );
 
-        $this->assertEquals(2, $response[today()->format('Y-m-d')]['order_count'] );
+        $this->assertEquals(2, $response[today()->format('Y-m-d')]['order_count']);
 
         $this->assertArrayNotHasKey($tomorrow->created_at->format('Y-m'), $response);
         $this->assertArrayNotHasKey($lastDayOfWeek->created_at->format('Y-m'), $response);
+    }
+
+    /** @test */
+    public function it_can_see_avg_order_count_and_avg_amount_group_by_days_in_pass_x_days(): void
+    {
+        $days = 5;
+        $today = Order::factory()->create(['total_amount' => 100, 'created_at' => today()->addHours()]);
+        $today2 = Order::factory()->create(['total_amount' => 200, 'created_at' => today()->addHours(2)]);
+        $yesterday = Order::factory()->create(['total_amount' => 89.56, 'created_at' => now()->subDays()]);
+
+        $todayTotal = $today->total_amount + $today2->total_amount;
+        $total = $todayTotal + $yesterday->total_amount;
+
+        $response = $this->fetch(['group_by_days' => $days])->toArray();
+
+        $this->assertArrayHasKey('order_avg', $response);
+        $this->assertEquals($response['order_avg'], round(3 / $days, 2));
+        $this->assertArrayHasKey('amount_avg', $response);
+        $this->assertEquals($response['amount_avg'], round($total / $days, 2));
     }
 
     /** @test */
@@ -108,7 +127,7 @@ class AdminOrderStatsTest extends TestCase
             fn($dt) => $dt->format('Y-m'),
             CarbonPeriod::create(now()->startOfMonth()->subMonths($month - 1), '1 month', now()->startOfMonth())->toArray()
         );
-        $response = $this->fetch(['group_by_months' => $month])->keyBy('dt');
+        $response = collect($this->fetch(['group_by_months' => $month])->get('data'))->keyBy('dt');
 
         $this->assertEquals($dates, $response->pluck('dt')->values()->all());
         $this->assertEquals(
@@ -124,10 +143,29 @@ class AdminOrderStatsTest extends TestCase
             $twoMonthsAgo->total_amount,
             $response[today()->subMonths(2)->format('Y-m')]['order_total_amount']
         );
-        $this->assertEquals(2, $response[today()->format('Y-m')]['order_count'] );
+        $this->assertEquals(2, $response[today()->format('Y-m')]['order_count']);
 
         $this->assertArrayNotHasKey($lastYear->created_at->format('Y-m'), $response);
         $this->assertArrayNotHasKey($nextMonth->created_at->format('Y-m'), $response);
+    }
+
+    /** @test */
+    public function it_can_see_avg_order_count_and_avg_amount_group_by_days_in_pass_x_months(): void
+    {
+        Carbon::setTestNow('2023-07-10');
+        $month = 6;
+        $currentMonth = Order::factory(2)->create(['total_amount' => 100]);
+        $lastMonth = Order::factory()->create(['total_amount' => 80, 'created_at' => today()->subMonths()]);
+        $twoMonthsAgo = Order::factory()->create(['total_amount' => 90, 'created_at' => today()->subMonths(2)]);
+        $total = $currentMonth->sum('total_amount') + $lastMonth->total_amount + $twoMonthsAgo->total_amount;
+
+
+        $response = $this->fetch(['group_by_months' => $month])->all();
+
+        $this->assertArrayHasKey('order_avg', $response);
+        $this->assertEquals($response['order_avg'], round(4 / $month, 2));
+        $this->assertArrayHasKey('amount_avg', $response);
+        $this->assertEquals($response['amount_avg'], round($total / $month, 2));
     }
 
     /** @test */
@@ -158,7 +196,7 @@ class AdminOrderStatsTest extends TestCase
             $response[today()->subMonths()->format('Y-m')]['margin']
         );
 
-        $this->assertEquals(0, $response[today()->subMonths(2)->format('Y-m')]['margin'] );
+        $this->assertEquals(0, $response[today()->subMonths(2)->format('Y-m')]['margin']);
     }
 
     /** @test */
