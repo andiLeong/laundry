@@ -108,6 +108,16 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function description_must_be_valid()
+    {
+        $name = 'description';
+        $rule = ['nullable', 'string'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
     public function unverified_user_cant_be_create_order()
     {
         $this->setUnverifiedUser();
