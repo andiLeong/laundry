@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -58,6 +59,18 @@ class UpdateOrderTest extends TestCase
 
         $this->assertTrue($order->fresh()->issued_invoice);
         $this->assertFalse($order2->fresh()->issued_invoice);
+    }
+
+    /** @test */
+    public function it_can_toggle_order_payment_status()
+    {
+        $order = Order::factory()->create();
+        $order2 = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $this->update($order->id,'payment');
+        $this->update($order2->id,'payment');
+
+        $this->assertEquals(OrderPayment::gcash->name,$order->fresh()->payment);
+        $this->assertEquals(OrderPayment::cash->name,$order2->fresh()->payment);
     }
 
     public function update($id, $column)

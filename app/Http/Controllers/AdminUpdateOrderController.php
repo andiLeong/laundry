@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -50,5 +51,15 @@ class AdminUpdateOrderController extends Controller
         }
 
         $this->order->paid();
+    }
+
+    public function payment()
+    {
+        if ($this->order->payment === OrderPayment::cash->name) {
+            $this->order->update(['payment' => OrderPayment::gcash->value]);
+            return;
+        }
+
+        $this->order->update(['payment' => OrderPayment::cash->value]);
     }
 }
