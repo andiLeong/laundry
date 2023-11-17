@@ -118,6 +118,67 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_order_by_today(): void
+    {
+        $order = Order::factory()->create(['created_at' => now()->subDay()]);
+        $todayOrder = Order::factory()->create();
+        $ids = $this->fetchOrderIds(['filter_by_days' => 'today']);
+
+        $this->assertTrue($ids->contains($todayOrder->id));
+        $this->assertFalse($ids->contains($order->id));
+    }
+
+    /** @test */
+    public function it_can_filter_order_by_current_week(): void
+    {
+        $order = Order::factory()->create(['created_at' => now()->subWeek()]);
+        $todayOrder = Order::factory()->create();
+        $ids = $this->fetchOrderIds(['filter_by_days' => 'week']);
+
+        $this->assertTrue($ids->contains($todayOrder->id));
+        $this->assertFalse($ids->contains($order->id));
+    }
+
+    /** @test */
+    public function it_can_filter_order_by_seven_days(): void
+    {
+        $order = Order::factory()->create(['created_at' => now()->subWeek()]);
+        $todayOrder = Order::factory()->create();
+        $yseterdayOrder = Order::factory()->create(['created_at' => now()->subDay()]);
+        $ids = $this->fetchOrderIds(['filter_by_days' => 7]);
+
+        $this->assertTrue($ids->contains($todayOrder->id));
+        $this->assertTrue($ids->contains($yseterdayOrder->id));
+        $this->assertFalse($ids->contains($order->id));
+    }
+
+    /** @test */
+    public function it_can_filter_order_by_ten_days(): void
+    {
+        $order = Order::factory()->create(['created_at' => now()->subWeeks(2)]);
+        $todayOrder = Order::factory()->create();
+        $yseterdayOrder = Order::factory()->create(['created_at' => now()->subDay()]);
+        $ids = $this->fetchOrderIds(['filter_by_days' => 10]);
+
+        $this->assertTrue($ids->contains($todayOrder->id));
+        $this->assertTrue($ids->contains($yseterdayOrder->id));
+        $this->assertFalse($ids->contains($order->id));
+    }
+
+    /** @test */
+    public function it_can_filter_order_by_fourteenth_days(): void
+    {
+        $order = Order::factory()->create(['created_at' => now()->subWeeks(2)]);
+        $todayOrder = Order::factory()->create();
+        $yseterdayOrder = Order::factory()->create(['created_at' => now()->subDay()]);
+        $ids = $this->fetchOrderIds(['filter_by_days' => 14]);
+
+        $this->assertTrue($ids->contains($todayOrder->id));
+        $this->assertTrue($ids->contains($yseterdayOrder->id));
+        $this->assertFalse($ids->contains($order->id));
+    }
+
+    /** @test */
     public function it_can_filter_by_user_first_name(): void
     {
         $user = User::factory()->create(['first_name' => 'pasdsdsds']);

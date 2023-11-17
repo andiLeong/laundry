@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Models\Enum\OrderPayment;
 use App\QueryFilter\Filterable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Order extends Model
 {
@@ -23,7 +23,7 @@ class Order extends Model
     protected function payment(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => OrderPayment::from($value)->name
+            get: fn(string $value) => OrderPayment::from($value)->name
         );
     }
 
@@ -49,12 +49,12 @@ class Order extends Model
 
     public function products()
     {
-        return $this->hasMany(OrderProduct::class,'order_id','id');
+        return $this->hasMany(OrderProduct::class, 'order_id', 'id');
     }
 
     public function gcash()
     {
-       return $this->hasOne(GcashOrder::class);
+        return $this->hasOne(GcashOrder::class);
     }
 
     public function scopeToday(Builder $query)
@@ -74,6 +74,13 @@ class Order extends Model
         return $query
             ->where('created_at', '>=', now()->startOfWeek())
             ->where('created_at', '<=', now()->endOfWeek());
+    }
+
+    public function scopeCreateBetween(Builder $query, $start, $end)
+    {
+        return $query
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<=', $end);
     }
 
     public function scopeGroupByCreated(Builder $query, $start, $end, $format = 'month')

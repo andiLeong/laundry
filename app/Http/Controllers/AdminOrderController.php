@@ -44,6 +44,27 @@ class AdminOrderController extends Controller
                         });
                     }
                 ],
+                'filter_by_days' => [
+                    'clause' => 'callBack',
+                    'callback' => function (Builder $query, Request $request) {
+                        $day = $request->get('filter_by_days');
+                        if ($day === 'today') {
+                            return $query->today();
+                        }
+
+                        if ($day === 'week') {
+                            return $query->currentWeek();
+                        }
+
+                        if (is_int((int)$day)) {
+                            $start = today()->subDays($day - 1);
+                            $end = today()->copy()->addDay();
+                            return $query->createBetween($start, $end);
+                        }
+
+                        return $query;
+                    }
+                ],
             ], $request)
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
@@ -59,7 +80,7 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->creator_id !== $user->id) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'products','gcash');
+        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'products', 'gcash');
         return $order;
     }
 
@@ -75,7 +96,7 @@ class AdminOrderController extends Controller
                     $qualifyPromotions = $validation->promotions;
                     OrderPromotion::insertByPromotions($qualifyPromotions, $order);
                 }
-                OrderCreated::dispatch($order,$validation->products);
+                OrderCreated::dispatch($order, $validation->products);
             });
     }
 }
