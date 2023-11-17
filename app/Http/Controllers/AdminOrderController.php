@@ -24,6 +24,7 @@ class AdminOrderController extends Controller
         $orders = $query
             ->filters([
                 'user_id' => [],
+                'description' => [],
                 'exclude_user' => [
                     'clause' => 'whereNull',
                     'column' => 'user_id',

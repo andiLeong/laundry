@@ -179,6 +179,17 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_order_by_description(): void
+    {
+        $jalenOrder = Order::factory()->create(['description' => 'jalen']);
+        $hugoOrder = Order::factory()->create(['description' => 'hugo']);
+        $ids = $this->fetchOrderIds(['description' => 'jalen']);
+
+        $this->assertTrue($ids->contains($jalenOrder->id));
+        $this->assertFalse($ids->contains($hugoOrder->id));
+    }
+
+    /** @test */
     public function it_can_filter_by_user_first_name(): void
     {
         $user = User::factory()->create(['first_name' => 'pasdsdsds']);
