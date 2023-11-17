@@ -190,6 +190,21 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_order_by_paid(): void
+    {
+        $paidOrder = Order::factory()->create(['paid' => true]);
+        $unpaidOrder = Order::factory()->create(['paid' => false]);
+        $ids = $this->fetchOrderIds(['paid' => 1]);
+        $ids2 = $this->fetchOrderIds(['paid' => 0]);
+
+        $this->assertTrue($ids->contains($paidOrder->id));
+        $this->assertFalse($ids->contains($unpaidOrder->id));
+
+        $this->assertTrue($ids2->contains($unpaidOrder->id));
+        $this->assertFalse($ids2->contains($paidOrder->id));
+    }
+
+    /** @test */
     public function it_can_filter_by_user_first_name(): void
     {
         $user = User::factory()->create(['first_name' => 'pasdsdsds']);

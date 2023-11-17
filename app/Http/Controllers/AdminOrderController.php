@@ -25,6 +25,7 @@ class AdminOrderController extends Controller
             ->filters([
                 'user_id' => [],
                 'description' => [],
+                'paid' => [],
                 'exclude_user' => [
                     'clause' => 'whereNull',
                     'column' => 'user_id',
