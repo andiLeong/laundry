@@ -5,7 +5,8 @@ namespace App\QueryFilter;
 use App\QueryFilter\Filters\WhereFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class QueryFilterManager
 {
@@ -46,12 +47,18 @@ class QueryFilterManager
      * apply each query cause to builder
      *
      * @return Builder
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function apply()
     {
-        $this->getSharedOption()
-            ->filter(fn($filter) => is_array($filter))
-            ->each(fn($filterOption, $key) => $this->attachQuery($filterOption, $key));
+        foreach ($this->filterOption as $key => $option) {
+            if (is_null($this->request->get($key)) || !is_array($option)) {
+                continue;
+            }
+
+            $this->attachQuery($option, $key);
+        }
 
         return $this->query;
     }
@@ -65,7 +72,7 @@ class QueryFilterManager
      */
     public function attachQuery($option, $key)
     {
-        $parser = new QueryArgumentPhaser($option, $key, $this->getRequest());
+        $parser = new QueryArgumentPhaser($option, $key, $this->request);
         if (empty($option)) {
             return (new WhereFilter($this->query, $parser))->filter();
         }
@@ -77,38 +84,5 @@ class QueryFilterManager
 
         $instance = new $class($this->query, $parser);
         return $instance->filter();
-    }
-
-
-    /**
-     * get the both shared option key and request key
-     * eg: when request have query string foo=bar&baz=1
-     * but in our filter option we only key of foo
-     * so we only response to foo filter
-     *
-     * @return Collection
-     */
-    public function getSharedOption(): Collection
-    {
-        return collect($this->filterOption)
-            ->intersectByKeys($this->removeNullFromRequest());
-    }
-
-    /**
-     *  remove any null value from the request
-     *
-     * @return array
-     */
-    public function removeNullFromRequest()
-    {
-        return array_filter(
-            $this->request->all(),
-            fn($request) => !is_null($request)
-        );
-    }
-
-    public function getRequest()
-    {
-        return $this->request;
     }
 }
