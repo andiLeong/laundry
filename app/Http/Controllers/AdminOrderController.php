@@ -39,12 +39,8 @@ class AdminOrderController extends Controller
                     'relationship' => 'user',
                 ],
                 'first_name' => [
-                    'clause' => 'callBack',
-                    'callback' => function (Builder $query, Request $request) {
-                        $query->whereHas('user', function (Builder $query) use ($request) {
-                            return $query->where('first_name', $request->first_name);
-                        });
-                    }
+                    'clause' => 'whereHas',
+                    'relationship' => 'user',
                 ],
                 'filter_by_days' => [
                     'clause' => 'callBack',
