@@ -84,9 +84,9 @@ class OrderGroupByDatesCollection
     protected function get()
     {
         if ($this->groupBy === 'day') {
-            $arg = [$this->start, today()->copy()->addDay(), 'day'];
+            $arg = [$this->span, 'day'];
         } else {
-            $arg = [$this->start, $this->end->copy()->addMonths()];
+            $arg = [$this->span];
         }
 
         if (is_null($this->collection)) {
