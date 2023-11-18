@@ -248,8 +248,7 @@ class AdminReadOrderTest extends TestCase
 
     protected function fetch($query = [], $as = null)
     {
-        $query = http_build_query($query);
-        return $this->signInAsAdmin($as)->getJson($this->endpoint . '?' . $query);
+        return $this->fetchAsAdmin($query,$as);
     }
 
     public function fetchOrderIds($query = [], $as = null)

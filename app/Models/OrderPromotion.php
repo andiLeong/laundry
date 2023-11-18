@@ -9,7 +9,7 @@ class OrderPromotion extends Model
 {
     use HasFactory;
 
-    public static function insertByPromotions($promotions,Order $order)
+    public static function insertByPromotions($promotions, Order $order)
     {
         foreach ($promotions as $promo) {
             OrderPromotion::insert([

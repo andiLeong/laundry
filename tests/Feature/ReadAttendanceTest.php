@@ -121,8 +121,9 @@ class ReadAttendanceTest extends TestCase
 
     protected function fetch($payload = [], $user = null)
     {
-        return $this->signIn($user ?? $this->user)->getJson(
-            $this->endpoint . '?' . http_build_query($payload)
-        )->collect('data')->pluck('id')->toArray();
+        return $this->fetchAsStaff($payload, $user ?? $this->user)
+            ->collect('data')
+            ->pluck('id')
+            ->toArray();
     }
 }

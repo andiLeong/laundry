@@ -83,6 +83,13 @@ class Order extends Model
             ->where('created_at', '<=', $end);
     }
 
+    public function scopePassDays(Builder $query, $days)
+    {
+        $start = today()->subDays($days - 1);
+        $end = today()->copy()->addDay();
+        return $query->createBetween($start, $end);
+    }
+
     public function scopeGroupByCreated(Builder $query, $start, $end, $format = 'month')
     {
         $format = $format == 'month' ? '%Y-%m' : '%Y-%m-%d';

@@ -208,11 +208,6 @@ class AdminOrderStatsTest extends TestCase
 
     public function fetch($query = [])
     {
-        $query = '?' . http_build_query($query);
-        return $this
-            ->signInAsAdmin()
-            ->getJson($this->endpoint . $query)
-            ->assertStatus(200)
-            ->collect();
+        return $this->fetchAsAdmin($query)->assertStatus(200)->collect();
     }
 }

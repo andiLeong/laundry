@@ -24,7 +24,7 @@ class AdminShowUserTest extends TestCase
     public function unverified_user_gets_404(): void
     {
         $unverifiedUser = User::factory()->create(['phone' => '0934342322', 'phone_verified_at' => null]);
-        $user = $this->fetch(null,$unverifiedUser->phone)->assertNotFound();
+        $user = $this->fetch(null, $unverifiedUser->phone)->assertNotFound();
     }
 
     /** @test */
@@ -50,6 +50,6 @@ class AdminShowUserTest extends TestCase
     {
         $as ??= $this->user;
         $phone ??= $this->phone;
-        return $this->signIn($as)->getJson($this->endpoint . '/' . $phone);
+        return $this->fetchAsStaff([], $as, $this->endpoint . '/' . $phone);
     }
 }

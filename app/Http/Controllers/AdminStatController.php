@@ -9,14 +9,20 @@ use Illuminate\Http\Request;
 
 class AdminStatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Order::query();
+
+        if($request->filled('days')){
+            $query->passDays($request->get('days'));
+        }
+
         return [
             'user_count' => User::count(),
-            'order_count' => $orderCount = Order::count(),
-            'total_order_amount' => Order::sum('total_amount'),
+            'order_count' => $orderCount = $query->count(),
+            'total_order_amount' => $query->sum('total_amount'),
             'order_promotion_rate' => $orderCount > 0
-                ? round(OrderPromotion::count() / $orderCount,2) * 100
+                ? round(OrderPromotion::whereIn('order_id',$query->pluck('id'))->count() / $orderCount,2) * 100
                 : 0,
         ];
     }

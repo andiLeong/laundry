@@ -92,6 +92,6 @@ class AdminShowOrderTest extends TestCase
 
     protected function fetch($id, $as = null)
     {
-        return $this->signInAsAdmin($as)->getJson($this->endpoint . $id);
+        return $this->fetchAsAdmin([],$as,$this->endpoint . $id);
     }
 }

@@ -82,4 +82,25 @@ abstract class TestCase extends BaseTestCase
 
         $this->assertEquals($columns, $result);
     }
+
+    protected function performFetch($query = [], $user = null, $endpoint = null)
+    {
+        $endpoint ??= $this->endpoint;
+        $query = '?' . http_build_query($query);
+        return $this
+            ->signIn($user)
+            ->getJson($endpoint . $query);
+    }
+
+    public function fetchAsAdmin($query = [], $user = null, $endpoint = null)
+    {
+        $user ??= $this->admin();
+        return $this->performFetch($query, $user, $endpoint);
+    }
+
+    public function fetchAsStaff($query = [], $user = null, $endpoint = null)
+    {
+        $user ??= $this->staff();
+        return $this->performFetch($query, $user, $endpoint);
+    }
 }
