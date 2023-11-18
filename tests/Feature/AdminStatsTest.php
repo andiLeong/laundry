@@ -28,7 +28,7 @@ class AdminStatsTest extends TestCase
     public function it_can_get_order_count(): void
     {
         $orders = Order::factory(10)->create();
-        $response = $this->fetch();
+        $response = $this->fetch(['days' => 'all']);
         $this->assertEquals($orders->count(), $response['order_count']);
     }
 
@@ -52,7 +52,7 @@ class AdminStatsTest extends TestCase
         $orders->take(7)->each(function ($order) use ($promotion) {
             OrderPromotion::insertByPromotions([$promotion], $order);
         });
-        $response = $this->fetch();
+        $response = $this->fetch(['days' => 'all']);
         $this->assertEquals(7 / $orders->count() * 100, $response['order_promotion_rate']);
     }
 
@@ -89,7 +89,7 @@ class AdminStatsTest extends TestCase
         $orders->take(3)->each(function ($order) use ($promotion) {
             OrderPromotion::insertByPromotions([$promotion], $order);
         });
-        $response = $this->fetch();
+        $response = $this->fetch(['days' => 'all']);
         $this->assertEquals(
             round(3 / 11, 2) * 100,
             $response['order_promotion_rate']
@@ -103,7 +103,7 @@ class AdminStatsTest extends TestCase
         $order2 = Order::factory()->create(['total_amount' => 70]);
         $order3 = Order::factory()->create(['total_amount' => 120]);
         $order4 = Order::factory()->create(['total_amount' => 100.56]);
-        $response = $this->fetch();
+        $response = $this->fetch(['days' => 'all']);
         $this->assertEquals(
             $order1->total_amount + $order2->total_amount + $order3->total_amount + $order4->total_amount,
             $response['total_order_amount']

@@ -13,7 +13,7 @@ class AdminStatController extends Controller
     {
         $query = Order::query();
 
-        if($request->filled('days')){
+        if($request->get('days') !== 'all'){
             $query->passDays($request->get('days'));
         }
 
