@@ -53,6 +53,13 @@ class QueryFilterManager
     public function apply()
     {
         foreach ($this->filterOption as $key => $option) {
+            if(isset($option['should_attach_query'])){
+                if(call_user_func($option['should_attach_query'],$this->request) ){
+                    $this->attachQuery($option, $key);
+                }
+                continue;
+            }
+
             if (is_null($this->request->get($key)) || !is_array($option)) {
                 continue;
             }

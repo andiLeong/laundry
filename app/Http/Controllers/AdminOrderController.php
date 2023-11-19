@@ -29,6 +29,7 @@ class AdminOrderController extends Controller
                 'include_user' => [
                     'clause' => 'whereNotNull',
                     'column' => 'user_id',
+                    'should_attach_query' => fn($request) => $request->get('include_user') == 'true' || $request->get('include_user') == '1',
                 ],
                 'phone' => [
                     'clause' => 'whereHas',
@@ -74,7 +75,8 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->creator_id !== $user->id) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount', 'products', 'gcash');
+        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount',
+            'products', 'gcash');
         return $order;
     }
 
