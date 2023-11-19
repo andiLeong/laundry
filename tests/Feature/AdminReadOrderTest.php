@@ -222,12 +222,7 @@ class AdminReadOrderTest extends TestCase
     {
         $orders = Order::factory(2)->create();
         $nonUserOrder = Order::factory()->create(['user_id' => null]);
-        $excludeUserIds = $this->fetchOrderIds(['exclude_user' => true]);
         $includeUserIds = $this->fetchOrderIds(['include_user' => true]);
-
-        $this->assertTrue($excludeUserIds->contains($nonUserOrder->id));
-        $this->assertFalse($excludeUserIds->contains($orders[0]->id));
-        $this->assertFalse($excludeUserIds->contains($orders[1]->id));
 
         $this->assertTrue($includeUserIds->contains($orders[0]->id));
         $this->assertTrue($includeUserIds->contains($orders[1]->id));
