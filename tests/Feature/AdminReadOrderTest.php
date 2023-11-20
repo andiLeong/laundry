@@ -80,6 +80,15 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
+    public function sum_amount_gets_return(): void
+    {
+        Order::factory(2)->create(['total_amount' => 210]);
+        $amount = $this->fetch()->collect()->get('sum_total_amount');
+        $this->assertNotNull($amount);
+        $this->assertEquals(210 * 2, $amount);
+    }
+
+    /** @test */
     public function order_is_order_by_latest_record(): void
     {
         $firstOrder = Order::factory()->create();
@@ -196,6 +205,21 @@ class AdminReadOrderTest extends TestCase
         $unpaidOrder = Order::factory()->create(['paid' => false]);
         $ids = $this->fetchOrderIds(['paid' => 1]);
         $ids2 = $this->fetchOrderIds(['paid' => 0]);
+
+        $this->assertTrue($ids->contains($paidOrder->id));
+        $this->assertFalse($ids->contains($unpaidOrder->id));
+
+        $this->assertTrue($ids2->contains($unpaidOrder->id));
+        $this->assertFalse($ids2->contains($paidOrder->id));
+    }
+
+    /** @test */
+    public function it_can_filter_order_by_confirmed(): void
+    {
+        $paidOrder = Order::factory()->create(['confirmed' => true]);
+        $unpaidOrder = Order::factory()->create(['confirmed' => false]);
+        $ids = $this->fetchOrderIds(['confirmed' => 1]);
+        $ids2 = $this->fetchOrderIds(['confirmed' => 0]);
 
         $this->assertTrue($ids->contains($paidOrder->id));
         $this->assertFalse($ids->contains($unpaidOrder->id));

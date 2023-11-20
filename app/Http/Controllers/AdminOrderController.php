@@ -26,6 +26,7 @@ class AdminOrderController extends Controller
                 'user_id' => [],
                 'description' => [],
                 'paid' => [],
+                'confirmed' => [],
                 'include_user' => [
                     'clause' => 'whereNotNull',
                     'column' => 'user_id',
@@ -66,7 +67,9 @@ class AdminOrderController extends Controller
             ->withCount('promotions')
             ->paginate();
 
-        return $orders;
+        $collection = $orders->toArray();
+        $collection['sum_total_amount'] = $orders->sum('total_amount');
+        return $collection;
     }
 
     public function show(Order $order)
