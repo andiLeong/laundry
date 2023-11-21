@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use Illuminate\Support\Carbon;
+use function Laravel\Prompts\password;
 
 class SalaryCalculator
 {
@@ -12,7 +13,7 @@ class SalaryCalculator
     protected $firstSalaryDay;
     protected $secondSalaryDay;
 
-    public function __construct(protected User $staff)
+    public function __construct(protected Staff $staff)
     {
         $this->today = today();
         $this->setFirstSalaryDay();
@@ -21,6 +22,9 @@ class SalaryCalculator
 
     public function calculate()
     {
+        if($this->salaryDay() === false){
+            return false;
+        }
 
     }
 

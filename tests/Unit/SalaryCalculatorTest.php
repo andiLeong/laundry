@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Attendance;
 use App\Models\SalaryCalculator;
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -16,7 +17,8 @@ class SalaryCalculatorTest extends TestCase
     {
         parent::setUp();
         $this->user = $this->staff();
-        $this->calculator = new FakeSalaryCalculator($this->user);
+        $this->staff = Staff::factory()->create(['user_id' => $this->user->id]);
+        $this->calculator = new FakeSalaryCalculator($this->staff);
     }
 
     /** @test */
@@ -24,12 +26,12 @@ class SalaryCalculatorTest extends TestCase
     {
         $fifteen = Carbon::parse('2023-11-15');
         Carbon::setTestNow($fifteen);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertEquals(15, $calculator->firstSalaryDay());
 
         $lastDay = Carbon::parse('2023-11-30');
         Carbon::setTestNow($lastDay);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertEquals(30, $calculator->secondSalaryDay());
     }
 
@@ -38,12 +40,12 @@ class SalaryCalculatorTest extends TestCase
     {
         $sunday = Carbon::parse('2023-10-15');
         Carbon::setTestNow($sunday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertEquals(13, $calculator->firstSalaryDay());
 
         $saturday = Carbon::parse('2023-09-30');
         Carbon::setTestNow($saturday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertEquals(29, $calculator->secondSalaryDay());
     }
 
@@ -58,27 +60,27 @@ class SalaryCalculatorTest extends TestCase
     {
         $monday = Carbon::parse('2023-11-13');
         Carbon::setTestNow($monday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertFalse($calculator->isSalaryDay());
 
         $tuesday = Carbon::parse('2023-11-14');
         Carbon::setTestNow($tuesday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertFalse($calculator->isSalaryDay());
 
         $wednesday = Carbon::parse('2023-11-15');
         Carbon::setTestNow($wednesday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertTrue($calculator->isSalaryDay());
 
         $thursday = Carbon::parse('2023-11-16');
         Carbon::setTestNow($thursday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertFalse($calculator->isSalaryDay());
 
         $friday = Carbon::parse('2023-11-17');
         Carbon::setTestNow($friday);
-        $calculator = new FakeSalaryCalculator($this->user);
+        $calculator = new FakeSalaryCalculator($this->staff);
         $this->assertFalse($calculator->isSalaryDay());
     }
 
@@ -89,7 +91,7 @@ class SalaryCalculatorTest extends TestCase
         $this->assertDatabaseCount('salaries', 0);
         $this->assertDatabaseCount('salary_detail', 0);
 
-        $salaryPerDay = $this->user->dailySalary;
+        $salaryPerDay = $this->staff->dailySalary;
 
         $attendance = Attendance::factory()->create([
             'staff_id' => $this->user->id,
