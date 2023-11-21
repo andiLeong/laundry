@@ -7,8 +7,6 @@ use Illuminate\Support\Carbon;
 
 class SalaryCalculator
 {
-    CONST MONTHLY_FIRST_SALARY_DAY = 15;
-
     private Carbon $today;
 
     protected $firstSalaryDay;
@@ -26,29 +24,18 @@ class SalaryCalculator
 
     }
 
-    protected function salaryDay() :bool
+    protected function salaryDay(): bool
     {
-        //if current month salary day falls on weekend or holiday
-        //a day before should count as salary day
-
-        if($this->today->isWeekend()){
-            return false;
-        }
-
-        if($this->today->copy()->endOfMonth()->isToday() || $this->today->day === static::MONTHLY_FIRST_SALARY_DAY){
-            return true;
-        }
-
-        return false;
+        return in_array($this->today->day, [$this->firstSalaryDay, $this->secondSalaryDay]);
     }
 
-    private function setFirstSalaryDay()
+    private function setFirstSalaryDay(): void
     {
         $firstSalary = $this->today->copy()->firstOfMonth()->addDays(14);
-        while(true){
-            if($firstSalary->isWeekend()){
-               $firstSalary->subDay();
-            }else{
+        while (true) {
+            if ($firstSalary->isWeekend()) {
+                $firstSalary->subDay();
+            } else {
                 break;
             }
         }
@@ -56,17 +43,17 @@ class SalaryCalculator
         $this->firstSalaryDay = $firstSalary->day;
     }
 
-    private function setSecondSalaryDay()
+    private function setSecondSalaryDay(): void
     {
-        $secondDaySalary = $this->today->copy()->endOfMonth();
-        while(true){
-            if($secondDaySalary->isWeekend()){
-               $secondDaySalary->subDay();
-            }else{
+        $secondSalary = $this->today->copy()->endOfMonth();
+        while (true) {
+            if ($secondSalary->isWeekend()) {
+                $secondSalary->subDay();
+            } else {
                 break;
             }
         }
-        $this->secondSalaryDay = $secondDaySalary->day;
+        $this->secondSalaryDay = $secondSalary->day;
     }
 
 }
