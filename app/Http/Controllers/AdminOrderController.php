@@ -26,6 +26,7 @@ class AdminOrderController extends Controller
                 'user_id' => [],
                 'description' => [],
                 'paid' => [],
+                'payment' => [],
                 'confirmed' => [],
                 'include_user' => [
                     'clause' => 'whereNotNull',

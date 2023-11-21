@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Enum\UserType;
 use App\Models\Order;
 use App\Models\OrderPromotion;
@@ -241,6 +242,18 @@ class AdminReadOrderTest extends TestCase
         $this->assertFalse($ids->contains($orders[1]->id));
     }
 
+
+    /** @test */
+    public function it_can_filter_by_payment(): void
+    {
+        $orders = Order::factory(2)->create();
+        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $ids = $this->fetchOrderIds(['payment' => OrderPayment::gcash->value]);
+
+        $this->assertTrue($ids->contains($gcashOrder->id));
+        $this->assertFalse($ids->contains($orders[0]->id));
+        $this->assertFalse($ids->contains($orders[1]->id));
+    }
     /** @test */
     public function it_can_filter_by_order_has_user_or_not(): void
     {
