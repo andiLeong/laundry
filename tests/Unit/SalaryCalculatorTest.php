@@ -3,7 +3,9 @@
 namespace Tests\Unit;
 
 use App\Models\Attendance;
+use App\Models\Salary;
 use App\Models\SalaryCalculator;
+use App\Models\SalaryDetail;
 use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -124,9 +126,9 @@ class SalaryCalculatorTest extends TestCase
         $salary = Salary::first();
         $details = SalaryDetail::all();
         $this->assertDatabaseHas('salaries', [
-            'month' => today()->format('Y-m'),
-            'user_id' => $this->user->id,
-            'staff_id' => $this->user->staff->id,
+            'from' => today()->startOfMonth()->format('Y-m-d'),
+            'to' => today()->startOfMonth()->adddays(15)->format('Y-m-d'),
+            'staff_id' => $this->staff->id,
             'amount' => $salaryPerDay * 2,
         ]);
         $this->assertDatabaseCount('salary_details', 2);

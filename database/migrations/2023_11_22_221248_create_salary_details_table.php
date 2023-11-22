@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('staff', function (Blueprint $table) {
+        Schema::create('salary_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('branch_id');
-            $table->unsignedInteger('daily_salary');
-            $table->boolean('full_time')->default(1);
-            $table->boolean('is_active')->default(1);
+            $table->unsignedBigInteger('salary_id');
+            $table->string('description');
+            $table->datetime('from');
+            $table->datetime('to');
+            $table->unsignedDecimal('hour');
+            $table->unsignedDecimal('amount');
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('staff');
+        Schema::dropIfExists('salary_details');
     }
 };

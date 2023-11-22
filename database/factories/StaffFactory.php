@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
 use App\Models\Enum\UserType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,9 +21,11 @@ class StaffFactory extends Factory
     {
         $staff = User::factory()->create([
             'type' => UserType::employee->value,
+            'branch_id' => Branch::factory()->create()->id
         ]);
         return [
             'user_id' => $staff->id,
+            'branch_id' => $staff->branch_id,
             'daily_salary' => 573,
             'full_time' => 1,
             'is_active' => 1,
