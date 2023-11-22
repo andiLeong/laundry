@@ -13,18 +13,23 @@ class SalaryCalculator
     protected $firstSalaryDay;
     protected $secondSalaryDay;
 
+    protected $coverPeriod;
+
     public function __construct(protected Staff $staff)
     {
         $this->today = today();
         $this->setFirstSalaryDay();
         $this->setSecondSalaryDay();
+        $this->setCoverPeriod();
     }
 
     public function calculate()
     {
-        if($this->salaryDay() === false){
+        if ($this->salaryDay() === false) {
             return false;
         }
+
+        $attendance = $this->getAttendance();
 
     }
 
@@ -58,6 +63,23 @@ class SalaryCalculator
             }
         }
         $this->secondSalaryDay = $secondSalary->day;
+    }
+
+    protected function setCoverPeriod()
+    {
+        $this->coverPeriod =
+            $this->today->day <= 15
+                ? [1, 16]
+                : [17, $this->today->endOfMonth()->day];
+    }
+
+    private function getAttendance()
+    {
+        Attendance::where('staff_id', $this->staff->id)
+                ->where('time','>=')
+            ->where('time','<=')
+        ;
+
     }
 
 }
