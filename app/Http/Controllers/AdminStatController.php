@@ -26,6 +26,8 @@ class AdminStatController extends Controller
             'order_promotion_rate' => $orderCount > 0
                 ? round($promotionCount / $orderCount,2) * 100
                 : 0,
+            'foo' => round($promotionCount / $orderCount,2),
+            'foo1' => $promotionCount / $orderCount,
         ];
     }
 }
