@@ -17,12 +17,14 @@ class AdminStatController extends Controller
             $query->passDays($request->get('days'));
         }
 
+        $promotionCount = OrderPromotion::whereIn('order_id',$query->pluck('id'))->count();
         return [
             'user_count' => User::count(),
             'order_count' => $orderCount = $query->count(),
             'total_order_amount' => $query->sum('total_amount'),
+            'promotion_count' => $promotionCount,
             'order_promotion_rate' => $orderCount > 0
-                ? round(OrderPromotion::whereIn('order_id',$query->pluck('id'))->count() / $orderCount,2) * 100
+                ? round($promotionCount / $orderCount,2) * 100
                 : 0,
         ];
     }
