@@ -28,6 +28,8 @@ class AdminStatController extends Controller
                 : 0,
             'foo' => $orderCount > 0 ? round($promotionCount / $orderCount,2) : 'no',
             'foo1' => $orderCount > 0 ? $promotionCount / $orderCount : 'no',
+            'foo2' => $orderCount > 0 ? round($promotionCount / $orderCount,2) : 'no',
+            'foo3' => $orderCount > 0 ? round($promotionCount / $orderCount,2) * 100 : 'no',
         ];
     }
 }
