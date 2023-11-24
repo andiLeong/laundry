@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Enum\AttendanceType;
+use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -50,18 +51,23 @@ class AttendanceController extends Controller
             'latitude' => 'required',
         ]);
 
-        $staff = auth()->user();
+        $staff = auth()->user()->staff;
+
+        $shift = Shift::where('date', today()->toDateTimeString())->where('staff_id', $staff->id)->first();
+        if (is_null($shift)) {
+            abort(400, 'You are not supposed to work today..');
+        }
 
         if (Attendance::outOfRange($validated['latitude'], $validated['longitude'], $staff->branch_id)) {
             abort(400, 'Your location seems too far from your branch');
         }
-
 
         return Attendance::create([
             'staff_id' => $staff->id,
             'time' => now(),
             'type' => $validated['type'],
             'branch_id' => $staff->branch_id,
+            'shift_id' => $shift->id,
         ]);
     }
 }
