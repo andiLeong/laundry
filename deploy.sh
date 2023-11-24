@@ -31,4 +31,7 @@ php artisan queue:restart
 # Exit maintenance mode
 #php artisan up
 
+
+php artisan cache:clear
+
 echo "Deployment finished!"
