@@ -50,7 +50,7 @@ class User extends Authenticatable
 
     public function staff()
     {
-        return $this->belongsTo(Staff::class, 'id','user_id');
+        return $this->hasOne(Staff::class, 'user_id','id');
     }
 
     protected function type(): Attribute

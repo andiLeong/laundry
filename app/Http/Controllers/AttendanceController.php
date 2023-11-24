@@ -16,7 +16,7 @@ class AttendanceController extends Controller
         $query = Attendance::query();
 
         if ($user->isEmployee()) {
-            $query->where('staff_id', auth()->id());
+            $query->where('staff_id', $user->staff->id);
         }
 
         if ($request->get('month') !== null) {
@@ -30,15 +30,19 @@ class AttendanceController extends Controller
         }
 
         return $query
-            ->with('staff:id,first_name,middle_name,last_name', 'branch:id,name')
+            ->with(['staff:id,user_id' => ['user:id,first_name,middle_name,last_name'], 'branch:id,name'])
             ->latest('id')
             ->paginate()
             ->through(function ($attendance) {
                 $attendance->branch_name = $attendance->branch->name;
+                $attendance->staff->first_name = $attendance->staff->user->first_name;
+                $attendance->staff->middle_name = $attendance->staff->user->middle_name;
+                $attendance->staff->last_name = $attendance->staff->user->last_name;
                 unset($attendance['branch']);
                 unset($attendance['branch_id']);
                 unset($attendance['staff_id']);
-                unset($attendance['staff']['id']);
+                unset($attendance['staff']['user']);
+                unset($attendance['shift_id']);
                 return $attendance;
             });
     }
