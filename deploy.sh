@@ -34,6 +34,4 @@ php artisan queue:restart
 
 php artisan cache:clear
 
-php artisan migrate:fresh
-
 echo "Deployment finished!"
