@@ -19,13 +19,13 @@ class StaffFactory extends Factory
      */
     public function definition(): array
     {
-        $staff = User::factory()->create([
+        $user = User::factory()->create([
             'type' => UserType::employee->value,
             'branch_id' => Branch::factory()->create()->id
         ]);
         return [
-            'user_id' => $staff->id,
-            'branch_id' => $staff->branch_id,
+            'user_id' => $user->id,
+            'branch_id' => $user->branch_id,
             'daily_salary' => 573,
             'full_time' => 1,
             'is_active' => 1,

@@ -26,7 +26,14 @@ class AdminOrderController extends Controller
                 'user_id' => [],
                 'description' => [],
                 'paid' => [],
+                'payment' => [],
                 'confirmed' => [],
+                'date' => [
+                    'clause' => 'whereBetween',
+                    'column' => 'created_at',
+                    'value' => [$request->get('start'), $request->get('end')],
+                    'should_attach_query' => fn($request) => $request->filled('start') && $request->filled('end'),
+                ],
                 'include_user' => [
                     'clause' => 'whereNotNull',
                     'column' => 'user_id',

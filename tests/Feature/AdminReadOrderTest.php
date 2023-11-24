@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
 use App\Models\Enum\UserType;
 use App\Models\Order;
 use App\Models\OrderPromotion;
@@ -68,7 +69,12 @@ class AdminReadOrderTest extends TestCase
         $promotions = Promotion::factory(2)->create();
         $user = User::factory()->create();
         $service = Service::factory()->create();
-        $orders = Order::factory(2)->create(['user_id' => $user->id, 'service_id' => $service->id,'amount' => 210,'description' => 'customer name jalen']);
+        $orders = Order::factory(2)->create([
+            'user_id' => $user->id,
+            'service_id' => $service->id,
+            'amount' => 210,
+            'description' => 'customer name jalen'
+        ]);
         OrderPromotion::insertByPromotions($promotions, $orders[1]);
         $order = $this->fetch()->collect('data')->first();
 
@@ -242,6 +248,40 @@ class AdminReadOrderTest extends TestCase
         $this->assertFalse($ids->contains($orders[1]->id));
     }
 
+
+    /** @test */
+    public function it_can_filter_by_payment(): void
+    {
+        $orders = Order::factory(2)->create();
+        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $ids = $this->fetchOrderIds(['payment' => OrderPayment::gcash->value]);
+
+        $this->assertTrue($ids->contains($gcashOrder->id));
+        $this->assertFalse($ids->contains($orders[0]->id));
+        $this->assertFalse($ids->contains($orders[1]->id));
+    }
+
+    /** @test */
+    public function it_can_filter_by_datetime(): void
+    {
+        $order = Order::factory()->create();
+        $yesterdayOrders = Order::factory()->create(['created_at' => today()->subDay()]);
+        $yesterdayIds = $this->fetchOrderIds([
+            'start' => today()->subDay()->toDateTimeString(),
+            'end' => today()->subDay()->addHours(10)->toDateTimeString()
+        ]);
+        $todayIds = $this->fetchOrderIds([
+            'start' => today()->toDateTimeString(),
+            'end' => today()->endOfDay()->toDateTimeString()
+        ]);
+
+        $this->assertTrue($yesterdayIds->contains($yesterdayOrders->id));
+        $this->assertFalse($yesterdayIds->contains($order->id));
+
+        $this->assertTrue($todayIds->contains($order->id));
+        $this->assertFalse($todayIds->contains($yesterdayOrders->id));
+    }
+
     /** @test */
     public function it_can_filter_by_order_has_user_or_not(): void
     {
@@ -268,7 +308,7 @@ class AdminReadOrderTest extends TestCase
 
     protected function fetch($query = [], $as = null)
     {
-        return $this->fetchAsAdmin($query,$as);
+        return $this->fetchAsAdmin($query, $as);
     }
 
     public function fetchOrderIds($query = [], $as = null)

@@ -29,7 +29,7 @@ class Attendance extends Model
 
     public function staff(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class, 'staff_id', 'id');
+        return $this->belongsTo(Staff::class, 'staff_id', 'id');
     }
 
     public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo

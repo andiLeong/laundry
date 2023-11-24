@@ -35,23 +35,28 @@ class User extends Authenticatable
 
     public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-       return $this->hasMany(Order::class,'user_id','id');
+        return $this->hasMany(Order::class, 'user_id', 'id');
     }
 
     public function verification()
     {
-        return $this->hasOne(VerificationToken::class,'user_id','id')->orderByDesc('id');
+        return $this->hasOne(VerificationToken::class, 'user_id', 'id')->orderByDesc('id');
     }
 
     public function shift()
     {
-        return $this->hasMany(Shift::class,'staff_id','id');
+        return $this->hasMany(Shift::class, 'staff_id', 'id');
+    }
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class, 'user_id','id');
     }
 
     protected function type(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => UserType::from($value)->name
+            get: fn(string $value) => UserType::from($value)->name
         );
     }
 
@@ -59,7 +64,7 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: null,
-            set: fn (string $value) => bcrypt($value),
+            set: fn(string $value) => bcrypt($value),
         );
     }
 
