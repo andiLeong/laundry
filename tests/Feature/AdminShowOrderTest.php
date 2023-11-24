@@ -18,18 +18,18 @@ class AdminShowOrderTest extends TestCase
     protected string $endpoint = 'api/admin/order/';
 
     /** @test */
-    public function employee_can_only_view_order_that_they_created(): void
+    public function employee_can_only_view_order_that_within_seven_days(): void
     {
-        $employee = User::factory()->create(['type' => UserType::employee->value]);
-        $employee2 = User::factory()->create(['type' => UserType::employee->value]);
-        $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
-        $employeeOrder2 = Order::factory()->create(['creator_id' => $employee2->id]);
+        $employee = $this->staff();
+        $nineDay = Order::factory()->create(['created_at' => today()->subDays(8)]);
+        $eightDay = Order::factory()->create(['created_at' => today()->subDays(9)]);
+        $sevenDay = Order::factory()->create(['created_at' => today()->subDays(7)]);
+        $today = Order::factory()->create();
 
-        $this->fetch($employeeOrder->id, $employee)->assertOk();
-        $this->fetch($employeeOrder->id, $employee2)->assertForbidden();
-
-        $this->fetch($employeeOrder2->id, $employee)->assertForbidden();
-        $this->fetch($employeeOrder2->id, $employee2)->assertOk();
+        $this->fetch($today->id, $employee)->assertOk();
+        $this->fetch($nineDay->id, $employee)->assertForbidden();
+        $this->fetch($eightDay->id, $employee)->assertForbidden();
+        $this->fetch($sevenDay->id, $employee)->assertForbidden();
     }
 
     /** @test */

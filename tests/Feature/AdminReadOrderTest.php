@@ -36,17 +36,18 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
-    public function employee_can_only_view_order_that_they_created(): void
+    public function employee_can_only_view_order_that_that_created_within_last_seven_days(): void
     {
-        $employee = User::factory()->create(['type' => UserType::employee->value]);
-        $employee2 = User::factory()->create(['type' => UserType::employee->value]);
-        $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
-        $employee2Orders = Order::factory(2)->create(['creator_id' => $employee2->id]);
-        $ids = $this->fetchOrderIds([], $employee);
+        $nineDay = Order::factory()->create(['created_at' => today()->subDays(8)]);
+        $eightDay = Order::factory()->create(['created_at' => today()->subDays(9)]);
+        $sevenDay = Order::factory()->create(['created_at' => today()->subDays(7)]);
+        $today = Order::factory()->create();
+        $ids = $this->fetchOrderIds([], $this->staff());
 
-        $this->assertTrue($ids->contains($employeeOrder->id));
-        $this->assertFalse($ids->contains($employee2Orders[0]->id));
-        $this->assertFalse($ids->contains($employee2Orders[1]->id));
+        $this->assertTrue($ids->contains($today->id));
+        $this->assertFalse($ids->contains($nineDay->id));
+        $this->assertFalse($ids->contains($eightDay->id));
+        $this->assertFalse($ids->contains($sevenDay->id));
     }
 
     /** @test */

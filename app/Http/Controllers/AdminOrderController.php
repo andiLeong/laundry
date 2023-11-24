@@ -18,7 +18,7 @@ class AdminOrderController extends Controller
         $query = Order::query();
 
         if ($user->isEmployee()) {
-            $query->where('creator_id', $user->id);
+            $query->passDays(7);
         }
 
         $orders = $query
@@ -60,9 +60,7 @@ class AdminOrderController extends Controller
                         }
 
                         if (is_int((int)$day)) {
-                            $start = today()->subDays($day - 1);
-                            $end = today()->copy()->addDay();
-                            return $query->createBetween($start, $end);
+                            return $query->passDays($day);
                         }
 
                         return $query;
@@ -81,8 +79,9 @@ class AdminOrderController extends Controller
 
     public function show(Order $order)
     {
+        $start = today()->subDays(7 - 1);
         $user = Auth::user();
-        if ($user->isEmployee() && $order->creator_id !== $user->id) {
+        if ($user->isEmployee() && $order->created_at->lt($start)) {
             abort(403, 'You do not have right to perform this action');
         }
         $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount',
