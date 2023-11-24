@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,14 +16,18 @@ return new class extends Migration
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('user_id')->index()->nullable();
             $table->unsignedBigInteger('company_id')->nullable();
-            $table->unsigneddecimal('amount');
-            $table->unsigneddecimal('total_amount');
+            $table->string('description')->nullable();
+            $table->unsignedDecimal('amount');
+            $table->unsignedDecimal('total_amount');
             $table->unsignedBigInteger('product_amount')->default(0);
             $table->unsignedTinyInteger('paid')->default(1);
+            $table->unsignedTinyInteger('confirmed')->nullable();
             $table->unsignedTinyInteger('payment')->default(1);
             $table->unsignedTinyInteger('issued_invoice')->default(0);
             $table->unsignedBigInteger('creator_id');
             $table->timestamps();
+
+            $table->index(['created_at']);
         });
     }
 

@@ -19,7 +19,7 @@ class PunchOutTest extends PunchInTest
         $this->punchOut()->assertSuccessful();
 
         $this->assertDatabaseHas('attendances', [
-            'staff_id' => $this->user->id,
+            'staff_id' => $this->staff->id,
             'type' => $this->type,
         ]);
         $this->assertDatabaseCount('attendances', 1);

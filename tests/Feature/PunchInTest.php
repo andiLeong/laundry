@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
 use App\Models\Shift;
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 use Tests\Validate;
@@ -23,8 +24,13 @@ class PunchInTest extends TestCase
 
         $this->branch = Branch::factory()->create();
         $this->user = $this->staff(['branch_id' => $this->branch->id]);
+        $this->staff = Staff::factory()->create([
+            'user_id' => $this->user->id,
+            'branch_id' => $this->user->branch_id,
+            'id' => 9999,
+        ]);
         $this->shift = Shift::factory()->create([
-            'staff_id' => $this->user->id,
+            'staff_id' => $this->staff->id,
         ]);
         $this->type = AttendanceType::in->value;
     }
@@ -42,6 +48,35 @@ class PunchInTest extends TestCase
     {
         $this->postJson($this->endpoint)->assertUnauthorized();
         $this->signIn($this->customer())->postJson($this->endpoint)->assertForbidden();
+    }
+
+    /** @test */
+    public function staff_cant_perform_punch_in_if_their_shift_not_today()
+    {
+        Shift::first()->delete();
+        $message = $this->punchIn([
+            'longitude' => 121.01346781509143,
+            'latitude' => 14.566808896873289
+        ])->assertStatus(400)->json('message');
+        $this->assertEquals($message,'You are not supposed to work today..');
+    }
+
+    /** @test */
+    public function shift_id_store_once_punch_success()
+    {
+        $this->punchIn()->assertSuccessful();
+        $attendance = Attendance::first();
+        $this->assertEquals($this->shift->id,$attendance->shift_id);
+    }
+
+    /** @test */
+    public function staff_id_should_be_staff_model_id()
+    {
+        $this->punchIn()->assertSuccessful();
+        $attendance = Attendance::first();
+        $this->assertEquals($this->staff->id,$attendance->staff_id);
+        $this->assertNotEquals($this->user->id,$attendance->staff_id);
+        $this->assertNotEquals($this->user->id,$this->staff->id);
     }
 
     /** @test */

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -19,6 +20,11 @@ class ReadAttendanceTest extends TestCase
 
         $this->branch = Branch::factory()->create();
         $this->user = $this->staff(['branch_id' => $this->branch->id]);
+        $this->staff = Staff::factory()->create([
+            'user_id' => $this->user->id,
+            'id' => 9999,
+            'branch_id' => $this->user->branch_id
+        ]);
     }
 
     /** @test */
@@ -32,8 +38,13 @@ class ReadAttendanceTest extends TestCase
     public function staff_can_only_read_its_attendance_record()
     {
         $john = $this->staff(['branch_id' => $this->branch->id, 'id' => 100]);
+        $johnStaff = Staff::factory()->create([
+            'branch_id' => $john->branch_id,
+            'user_id' => $john->id,
+            'id' => 99998,
+        ]);
         $johnAttendance = Attendance::factory()->create([
-            'staff_id' => $john->id,
+            'staff_id' => $johnStaff->id,
             'branch_id' => $john->branch_id
         ]);
         $attendance = $this->attendance(2);
@@ -49,8 +60,13 @@ class ReadAttendanceTest extends TestCase
     public function admin_can_only_read_all_attendance_record()
     {
         $john = $this->staff(['branch_id' => $this->branch->id, 'id' => 100]);
+        $johnStaff = Staff::factory()->create([
+            'branch_id' => $john->branch_id,
+            'user_id' => $john->id,
+            'id' => 91,
+        ]);
         $johnAttendance = Attendance::factory()->create([
-            'staff_id' => $john->id,
+            'staff_id' => $johnStaff->id,
             'branch_id' => $john->branch_id
         ]);
         $attendance = $this->attendance(2);
@@ -80,16 +96,20 @@ class ReadAttendanceTest extends TestCase
     {
         $attendance = $this->attendance();
         $john = $this->staff(['branch_id' => $this->branch->id, 'id' => 100]);
+        $johnStaff = Staff::factory()->create([
+            'branch_id' => $john->branch_id,
+            'user_id' => $john->id
+        ]);
         $johnAttendance = Attendance::factory()->create([
-            'staff_id' => $john->id,
+            'staff_id' => $johnStaff->id,
             'branch_id' => $john->branch_id
         ]);
 
-        $response = $this->fetch(['staff_id' => $john->id]);
+        $response = $this->fetch(['staff_id' => $johnStaff->id]);
         $this->assertTrue(in_array($attendance->id, $response));
         $this->assertFalse(in_array($johnAttendance->id, $response));
 
-        $response = $this->fetch(['staff_id' => $john->id], $this->admin());
+        $response = $this->fetch(['staff_id' => $johnStaff->id], $this->admin());
         $this->assertFalse(in_array($attendance->id, $response));
         $this->assertTrue(in_array($johnAttendance->id, $response));
     }
@@ -103,18 +123,18 @@ class ReadAttendanceTest extends TestCase
         $this->assertEquals($attendance->id, $response['id']);
         $this->assertEquals(AttendanceType::in->name, $response['type']);
         $this->assertEquals($attendance->time->toJson(), $response['time']);
-        $this->assertEquals($attendance->staff->first_name, $response['staff']['first_name']);
-        $this->assertEquals($attendance->staff->middle_name, $response['staff']['middle_name']);
-        $this->assertEquals($attendance->staff->last_name, $response['staff']['last_name']);
+        $this->assertEquals($attendance->staff->user->first_name, $response['staff']['first_name']);
+        $this->assertEquals($attendance->staff->user->middle_name, $response['staff']['middle_name']);
+        $this->assertEquals($attendance->staff->user->last_name, $response['staff']['last_name']);
         $this->assertEquals($attendance->branch->name, $response['branch_name']);
         $this->assertColumnsSame(['id', 'type', 'time', 'branch_name', 'staff'], array_keys($response));
-        $this->assertColumnsSame(['first_name', 'middle_name', 'last_name'], array_keys($response['staff']));
+        $this->assertColumnsSame(['first_name', 'middle_name', 'last_name', 'id', 'user_id'], array_keys($response['staff']));
     }
 
     protected function attendance($count = null, $attributes = [])
     {
         return Attendance::factory($count)->create(array_merge([
-            'staff_id' => $this->user->id,
+            'staff_id' => $this->staff->id,
             'branch_id' => $this->user->branch_id
         ], $attributes));
     }

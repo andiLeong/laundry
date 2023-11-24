@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->unsignedTinyInteger('confirmed')->nullable()->after('paid');
+        Schema::create('salaries', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('staff_id');
+            $table->date('from');
+            $table->date('to');
+            $table->unsignedDecimal('amount');
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('confirmed');
-        });
+        Schema::dropIfExists('salaries');
     }
 };

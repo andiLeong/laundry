@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
 use App\Models\Shift;
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -19,8 +20,12 @@ class ReviewShiftTest extends TestCase
         $date = today();
         $this->branch = Branch::factory()->create();
         $this->user = $this->staff(['branch_id' => $this->branch->id]);
+        $this->staff = Staff::factory()->create([
+            'branch_id' => $this->user->branch_id,
+            'user_id' => $this->user->id
+        ]);
         $this->shift = Shift::factory()->create([
-            'staff_id' => $this->user->id,
+            'staff_id' => $this->staff->id,
             'from' => $date->copy()->hour('09:00')->minute("00")->second(0),
             'to' => $date->copy()->hour('18:00')->minute("00")->second(0),
             'date' => $date->toDateString(),
@@ -153,8 +158,8 @@ class ReviewShiftTest extends TestCase
     public function attendance($time = null, $type = AttendanceType::in)
     {
         return Attendance::factory()->create([
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id,
+            'staff_id' => $this->staff->id,
+            'branch_id' => $this->staff->branch_id,
             'time' => $time ?? now(),
             'type' => $type->value,
         ]);
