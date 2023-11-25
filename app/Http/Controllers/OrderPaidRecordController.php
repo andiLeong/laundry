@@ -16,6 +16,10 @@ class OrderPaidRecordController extends Controller
             $record->today();
         }
 
-        return $record->with('creator:id,first_name')->paginate();
+        if ($request->filled('payment')) {
+            $record->whereHas('order', fn($query) => $query->where('payment', $request->get('payment')));
+        }
+
+        return $record->with('creator:id,first_name', 'order:id,payment,description')->paginate();
     }
 }

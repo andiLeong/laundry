@@ -23,7 +23,6 @@ class OrderPaidFactory extends Factory
             'order_id' => Order::factory(),
             'creator_id' => User::factory(),
             'amount' => 170,
-            'payment' => OrderPayment::cash->value,
         ];
     }
 }

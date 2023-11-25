@@ -56,7 +56,6 @@ class AdminUpdateOrderController extends Controller
         OrderPaid::create([
             'order_id' => $this->order->id,
             'amount' => $this->order->total_amount,
-            'payment' => OrderPayment::fromName($this->order->payment),
             'creator_id' => auth()->id(),
         ]);
     }

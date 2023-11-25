@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Enum\OrderPayment;
+use App\Models\Order;
 use App\Models\OrderPaid;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -51,6 +53,28 @@ class AdminReadOrderPaidRecord extends TestCase
         $this->assertFalse($yesterdayIds->contains($order->id));
     }
 
+
+    /** @test */
+    public function it_can_filter_dy_payment(): void
+    {
+        $cashOrder = Order::factory()->create(['payment' => OrderPayment::cash->value]);
+        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $cashOrderPaidRecord = OrderPaid::factory()->create(['order_id' => $cashOrder->id]);
+        $gcashOrderPaidRecord = OrderPaid::factory()->create(['order_id' => $gcashOrder->id]);
+        $cashResult = $this->fetch([
+            'payment' => OrderPayment::cash->value,
+        ])->collect('data')->pluck('id');
+        $gcashResult = $this->fetch([
+            'payment' => OrderPayment::gcash->value,
+        ])->collect('data')->pluck('id');
+
+        $this->assertTrue($cashResult->contains($cashOrderPaidRecord->id));
+        $this->assertFalse($cashResult->contains($gcashOrderPaidRecord->id));
+
+        $this->assertTrue($gcashResult->contains($gcashOrderPaidRecord->id));
+        $this->assertFalse($gcashResult->contains($cashOrderPaidRecord->id));
+    }
+
     /** @test */
     public function it_read_its_creator_name(): void
     {
@@ -58,6 +82,17 @@ class AdminReadOrderPaidRecord extends TestCase
         $result = $this->fetch()->json('data')[0];
 
         $this->assertEquals($orderPaidRecord->creator->first_name, $result['creator']['first_name']);
+    }
+
+    /** @test */
+    public function it_read_its_order_detail(): void
+    {
+        $order = Order::factory()->create(['paid' => true]);
+        $orderPaidRecord = OrderPaid::factory()->create(['order_id' => $order]);
+        $result = $this->fetch()->json('data')[0];
+
+        $this->assertEquals($orderPaidRecord->order->description, $result['order']['description']);
+        $this->assertEquals($orderPaidRecord->order->payment, $result['order']['payment']);
     }
 
     protected function fetch($query = [], $as = null)

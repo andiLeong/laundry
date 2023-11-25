@@ -86,7 +86,6 @@ class UpdateOrderTest extends TestCase
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'creator_id' => $this->user->id,
-            'payment' => OrderPayment::cash->value,
         ]);
     }
 

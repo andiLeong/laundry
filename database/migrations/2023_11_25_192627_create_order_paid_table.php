@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('order_id')->unique();
             $table->unsignedDecimal('amount');
-            $table->unsignedTinyInteger('payment')->default(1);
             $table->timestamp('created_at')->useCurrent();
             $table->unsignedBigInteger('creator_id');
         });

@@ -35,7 +35,6 @@ class CreatedOrderProduct
             OrderPaid::create([
                 'order_id' => $order->id,
                 'amount' => $order->total_amount,
-                'payment' => OrderPayment::fromName($order->payment),
                 'creator_id' => auth()->id(),
             ]);
         }
