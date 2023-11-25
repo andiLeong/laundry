@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Enum\OrderPayment;
 use App\Models\Order;
+use App\Models\OrderPaid;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -42,8 +43,8 @@ class UpdateOrderTest extends TestCase
     {
         $order = Order::factory()->create();
         $order2 = Order::factory()->create(['paid' => false]);
-        $this->update($order->id,'paid');
-        $this->update($order2->id,'paid');
+        $this->update($order->id, 'paid');
+        $this->update($order2->id, 'paid');
 
         $this->assertFalse($order->fresh()->paid);
         $this->assertTrue($order2->fresh()->paid);
@@ -54,8 +55,8 @@ class UpdateOrderTest extends TestCase
     {
         $order = Order::factory()->create();
         $order2 = Order::factory()->create(['issued_invoice' => true]);
-        $this->update($order->id,'issued_invoice');
-        $this->update($order2->id,'issued_invoice');
+        $this->update($order->id, 'issued_invoice');
+        $this->update($order2->id, 'issued_invoice');
 
         $this->assertTrue($order->fresh()->issued_invoice);
         $this->assertFalse($order2->fresh()->issued_invoice);
@@ -66,11 +67,38 @@ class UpdateOrderTest extends TestCase
     {
         $order = Order::factory()->create();
         $order2 = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
-        $this->update($order->id,'payment');
-        $this->update($order2->id,'payment');
+        $this->update($order->id, 'payment');
+        $this->update($order2->id, 'payment');
 
-        $this->assertEquals(OrderPayment::gcash->name,$order->fresh()->payment);
-        $this->assertEquals(OrderPayment::cash->name,$order2->fresh()->payment);
+        $this->assertEquals(OrderPayment::gcash->name, $order->fresh()->payment);
+        $this->assertEquals(OrderPayment::cash->name, $order2->fresh()->payment);
+    }
+
+    /** @test */
+    public function when_mark_order_is_paid_order_paid_is_recorded()
+    {
+        $this->assertDatabaseCount('order_paid', 0);
+
+        $order = Order::factory()->create(['paid' => false]);
+        $this->update($order->id, 'paid');
+
+        $this->assertDatabaseHas('order_paid', [
+            'order_id' => $order->id,
+            'amount' => $order->total_amount,
+            'creator_id' => $this->user->id,
+            'payment' => OrderPayment::cash->value,
+        ]);
+    }
+
+    /** @test */
+    public function when_mark_order_is_unpaid_order_paid_record_should_be_deleted()
+    {
+        $order = Order::factory()->create(['paid' => true]);
+        OrderPaid::factory()->create(['order_id' => $order->id]);
+
+        $this->assertDatabaseCount('order_paid', 1);
+        $this->update($order->id, 'paid');
+        $this->assertDatabaseCount('order_paid', 0);
     }
 
     public function update($id, $column)

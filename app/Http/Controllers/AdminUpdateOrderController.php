@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Enum\OrderPayment;
 use App\Models\Order;
+use App\Models\OrderPaid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -47,10 +48,17 @@ class AdminUpdateOrderController extends Controller
     {
         if ($this->order->paid) {
             $this->order->unpaid();
+            OrderPaid::where('order_id', $this->order->id)->delete();
             return;
         }
 
         $this->order->paid();
+        OrderPaid::create([
+            'order_id' => $this->order->id,
+            'amount' => $this->order->total_amount,
+            'payment' => OrderPayment::fromName($this->order->payment),
+            'creator_id' => auth()->id(),
+        ]);
     }
 
     public function payment()
