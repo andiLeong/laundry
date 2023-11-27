@@ -36,6 +36,7 @@ class CreatedOrderProduct
                 'order_id' => $order->id,
                 'amount' => $order->total_amount,
                 'creator_id' => auth()->id(),
+                'created_at' => now(),
             ]);
         }
     }

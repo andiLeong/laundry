@@ -57,6 +57,7 @@ class AdminUpdateOrderController extends Controller
             'order_id' => $this->order->id,
             'amount' => $this->order->total_amount,
             'creator_id' => auth()->id(),
+            'created_at' => now(),
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Enum\OrderPayment;
 use App\Models\Order;
 use App\Models\OrderPaid;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -77,6 +78,7 @@ class UpdateOrderTest extends TestCase
     /** @test */
     public function when_mark_order_is_paid_order_paid_is_recorded()
     {
+        Carbon::setTestNow(now()->subDays(2));
         $this->assertDatabaseCount('order_paid', 0);
 
         $order = Order::factory()->create(['paid' => false]);
@@ -86,6 +88,7 @@ class UpdateOrderTest extends TestCase
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'creator_id' => $this->user->id,
+            'created_at' => now()->toDateTimeString()
         ]);
     }
 
