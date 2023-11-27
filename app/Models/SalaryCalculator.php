@@ -14,15 +14,18 @@ class SalaryCalculator
     protected $firstSalaryDay;
     protected $secondSalaryDay;
 
-    protected $coverPeriod;
-    private $firstHalfSalary = false;
+    /**
+     * the salary cover period
+     * @array
+     */
+    protected array $coverPeriod = [];
 
     public function __construct(protected Staff $staff)
     {
         $this->today = today();
         $this->setFirstSalaryDay();
         $this->setSecondSalaryDay();
-        $this->setFirstHalfSalary();
+        $this->setCoverPeriod();
     }
 
     public function calculate()
@@ -32,25 +35,22 @@ class SalaryCalculator
         }
 
         $details = $this->getSalaryDetail();
+        $totalSalaries = $details->sum('amount');
+        [$start, $end] = $this->coverPeriod;
 
-//        [
-//            '2023-11-23' => [
-//                'start' => '2023-11-23 08:00',
-//                'end' => '2023-11-23 20:00',
-//                'hour' => 12,
-//            ]
-//        ];
-//        $details = $this->getAttendance()
-//            ->map(function ($attendance) {
-//
-//                return [
-//
-//                    'amount' => $hour > static::MIN_WORK_HOUR
-//                        ? $this->staff->daily_salary + 100
-//                        : $this->staff->daily_salary,
-//                ];
-//            });
+        $salary = Salary::create([
+            'staff_id' => $this->staff->id,
+            'amount' => $totalSalaries,
+            'from' => $start->toDateTimeString(),
+            'to' => $end->toDateTimeString(),
+        ]);
 
+        SalaryDetail::insert($details->map(function($detail) use($salary){
+            $detail['salary_id'] = $salary->id;
+            return $detail;
+        })->toArray());
+
+        return true;
     }
 
     protected function salaryDay(): bool
@@ -85,27 +85,17 @@ class SalaryCalculator
         $this->secondSalaryDay = $secondSalary->day;
     }
 
-    protected function setFirstHalfSalary()
+    protected function setCoverPeriod()
     {
-//        $this->coverPeriod =
-//            $this->today->day <= 15
-//                ? [1, 16]
-//                : [17, $this->today->endOfMonth()->day];
-
-        if ($this->today->day <= 15) {
-            $this->firstHalfSalary = true;
-        }
+        $this->coverPeriod =
+            $this->today->day <= 15
+                ? [today()->startOfMonth(), today()->startOfMonth()->addDays(15)]
+                : [today()->startOfMonth()->addDays(15), today()->endOfMonth()->endOfDay()];
     }
 
     private function getShifts(): Collection
     {
-        if ($this->firstHalfSalary) {
-            $start = today()->startOfMonth();
-            $end = today()->startOfMonth()->addDays(15);
-        } else {
-            $start = today()->startOfMonth()->addDays(15);
-            $end = today()->endOfMonth()->endOfDay();
-        }
+        [$start, $end] = $this->coverPeriod;
 
         return Shift::where('staff_id', $this->staff->id)
             ->with('attendance')
