@@ -17,7 +17,9 @@ class HolidayFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => 'new year',
+            'rate' => 0.2,
+            'date' => today(),
         ];
     }
 }

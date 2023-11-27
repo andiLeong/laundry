@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Models\Enum\AttendanceType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
@@ -45,7 +46,7 @@ class SalaryCalculator
             'to' => $end->toDateString(),
         ]);
 
-        SalaryDetail::insert($details->map(function($detail) use($salary){
+        SalaryDetail::insert($details->map(function ($detail) use ($salary) {
             $detail['salary_id'] = $salary->id;
             return $detail;
         })->toArray());
@@ -112,7 +113,7 @@ class SalaryCalculator
             $attendances = $shift->attendance;
             $attendances->sortBy('type')->values()->sortBy('time')->values();
 
-            if (empty($attendances)) {
+            if ($attendances->isEmpty()) {
                 $amount = 0;
                 $description = 'cant find punch detail, absence no salary of course';
                 $hour = 0;
@@ -120,12 +121,12 @@ class SalaryCalculator
             } elseif (count($attendances) === 1) {
                 $attendance = $attendances->first();
                 $hour = 0;
-                if ($attendance->type == 1) {
-                    $start = $attendance->time;
-                    $end = null;
-                } else {
-                    $start = null;
+                if ($attendance->type == AttendanceType::out->name) {
                     $end = $attendance->time;
+                    $start = null;
+                } else {
+                    $end = null;
+                    $start = $attendance->time;
                 }
                 [$description, $amount] = $this->getSalaryForHours(8, $shift->date);
             } else {
@@ -148,18 +149,18 @@ class SalaryCalculator
 
     private function getSalaryForHours(mixed $hour, $date)
     {
-        $holiday = Holiday::where('date', $date)->first();
-        $rate = $holiday?->rate ?? 1;
+        $perDay = $this->staff->daily_salary;
 
         if ($hour >= 4 && $hour < 8) {
             $description = 'working hour is between 4 to 8 hours, half day salary';
-            $amount = $this->staff->daily_salary / 2;
+            $amount = $perDay / 2;
         } elseif ($hour >= 8 && $hour < 12) {
-            $description = 'working hour is between 8 - 12 hour, normal daily salary';
-            $amount = $this->staff->daily_salary * $rate;
+            [$holidayDescription, $amount] = $this->getHolidaySalary($date, $perDay);
+            $description = 'working hour is between 8 - 12 hour, normal daily salary' . $holidayDescription;
         } elseif ($hour >= 12) {
-            $description = 'working hour is euq or more than 12 hours, add 100 currently';
-            $amount = ($this->staff->daily_salary + 100) * $rate;
+            $perDay = $perDay + 100;
+            [$holidayDescription, $amount] = $this->getHolidaySalary($date, $perDay);
+            $description = 'working hour is euq or more than 12 hours, add 100 currently' . $holidayDescription;
         } else {
             $description = "hour is $hour, unknown condition";
             $amount = 0;
@@ -169,6 +170,19 @@ class SalaryCalculator
             $description,
             round($amount, 2),
         ];
+    }
+
+    protected function getHolidaySalary($date, $perDay)
+    {
+        $holiday = Holiday::where('date', $date)->first();
+        $holidayDescription = '';
+        $amount = $perDay;
+        if (!is_null($holiday)) {
+            $holidayDescription = ' with holiday rate ' . round($holiday->rate, 1);
+            $amount = $perDay + $perDay * $holiday->rate;
+        }
+
+        return [$holidayDescription, $amount];
     }
 
 }
