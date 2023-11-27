@@ -41,8 +41,8 @@ class SalaryCalculator
         $salary = Salary::create([
             'staff_id' => $this->staff->id,
             'amount' => $totalSalaries,
-            'from' => $start->toDateTimeString(),
-            'to' => $end->toDateTimeString(),
+            'from' => $start->toDateString(),
+            'to' => $end->toDateString(),
         ]);
 
         SalaryDetail::insert($details->map(function($detail) use($salary){
@@ -93,7 +93,7 @@ class SalaryCalculator
                 : [today()->startOfMonth()->addDays(15), today()->endOfMonth()->endOfDay()];
     }
 
-    private function getShifts(): Collection
+    protected function getShifts(): Collection
     {
         [$start, $end] = $this->coverPeriod;
 
@@ -104,12 +104,12 @@ class SalaryCalculator
             ->get();
     }
 
-    public function getSalaryDetail()
+    protected function getSalaryDetail()
     {
         $shifts = $this->getShifts();
         return $shifts->map(function ($shift) {
 
-            $attendances = $shift->attedance;
+            $attendances = $shift->attendance;
             $attendances->sortBy('type')->values()->sortBy('time')->values();
 
             if (empty($attendances)) {
@@ -136,7 +136,7 @@ class SalaryCalculator
             }
 
             return [
-                'date' => $shift->date,
+//                'date' => $shift->date,
                 'from' => $start,
                 'to' => $end,
                 'description' => $description,
