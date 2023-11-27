@@ -27,4 +27,9 @@ class Shift extends Model
     {
         return $query->where('reviewed', false);
     }
+
+    public function attedance()
+    {
+        return $this->hasMany(Attendance::class, 'shift_id', 'id');
+    }
 }
