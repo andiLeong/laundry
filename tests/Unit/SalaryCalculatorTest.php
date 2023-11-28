@@ -114,7 +114,10 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date);
+        $shift = $this->createShift($date,[
+            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(12,0)->toDateTimeString()
+        ]);
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $this->createAttendance($date->setTime(9, 0), $shift->id);
         $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
@@ -177,30 +180,6 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is euq or more than 12 hours, add 100 currently',
             $salaryPerDay + 100,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
-        );
-    }
-
-    /** @test */
-    public function it_can_not_calculate_staff_salary_that_working_hour_is_than_4hour()
-    {
-        $this->assertDatabaseCount('salaries', 0);
-        $this->assertDatabaseCount('salary_details', 0);
-
-        $fifteen = Carbon::parse('2023-11-15');
-        $calculator = $this->createCalculator($fifteen);
-        $date = $fifteen->subDay();
-
-        $shift = $this->createShift($date);
-        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
-        $this->createAttendance($date->setTime(9, 0), $shift->id);
-        $this->createAttendance($end = $date->copy()->setTime(11, 0), $shift->id, 1);
-        $calculator->calculate();
-
-        $this->assertSalaryCorrect(
-            $calculator,
-            'hour is 3, unknown condition',
-            0,
             [$start->toDateTimeString(), $end->toDateTimeString()]
         );
     }
@@ -282,7 +261,7 @@ class SalaryCalculatorTest extends TestCase
     }
 
     /** @test */
-    public function if_staff_only_has_punch_in_record_it_calculates_as_8hour_salary()
+    public function if_staff_only_has_punch_in_record_it_calculates_as_the_shift_salary()
     {
         $this->assertDatabaseCount('salaries', 0);
         $this->assertDatabaseCount('salary_details', 0);
@@ -292,14 +271,17 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date);
+        $shift = $this->createShift($date, [
+            'from' => $date->copy()->setTime(8, 0)->toDateTimeString(),
+            'to' => $date->copy()->setTime(12, 0)->toDateTimeString(),
+        ]);
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $calculator->calculate();
 
         $this->assertSalaryCorrect(
             $calculator,
-            'working hour is between 8 - 12 hour, normal daily salary',
-            $salaryPerDay,
+            'no punch out detail, get 8 hour salary',
+            $salaryPerDay / 2,
             [$start->toDateTimeString(), null]
         );
     }
@@ -321,9 +303,61 @@ class SalaryCalculatorTest extends TestCase
 
         $this->assertSalaryCorrect(
             $calculator,
-            'working hour is between 8 - 12 hour, normal daily salary',
+            'no punch in detail, get 8 hour salary',
             $salaryPerDay,
             [null, $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function if_staff_no_attendance_record_then_no_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $this->createShift($date);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'cant find punch detail, absence no salary of course',
+            0,
+            [null, null]
+        );
+    }
+
+        /** @test */
+    public function it_cant_get_salary_if_staff_working_hour_is_less_than_shift_hour()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date,[
+            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(20,0)->toDateTimeString(),
+        ]);
+
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(17, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is 9 less than shift hour 12 no salary',
+            0,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
         );
     }
 
@@ -338,12 +372,12 @@ class SalaryCalculatorTest extends TestCase
         ]);
     }
 
-    public function createShift($date)
+    public function createShift($date, $attributes = [])
     {
-        return Shift::factory()->create([
+        return Shift::factory()->create(array_merge([
             'date' => $date->toDateString(),
             'staff_id' => $this->staff->id
-        ]);
+        ], $attributes));
     }
 
     public function assertSalaryCorrect($calculator, $description, $amount, $date)

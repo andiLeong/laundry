@@ -9,7 +9,6 @@ use Illuminate\Support\Carbon;
 
 class SalaryCalculator
 {
-    const MIN_WORK_HOUR = 8;
     private Carbon $today;
 
     protected $firstSalaryDay;
@@ -107,51 +106,73 @@ class SalaryCalculator
 
     protected function getSalaryDetail()
     {
-        $shifts = $this->getShifts();
-        return $shifts->map(function ($shift) {
+        return $this->getShifts()->map(function ($shift) {
 
             $attendances = $shift->attendance;
-            $attendances->sortBy('type')->values()->sortBy('time')->values();
 
             if ($attendances->isEmpty()) {
-                $amount = 0;
                 $description = 'cant find punch detail, absence no salary of course';
-                $hour = 0;
-                $start = $end = null;
-            } elseif (count($attendances) === 1) {
-                $attendance = $attendances->first();
-                $hour = 0;
-                if ($attendance->type == AttendanceType::out->name) {
-                    $end = $attendance->time;
-                    $start = null;
-                } else {
-                    $end = null;
-                    $start = $attendance->time;
-                }
-                [$description, $amount] = $this->getSalaryForHours(8, $shift->date);
-            } else {
-                $start = $attendances->first()->time;
-                $end = $attendances->last()->time;
+                return [
+                    'from' => null,
+                    'to' => null,
+                    'description' => $description,
+                    'hour' => 0,
+                    'amount' => 0,
+                ];
+            }
+
+            [$in, $out] = $attendances->partition(fn($record) => $record->type === AttendanceType::in->name);
+            $in->sortBy('time')->values();
+            $out->sortBy('time')->values();
+
+            if ($in->isNotEmpty() && $out->isNotEmpty()) {
+                $start = $in->first()->time;
+                $end = $out->last()->time;
                 $hour = $start->diffInHours($end);
-                [$description, $amount] = $this->getSalaryForHours($hour, $shift->date);
+                [$description, $amount] = $this->getSalaryForHours($hour, $shift);
+
+                return [
+                    'from' => $start,
+                    'to' => $end,
+                    'description' => $description,
+                    'hour' => $hour,
+                    'amount' => $amount,
+                ];
+            }
+
+            $hour = $shift->from->diffInHours($shift->to);
+            [$description, $amount] = $this->getSalaryForHours($hour, $shift);
+            if ($in->isEmpty()) {
+                $end = $out->first()->time;
+                $start = null;
+                $description = 'no punch in detail, get 8 hour salary';
+            } else {
+                $end = null;
+                $start = $in->first()->time;
+                $description = 'no punch out detail, get 8 hour salary';
             }
 
             return [
-//                'date' => $shift->date,
                 'from' => $start,
                 'to' => $end,
                 'description' => $description,
                 'hour' => $hour,
                 'amount' => $amount,
             ];
+
         });
     }
 
-    private function getSalaryForHours(mixed $hour, $date)
+    private function getSalaryForHours(mixed $hour, $shift)
     {
         $perDay = $this->staff->daily_salary;
+        $date = $shift->date;
 
-        if ($hour >= 4 && $hour < 8) {
+        $shouldWorkHour = $shift->from->diffInHours($shift->to);
+        if ($hour < $shouldWorkHour) {
+            $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
+            $amount = 0;
+        } elseif ($hour >= 4 && $hour < 8) {
             $description = 'working hour is between 4 to 8 hours, half day salary';
             $amount = $perDay / 2;
         } elseif ($hour >= 8 && $hour < 12) {
