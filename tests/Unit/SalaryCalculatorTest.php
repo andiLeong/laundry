@@ -3,9 +3,13 @@
 namespace Tests\Unit;
 
 use App\Models\Attendance;
+use App\Models\Branch;
+use App\Models\Enum\AttendanceType;
+use App\Models\Holiday;
 use App\Models\Salary;
 use App\Models\SalaryCalculator;
 use App\Models\SalaryDetail;
+use App\Models\Shift;
 use App\Models\Staff;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -18,8 +22,9 @@ class SalaryCalculatorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = $this->staff();
-        $this->staff = Staff::factory()->create(['user_id' => $this->user->id]);
+        $this->branch = Branch::factory()->create();
+        $this->user = $this->staff(['branch_id' => $this->branch->id]);
+        $this->staff = Staff::factory()->create(['user_id' => $this->user->id, 'branch_id' => $this->branch->id]);
         $this->calculator = new FakeSalaryCalculator($this->staff);
     }
 
@@ -27,28 +32,20 @@ class SalaryCalculatorTest extends TestCase
     public function salary_day_is_on_15th_and_last_day_of_the_month(): void
     {
         $fifteen = Carbon::parse('2023-11-15');
-        Carbon::setTestNow($fifteen);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertEquals(15, $calculator->firstSalaryDay());
+        $this->assertEquals(15, $this->createCalculator($fifteen)->firstSalaryDay());
 
         $lastDay = Carbon::parse('2023-11-30');
-        Carbon::setTestNow($lastDay);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertEquals(30, $calculator->secondSalaryDay());
+        $this->assertEquals(30, $this->createCalculator($lastDay)->secondSalaryDay());
     }
 
     /** @test */
     public function if_salary_day_falls_on_weekend_any_week_days_before_is_salary_day(): void
     {
         $sunday = Carbon::parse('2023-10-15');
-        Carbon::setTestNow($sunday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertEquals(13, $calculator->firstSalaryDay());
+        $this->assertEquals(13, $this->createCalculator($sunday)->firstSalaryDay());
 
         $saturday = Carbon::parse('2023-09-30');
-        Carbon::setTestNow($saturday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertEquals(29, $calculator->secondSalaryDay());
+        $this->assertEquals(29, $this->createCalculator($saturday)->secondSalaryDay());
     }
 
     /** @test */
@@ -61,97 +58,353 @@ class SalaryCalculatorTest extends TestCase
     public function it_can_determine_if_today_should_calculate_salary()
     {
         $monday = Carbon::parse('2023-11-13');
-        Carbon::setTestNow($monday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertFalse($calculator->isSalaryDay());
+        $this->assertFalse($this->createCalculator($monday)->isSalaryDay());
 
         $tuesday = Carbon::parse('2023-11-14');
-        Carbon::setTestNow($tuesday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertFalse($calculator->isSalaryDay());
+        $this->assertFalse($this->createCalculator($tuesday)->isSalaryDay());
 
         $wednesday = Carbon::parse('2023-11-15');
-        Carbon::setTestNow($wednesday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertTrue($calculator->isSalaryDay());
+        $this->assertTrue($this->createCalculator($wednesday)->isSalaryDay());
 
         $thursday = Carbon::parse('2023-11-16');
-        Carbon::setTestNow($thursday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertFalse($calculator->isSalaryDay());
+        $this->assertFalse($this->createCalculator($thursday)->isSalaryDay());
 
         $friday = Carbon::parse('2023-11-17');
-        Carbon::setTestNow($friday);
-        $calculator = new FakeSalaryCalculator($this->staff);
-        $this->assertFalse($calculator->isSalaryDay());
+        $this->assertFalse($this->createCalculator($friday)->isSalaryDay());
     }
-//
-//    /** @test */
-//    public function it_can_get_the_cover_period(): void
-//    {
-//        $friday = Carbon::parse('2023-11-17');
-//        Carbon::setTestNow($friday);
-//        $calculator = new FakeSalaryCalculator($this->staff);
-//        $this->assertSame($calculator->cover(),[16,$friday->lastOfMonth()->day]);
-//
-//        $friday = Carbon::parse('2023-11-13');
-//        Carbon::setTestNow($friday);
-//        $calculator = new FakeSalaryCalculator($this->staff);
-//        $this->assertSame($calculator->cover(),[1,16]);
-//    }
 
     /** @test */
-    public function it_can_calculate_staff_salary_per8_hour_shift()
+    public function it_can_get_the_cover_period(): void
     {
-        $this->markTestSkipped();
+        $friday = Carbon::parse('2023-11-17');
+        $cover = $this->createCalculator($friday)->cover();
+        $this->assertSame($cover[0]->toDateString(), '2023-11-16');
+        $this->assertSame($cover[1]->toDateString(), '2023-11-30');
+
+        $friday = Carbon::parse('2023-11-13');
+        Carbon::setTestNow($friday);
+        $cover = $this->createCalculator($friday)->cover();
+        $this->assertSame($cover[0]->toDateString(), '2023-11-01');
+        $this->assertSame($cover[1]->toDateString(), '2023-11-16');
+    }
+
+    /** @test */
+    public function it_can_get_shifts_from_the_cover_period(): void
+    {
+        $friday = Carbon::parse('2023-11-17');
+        $calculator = $this->createCalculator($friday);
+
+        $shift = $this->createShift($friday);
+        $yesterdayShift = $this->createShift($friday->subDays(3));
+
+        $shifts = $calculator->shifts()->pluck('id')->toArray();
+
+        $this->assertTrue(in_array($shift->id, $shifts));
+        $this->assertFalse(in_array($yesterdayShift->id, $shifts));
+    }
+
+    /** @test */
+    public function it_can_calculate_staff_half_day_salary()
+    {
         $this->assertDatabaseCount('salaries', 0);
-        $this->assertDatabaseCount('salary_detail', 0);
+        $this->assertDatabaseCount('salary_details', 0);
 
-        $salaryPerDay = $this->staff->dailySalary;
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
 
-        $attendance = Attendance::factory()->create([
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id,
-            'time' => today()->startOfMonth()->setTime(8, 0),
-            'type' => 0
+        $shift = $this->createShift($date,[
+            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(12,0)->toDateTimeString()
+        ]);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(12, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is between 4 to 8 hours, half day salary',
+            $salaryPerDay / 2,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function it_can_calculate_staff_full_day_8hour_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(17, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is between 8 - 12 hour, normal daily salary',
+            $salaryPerDay,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function it_can_calculate_staff_12hour_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(20, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is euq or more than 12 hours, add 100 currently',
+            $salaryPerDay + 100,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function it_can_calculate_staff_full_day_8hour_salary_with_holiday()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(17, 0), $shift->id, 1);
+        $holiday = Holiday::factory()->create(['date' => $start->toDateString()]);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is between 8 - 12 hour, normal daily salary with holiday rate ' . $holiday->rate,
+            $salaryPerDay + $salaryPerDay * $holiday->rate,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function it_can_calculate_staff_12hour_salary_with_holiday()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary + 100;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(20, 0), $shift->id, 1);
+        $holiday = Holiday::factory()->create(['date' => $start->toDateString()]);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is euq or more than 12 hours, add 100 currently with holiday rate ' . $holiday->rate,
+            $salaryPerDay + $salaryPerDay * $holiday->rate,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function if_no_attendance_record_it_calculate_as_zero_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $this->staff->daily_salary + 100;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $this->createShift($date);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'cant find punch detail, absence no salary of course',
+            0,
+            [null, null]
+        );
+    }
+
+    /** @test */
+    public function if_staff_only_has_punch_in_record_it_calculates_as_the_shift_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date, [
+            'from' => $date->copy()->setTime(8, 0)->toDateTimeString(),
+            'to' => $date->copy()->setTime(12, 0)->toDateTimeString(),
+        ]);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'no punch out detail, get 8 hour salary',
+            $salaryPerDay / 2,
+            [$start->toDateTimeString(), null]
+        );
+    }
+
+    /** @test */
+    public function if_staff_only_has_punch_out_record_it_calculates_as_8hour_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $this->createAttendance($end = $date->copy()->setTime(20, 0), $shift->id, AttendanceType::out->value);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'no punch in detail, get 8 hour salary',
+            $salaryPerDay,
+            [null, $end->toDateTimeString()]
+        );
+    }
+
+    /** @test */
+    public function if_staff_no_attendance_record_then_no_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $this->createShift($date);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'cant find punch detail, absence no salary of course',
+            0,
+            [null, null]
+        );
+    }
+
+        /** @test */
+    public function it_cant_get_salary_if_staff_working_hour_is_less_than_shift_hour()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date,[
+            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(20,0)->toDateTimeString(),
         ]);
 
-        $attendance = Attendance::factory()->create([
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(17, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is 9 less than shift hour 12 no salary',
+            0,
+            [$start->toDateTimeString(), $end->toDateTimeString()]
+        );
+    }
+
+    public function createAttendance($time, $shiftId, $type = 0)
+    {
+        return Attendance::factory()->create([
             'staff_id' => $this->user->id,
             'branch_id' => $this->user->branch_id,
-            'time' => today()->startOfMonth()->setTime(17, 0),
-            'type' => 1
+            'time' => $time,
+            'type' => $type,
+            'shift_id' => $shiftId,
         ]);
+    }
 
-        $attendance = Attendance::factory()->create([
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id,
-            'time' => today()->startOfMonth()->addDay()->setTime(8, 0),
-            'type' => 0
-        ]);
+    public function createShift($date, $attributes = [])
+    {
+        return Shift::factory()->create(array_merge([
+            'date' => $date->toDateString(),
+            'staff_id' => $this->staff->id
+        ], $attributes));
+    }
 
-        $attendance = Attendance::factory()->create([
-            'staff_id' => $this->user->id,
-            'branch_id' => $this->user->branch_id,
-            'time' => today()->startOfMonth()->addDays(2)->setTime(17, 0),
-            'type' => 1
-        ]);
-
+    public function assertSalaryCorrect($calculator, $description, $amount, $date)
+    {
         $salary = Salary::first();
         $details = SalaryDetail::all();
         $this->assertDatabaseHas('salaries', [
-            'from' => today()->startOfMonth()->format('Y-m-d'),
-            'to' => today()->startOfMonth()->adddays(15)->format('Y-m-d'),
+            'from' => $calculator->cover()[0]->toDateString(),
+            'to' => $calculator->cover()[1]->toDateString(),
             'staff_id' => $this->staff->id,
-            'amount' => $salaryPerDay * 2,
+            'amount' => $amount,
         ]);
-        $this->assertDatabaseCount('salary_details', 2);
+        $this->assertDatabaseCount('salary_details', 1);
 
         foreach ($details as $detail) {
-            $this->assertEquals('normal daily salary ', $salaryPerDay, $detail['description']);
+            $this->assertEquals($description, $detail['description']);
             $this->assertEquals($salary->id, $detail['salary_id']);
-            $this->assertEquals($salaryPerDay, $detail['amount']);
+            $this->assertEquals($amount, $detail['amount']);
+            $this->assertEquals($date[0], $detail['from']);
+            $this->assertEquals($date[1], $detail['to']);
         }
+    }
+
+    protected function createCalculator($date)
+    {
+        Carbon::setTestNow($date);
+        return new FakeSalaryCalculator($this->staff);
     }
 }
 
@@ -174,6 +427,11 @@ class FakeSalaryCalculator extends SalaryCalculator
 
     public function cover()
     {
-       return $this->coverPeriod;
+        return $this->coverPeriod;
+    }
+
+    public function shifts()
+    {
+        return $this->getShifts();
     }
 }

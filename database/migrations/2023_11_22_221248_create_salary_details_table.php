@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('salary_id');
             $table->string('description');
-            $table->datetime('from');
-            $table->datetime('to');
+            $table->datetime('from')->nullable();
+            $table->datetime('to')->nullable();
             $table->unsignedDecimal('hour');
             $table->unsignedDecimal('amount');
         });
