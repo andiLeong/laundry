@@ -30,7 +30,7 @@ class CalculateSalary extends Command
         logger('calculate staff salary');
 
         Staff::with('user')
-            ->all()
+            ->get()
             ->each(function(Staff $staff){
 
                 logger('calculating staff: ' . $staff->user->first_name);
