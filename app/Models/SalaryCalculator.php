@@ -171,6 +171,24 @@ class SalaryCalculator
         $perDay = $this->staff->daily_salary;
         $date = $shift->date;
 
+        $salaryHour = [
+            [
+                'condition' => [4, 8],
+                'description' => 'working hour is between 4 to 8 hours, half day salary',
+                'amount' => fn($perDay, $date) => $perDay / 2,
+            ],
+            [
+                'condition' => [8, 12],
+                'description' => 'working hour is between 8 - 12 hour, normal daily salary',
+                'amount' => fn($perDay, $date) => $this->getHolidaySalary($date, $perDay),
+            ],
+            [
+                'condition' => [12],
+                'description' => 'working hour is euq or more than 12 hours, add 100 currently',
+                'amount' => fn($perDay, $date) => $this->getHolidaySalary($date, $perDay),
+            ],
+        ];
+
         $shouldWorkHour = $shift->from->diffInHours($shift->to);
         if ($hour < $shouldWorkHour) {
             $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
