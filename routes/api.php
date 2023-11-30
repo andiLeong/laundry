@@ -13,6 +13,7 @@ use App\Http\Controllers\GcashOrderController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderPaidRecordController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
@@ -66,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/admin/attendance', [AttendanceController::class, 'store']);
         Route::get('/admin/attendance', [AttendanceController::class, 'index']);
+        Route::get('/admin/order-paid-record', [OrderPaidRecordController::class, 'index']);
 
         Route::post('/admin/gcash-order', [GcashOrderController::class, 'store']);
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);

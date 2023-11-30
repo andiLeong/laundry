@@ -285,6 +285,24 @@ class AdminCreateOrderTest extends TestCase
         $this->assertValidateMessage('stock is not enough', $response, 'product_ids');
     }
 
+    /** @test */
+    public function order_paid_record_is_also_created_if_when_order_create_order_is_paid(): void
+    {
+        $this->assertDatabaseCount('order_paid', 0);
+        $response = $this->createOrder(['paid' => 1]);
+        $this->assertDatabaseCount('order_paid', 1);
+        $response->assertSuccessful();
+    }
+
+    /** @test */
+    public function order_paid_record_is_not_created_if_when_order_create_order_is_not_paid(): void
+    {
+        $this->assertDatabaseCount('order_paid', 0);
+        $response = $this->createOrder(['paid' => 0]);
+        $this->assertDatabaseCount('order_paid', 0);
+        $response->assertSuccessful();
+    }
+
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
