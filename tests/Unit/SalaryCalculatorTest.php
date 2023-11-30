@@ -114,9 +114,9 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date,[
-            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
-            'from' => $date->copy()->setTime(12,0)->toDateTimeString()
+        $shift = $this->createShift($date, [
+            'to' => $date->copy()->setTime(8, 0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(12, 0)->toDateTimeString()
         ]);
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $this->createAttendance($date->setTime(9, 0), $shift->id);
@@ -128,7 +128,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is between 4 to 8 hours, half day salary',
             $salaryPerDay / 2,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -154,7 +155,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is between 8 - 12 hour, normal daily salary',
             $salaryPerDay,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -180,7 +182,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is euq or more than 12 hours, add 100 currently',
             $salaryPerDay + 100,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -207,7 +210,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is between 8 - 12 hour, normal daily salary with holiday rate ' . $holiday->rate,
             $salaryPerDay + $salaryPerDay * $holiday->rate,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -234,7 +238,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is euq or more than 12 hours, add 100 currently with holiday rate ' . $holiday->rate,
             $salaryPerDay + $salaryPerDay * $holiday->rate,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -249,14 +254,15 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $this->createShift($date);
+        $shift = $this->createShift($date);
         $calculator->calculate();
 
         $this->assertSalaryCorrect(
             $calculator,
             'cant find punch detail, absence no salary of course',
             0,
-            [null, null]
+            [null, null],
+            $shift
         );
     }
 
@@ -282,7 +288,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'no punch out detail, get 8 hour salary',
             $salaryPerDay / 2,
-            [$start->toDateTimeString(), null]
+            [$start->toDateTimeString(), null],
+            $shift
         );
     }
 
@@ -305,7 +312,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'no punch in detail, get 8 hour salary',
             $salaryPerDay,
-            [null, $end->toDateTimeString()]
+            [null, $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -320,18 +328,19 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $this->createShift($date);
+        $shift = $this->createShift($date);
         $calculator->calculate();
 
         $this->assertSalaryCorrect(
             $calculator,
             'cant find punch detail, absence no salary of course',
             0,
-            [null, null]
+            [null, null],
+            $shift
         );
     }
 
-        /** @test */
+    /** @test */
     public function it_cant_get_salary_if_staff_working_hour_is_less_than_shift_hour()
     {
         $this->assertDatabaseCount('salaries', 0);
@@ -342,9 +351,9 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date,[
-            'to' => $date->copy()->setTime(8,0)->toDateTimeString(),
-            'from' => $date->copy()->setTime(20,0)->toDateTimeString(),
+        $shift = $this->createShift($date, [
+            'to' => $date->copy()->setTime(8, 0)->toDateTimeString(),
+            'from' => $date->copy()->setTime(20, 0)->toDateTimeString(),
         ]);
 
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
@@ -357,7 +366,8 @@ class SalaryCalculatorTest extends TestCase
             $calculator,
             'working hour is 9 less than shift hour 12 no salary',
             0,
-            [$start->toDateTimeString(), $end->toDateTimeString()]
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
         );
     }
 
@@ -380,7 +390,7 @@ class SalaryCalculatorTest extends TestCase
         ], $attributes));
     }
 
-    public function assertSalaryCorrect($calculator, $description, $amount, $date)
+    public function assertSalaryCorrect($calculator, $description, $amount, $date, $shift)
     {
         $salary = Salary::first();
         $details = SalaryDetail::all();
@@ -398,6 +408,7 @@ class SalaryCalculatorTest extends TestCase
             $this->assertEquals($amount, $detail['amount']);
             $this->assertEquals($date[0], $detail['from']);
             $this->assertEquals($date[1], $detail['to']);
+            $this->assertEquals($shift->id, $detail['shift_id']);
         }
     }
 

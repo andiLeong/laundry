@@ -118,6 +118,7 @@ class SalaryCalculator
                     'description' => $description,
                     'hour' => 0,
                     'amount' => 0,
+                    'shift_id' => $shift->id,
                 ];
             }
 
@@ -137,6 +138,7 @@ class SalaryCalculator
                     'description' => $description,
                     'hour' => $hour,
                     'amount' => $amount,
+                    'shift_id' => $shift->id,
                 ];
             }
 
@@ -158,6 +160,7 @@ class SalaryCalculator
                 'description' => $description,
                 'hour' => $hour,
                 'amount' => $amount,
+                'shift_id' => $shift->id,
             ];
 
         });
