@@ -25,7 +25,6 @@ class SalaryCalculatorTest extends TestCase
         $this->branch = Branch::factory()->create();
         $this->user = $this->staff(['branch_id' => $this->branch->id]);
         $this->staff = Staff::factory()->create(['user_id' => $this->user->id, 'branch_id' => $this->branch->id]);
-//        $this->calculator = new FakeSalaryCalculator($this->staff);
     }
 
     /** @test */
@@ -114,13 +113,36 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date, [
-            'to' => $date->copy()->setTime(8, 0)->toDateTimeString(),
-            'from' => $date->copy()->setTime(12, 0)->toDateTimeString()
-        ]);
+        $shift = $this->createHalfDayShift($date);
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $this->createAttendance($date->setTime(9, 0), $shift->id);
         $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(12, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is between 4 to 8 hours, half day salary',
+            $salaryPerDay / 2,
+            [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
+        );
+    }
+
+    /** @test */
+    public function half_day_shift_should_not_consider_holiday_salary()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+        Holiday::factory()->create(['date' => $date]);
+
+        $shift = $this->createHalfDayShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $this->createAttendance($end = $date->copy()->setTime(12, 0), $shift->id, 1);
         $calculator->calculate();
 
@@ -277,10 +299,7 @@ class SalaryCalculatorTest extends TestCase
         $calculator = $this->createCalculator($fifteen);
         $date = $fifteen->subDay();
 
-        $shift = $this->createShift($date, [
-            'from' => $date->copy()->setTime(8, 0)->toDateTimeString(),
-            'to' => $date->copy()->setTime(12, 0)->toDateTimeString(),
-        ]);
+        $shift = $this->createHalfDayShift($date);
         $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
         $calculator->calculate();
 
@@ -378,18 +397,44 @@ class SalaryCalculatorTest extends TestCase
         $this->assertDatabaseCount('salary_details', 0);
 
         $salaryPerDay = $this->staff->daily_salary;
-        $fifteen = Carbon::parse('2023-12-31');
-        $calculator = $this->createCalculator($fifteen);
-        $date = $fifteen->subDay();
+        $salaryDay = Carbon::parse('2023-12-29');
+        $calculator = $this->createCalculator($salaryDay);
+        //shift after salary day but still within salary coverage
+        $sunday = $salaryDay->addDays(2);
 
-        $shift = $this->createShift($date);
+        $shift = $this->createShift($sunday);
         $calculator->calculate();
 
         $this->assertSalaryCorrect(
             $calculator,
             'you get paid without actually working because today is on ' . $shift->date->toDateString(),
             $salaryPerDay,
-            [null,null],
+            [null, null],
+            $shift
+        );
+    }
+
+    /** @test */
+    public function it_can_not_get_holiday_salary_if_shift_date_is_near_the_weekend_on_a_half_day_shift()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $salaryDay = Carbon::parse('2023-12-29');
+        $calculator = $this->createCalculator($salaryDay);
+        //shift after salary day but still within salary coverage
+        $sunday = $salaryDay->addDays(2);
+        Holiday::factory()->create(['date' => $sunday]);
+
+        $shift = $this->createHalfDayShift($sunday);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'you get paid without actually working because today is on ' . $shift->date->toDateString(),
+            $salaryPerDay,
+            [null, null],
             $shift
         );
     }
@@ -411,6 +456,14 @@ class SalaryCalculatorTest extends TestCase
             'date' => $date->toDateString(),
             'staff_id' => $this->staff->id
         ], $attributes));
+    }
+
+    public function createHalfDayShift($date, $attributes = [])
+    {
+        return $this->createShift($date,[
+                'from' => $date->copy()->setTime(8, 0)->toDateTimeString(),
+                'to' => $date->copy()->setTime(12, 0)->toDateTimeString(),
+            ] + $attributes);
     }
 
     public function assertSalaryCorrect($calculator, $description, $amount, $date, $shift)

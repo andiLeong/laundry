@@ -116,6 +116,22 @@ class SalaryCalculator
     {
         return $this->getShifts()->map(function ($shift) {
 
+            $perDay = $this->staff->daily_salary;
+            $date = $shift->date;
+            $shouldWorkHour = $shift->from->diffInHours($shift->to);
+            if ($this->getPaidWithoutWork($shift->date)) {
+                [$holidayDescription, $amount] = $this->getHolidaySalary($date, $perDay,$shouldWorkHour);
+                $description = "you get paid without actually working because today is on " . $shift->date->toDateString() . $holidayDescription;
+                return [
+                    'from' => null,
+                    'to' => null,
+                    'description' => $description,
+                    'hour' => 0,
+                    'amount' => $amount,
+                    'shift_id' => $shift->id,
+                ];
+            }
+
             $attendances = $shift->attendance;
 
             if ($attendances->isEmpty()) {
@@ -199,14 +215,8 @@ class SalaryCalculator
 
         $shouldWorkHour = $shift->from->diffInHours($shift->to);
         if ($hour < $shouldWorkHour) {
-            if ($this->getPaidWithoutWork($shift->date)) {
-                //todo what if should work hour is only 4 hour , should they can get holiday pay??
-                [$holidayDescription, $amount] = $this->getHolidaySalary($shouldWorkHour, $perDay);
-                $description = "you get paid without actually working because today is on " . $shift->date->toDateString() . $holidayDescription;
-            } else {
-                $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
-                $amount = 0;
-            }
+            $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
+            $amount = 0;
         } elseif ($hour >= 4 && $hour < 8) {
             $description = 'working hour is between 4 to 8 hours, half day salary';
             $amount = $perDay / 2;
@@ -228,12 +238,12 @@ class SalaryCalculator
         ];
     }
 
-    protected function getHolidaySalary($date, $perDay)
+    protected function getHolidaySalary($date, $perDay, $hour = 8)
     {
         $holiday = Holiday::where('date', $date)->first();
         $holidayDescription = '';
         $amount = $perDay;
-        if (!is_null($holiday)) {
+        if (!is_null($holiday) && in_array($hour, [8, 12])) {
             $holidayDescription = ' with holiday rate ' . round($holiday->rate, 1);
             $amount = $perDay + $perDay * $holiday->rate;
         }
