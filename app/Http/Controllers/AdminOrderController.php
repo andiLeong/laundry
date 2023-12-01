@@ -27,7 +27,6 @@ class AdminOrderController extends Controller
                 'description' => [],
                 'paid' => [],
                 'payment' => [],
-                'confirmed' => [],
                 'date' => [
                     'clause' => 'whereBetween',
                     'column' => 'created_at',

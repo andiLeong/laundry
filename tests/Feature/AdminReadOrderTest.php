@@ -221,21 +221,6 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
-    public function it_can_filter_order_by_confirmed(): void
-    {
-        $paidOrder = Order::factory()->create(['confirmed' => true]);
-        $unpaidOrder = Order::factory()->create(['confirmed' => false]);
-        $ids = $this->fetchOrderIds(['confirmed' => 1]);
-        $ids2 = $this->fetchOrderIds(['confirmed' => 0]);
-
-        $this->assertTrue($ids->contains($paidOrder->id));
-        $this->assertFalse($ids->contains($unpaidOrder->id));
-
-        $this->assertTrue($ids2->contains($unpaidOrder->id));
-        $this->assertFalse($ids2->contains($paidOrder->id));
-    }
-
-    /** @test */
     public function it_can_filter_by_user_first_name(): void
     {
         $user = User::factory()->create(['first_name' => 'pasdsdsds']);

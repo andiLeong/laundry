@@ -16,7 +16,6 @@ class Order extends Model
 
     protected $casts = [
         'paid' => 'boolean',
-        'confirmed' => 'boolean',
         'issued_invoice' => 'boolean'
     ];
 

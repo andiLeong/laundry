@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->unsignedDecimal('total_amount');
             $table->unsignedBigInteger('product_amount')->default(0);
             $table->unsignedTinyInteger('paid')->default(1);
-            $table->unsignedTinyInteger('confirmed')->nullable();
             $table->unsignedTinyInteger('payment')->default(1);
             $table->unsignedTinyInteger('issued_invoice')->default(0);
             $table->unsignedBigInteger('creator_id');
