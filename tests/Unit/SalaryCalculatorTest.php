@@ -25,7 +25,7 @@ class SalaryCalculatorTest extends TestCase
         $this->branch = Branch::factory()->create();
         $this->user = $this->staff(['branch_id' => $this->branch->id]);
         $this->staff = Staff::factory()->create(['user_id' => $this->user->id, 'branch_id' => $this->branch->id]);
-        $this->calculator = new FakeSalaryCalculator($this->staff);
+//        $this->calculator = new FakeSalaryCalculator($this->staff);
     }
 
     /** @test */
@@ -51,7 +51,7 @@ class SalaryCalculatorTest extends TestCase
     /** @test */
     public function if_salary_day_falls_on_holiday_a_day_before_should_be_salary_day(): void
     {
-        $this->assertTrue(true);
+        $this->markTestSkipped();
     }
 
     /** @test */
@@ -367,6 +367,29 @@ class SalaryCalculatorTest extends TestCase
             'working hour is 9 less than shift hour 12 no salary',
             0,
             [$start->toDateTimeString(), $end->toDateTimeString()],
+            $shift
+        );
+    }
+
+    /** @test */
+    public function it_can_get_salary_if_shift_date_is_near_the_weekend()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-12-31');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->subDay();
+
+        $shift = $this->createShift($date);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'you get paid without actually working because today is on ' . $shift->date->toDateString(),
+            $salaryPerDay,
+            [null,null],
             $shift
         );
     }

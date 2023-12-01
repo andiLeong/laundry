@@ -15,6 +15,12 @@ class SalaryCalculator
     protected $secondSalaryDay;
 
     /**
+     * contains the day that can get paid without actually working
+     * @var array
+     */
+    protected array $getPaidWithoutWork = [];
+
+    /**
      * the salary cover period
      * @array
      */
@@ -63,6 +69,7 @@ class SalaryCalculator
         $firstSalary = $this->today->copy()->firstOfMonth()->addDays(14);
         while (true) {
             if ($firstSalary->isWeekend()) {
+                $this->getPaidWithoutWork[] = $firstSalary->day;
                 $firstSalary->subDay();
             } else {
                 break;
@@ -77,6 +84,7 @@ class SalaryCalculator
         $secondSalary = $this->today->copy()->endOfMonth();
         while (true) {
             if ($secondSalary->isWeekend()) {
+                $this->getPaidWithoutWork[] = $secondSalary->day;
                 $secondSalary->subDay();
             } else {
                 break;
@@ -191,8 +199,14 @@ class SalaryCalculator
 
         $shouldWorkHour = $shift->from->diffInHours($shift->to);
         if ($hour < $shouldWorkHour) {
-            $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
-            $amount = 0;
+            if ($this->getPaidWithoutWork($shift->date)) {
+                //todo what if should work hour is only 4 hour , should they can get holiday pay??
+                [$holidayDescription, $amount] = $this->getHolidaySalary($shouldWorkHour, $perDay);
+                $description = "you get paid without actually working because today is on " . $shift->date->toDateString() . $holidayDescription;
+            } else {
+                $description = "working hour is $hour less than shift hour $shouldWorkHour no salary";
+                $amount = 0;
+            }
         } elseif ($hour >= 4 && $hour < 8) {
             $description = 'working hour is between 4 to 8 hours, half day salary';
             $amount = $perDay / 2;
@@ -225,6 +239,11 @@ class SalaryCalculator
         }
 
         return [$holidayDescription, $amount];
+    }
+
+    private function getPaidWithoutWork(\Carbon\Carbon $date): bool
+    {
+        return in_array($date->day, $this->getPaidWithoutWork);
     }
 
 }
