@@ -73,7 +73,7 @@ class SalaryCalculator
     {
         $firstSalary = $this->today->copy()->firstOfMonth()->addDays(14);
         while (true) {
-            if ($firstSalary->isWeekend()) {
+            if ($firstSalary->isWeekend() || Holiday::where('date',$firstSalary)->first() !== null) {
                 $this->getPaidWithoutWork[] = $firstSalary->day;
                 $firstSalary->subDay();
             } else {
@@ -87,8 +87,11 @@ class SalaryCalculator
     private function setSecondSalaryDay(): void
     {
         $secondSalary = $this->today->copy()->endOfMonth();
+//        dd($secondSalary);
+//        $foo = Holiday::where('date',$secondSalary)->first();
+//        dump($foo->toArray());
         while (true) {
-            if ($secondSalary->isWeekend()) {
+            if ($secondSalary->isWeekend() || Holiday::where('date',$secondSalary)->first() !== null) {
                 $this->getPaidWithoutWork[] = $secondSalary->day;
                 $secondSalary->subDay();
             } else {
@@ -147,19 +150,6 @@ class SalaryCalculator
                 $end = $out->sortBy('time')->values()->last()?->time;
                 return $this->calculateSalary($shift, $start, $end);
             });
-    }
-
-    protected function getHolidaySalary($date, $perDay, $hour = 8)
-    {
-        $holiday = Holiday::where('date', $date)->first();
-        $holidayDescription = '';
-        $amount = $perDay;
-        if (!is_null($holiday) && in_array($hour, [8, 12])) {
-            $holidayDescription = ' with holiday rate ' . round($holiday->rate, 1);
-            $amount = $perDay + $perDay * $holiday->rate;
-        }
-
-        return [$holidayDescription, $amount];
     }
 
     private function getPaidWithoutWork(\Carbon\Carbon $date): bool

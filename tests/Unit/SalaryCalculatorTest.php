@@ -50,7 +50,13 @@ class SalaryCalculatorTest extends TestCase
     /** @test */
     public function if_salary_day_falls_on_holiday_a_day_before_should_be_salary_day(): void
     {
-        $this->markTestSkipped();
+//        $friday = Carbon::parse('2023-12-15');
+//        Holiday::factory()->create(['date' => $friday]);
+//        $this->assertEquals(14, $this->createCalculator($friday)->firstSalaryDay());
+
+        $thursday = Carbon::parse('2023-11-30');
+        Holiday::factory()->create(['date' => $thursday]);
+        $this->assertEquals(29, $this->createCalculator($thursday)->secondSalaryDay());
     }
 
     /** @test */
