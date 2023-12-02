@@ -407,7 +407,7 @@ class SalaryCalculatorTest extends TestCase
 
         $this->assertSalaryCorrect(
             $calculator,
-            'you get paid without actually working because today is on ' . $shift->date->toDateString(),
+            'working hour is between 8 - 12 hour, normal daily salary salary without works on ' . $shift->date->toDateString(),
             $salaryPerDay,
             [null, null],
             $shift
@@ -432,8 +432,8 @@ class SalaryCalculatorTest extends TestCase
 
         $this->assertSalaryCorrect(
             $calculator,
-            'you get paid without actually working because today is on ' . $shift->date->toDateString(),
-            $salaryPerDay,
+            'working hour is between 4 to 8 hours, half day salary salary without works on ' . $shift->date->toDateString(),
+            $salaryPerDay / 2,
             [null, null],
             $shift
         );

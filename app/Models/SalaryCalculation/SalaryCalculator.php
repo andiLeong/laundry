@@ -121,16 +121,13 @@ class SalaryCalculator
     {
         return $this
             ->getShifts()
-            ->map(function ($shift) {
+            ->map(function (Shift $shift) {
                 $attendances = $shift->attendance;
                 if ($attendances->isEmpty()) {
                     if ($this->getPaidWithoutWork($shift->date)) {
-                        $date = $shift->date;
-                        $shouldWorkHour = $shift->from->diffInHours($shift->to);
-                        //todo it should calculate based on hour
-                        [$holidayDescription, $amount] = $this->getHolidaySalary($date, $this->staff->daily_salary, $shouldWorkHour);
-                        $description = "you get paid without actually working because today is on " . $shift->date->toDateString() . $holidayDescription;
-                    }else{
+                        $salary = new GetSalaryForHours($shift, $shift->from->diffInHours($shift->to), $this->staff->daily_salary);
+                        [$description, $amount] = $salary->getSalaryWithoutPay();
+                    } else {
                         $description = 'cant find punch detail, absence no salary of course';
                         $amount = 0;
                     }
@@ -172,30 +169,13 @@ class SalaryCalculator
 
     private function calculateSalary(Shift $shift, $start, $end)
     {
-
-        $perDay = $this->staff->daily_salary;
-        $date = $shift->date;
-        $shouldWorkHour = $shift->from->diffInHours($shift->to);
-        if ($this->getPaidWithoutWork($shift->date)) {
-            [$holidayDescription, $amount] = $this->getHolidaySalary($date, $perDay, $shouldWorkHour);
-            $description = "you get paid without actually working because today is on " . $shift->date->toDateString() . $holidayDescription;
-            return [
-                'from' => null,
-                'to' => null,
-                'description' => $description,
-                'hour' => 0,
-                'amount' => $amount,
-                'shift_id' => $shift->id,
-            ];
-        }
-
         if (!is_null($start) && !is_null($end)) {
             $hour = $start->diffInHours($end);
         } else {
             $hour = $shift->from->diffInHours($shift->to);
         }
 
-        [$description, $amount] = (new GetSalaryForHours($shift,$hour,$this->staff->daily_salary))->get();
+        [$description, $amount] = (new GetSalaryForHours($shift, $hour, $this->staff->daily_salary))->get();
         if (is_null($start)) {
             $description = 'no punch in detail, get 8 hour salary';
         }

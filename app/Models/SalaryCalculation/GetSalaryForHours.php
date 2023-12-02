@@ -51,7 +51,14 @@ class GetSalaryForHours
         return ["hour is $this->hour, unknown condition", 0];
     }
 
-    protected function lessThanShiftHourSalary()
+    public function getSalaryWithoutPay(): array
+    {
+        [$description, $amount] = $this->get();
+        $description .= " salary without works on " . $this->date->toDateString();
+        return [$description, $amount];
+    }
+
+    protected function lessThanShiftHourSalary(): array
     {
         return [
             Str::replaceArray('?', [$this->hour, $this->shouldWorkHour], static::DESCRIPTION[0]),
@@ -59,18 +66,18 @@ class GetSalaryForHours
         ];
     }
 
-    protected function halfDaySalary()
+    protected function halfDaySalary(): array
     {
         return [static::DESCRIPTION[4], round($this->perday / 2, 2)];
     }
 
-    protected function fullDaySalary()
+    protected function fullDaySalary(): array
     {
         [$description, $amount] = $this->getHolidaySalary(static::DESCRIPTION[8]);
         return [$description, round($amount, 2)];
     }
 
-    protected function extraFullDaySalary()
+    protected function extraFullDaySalary(): array
     {
         $this->perday = $this->perday + 100;
         [$description, $amount] = $this->getHolidaySalary(static::DESCRIPTION[12]);
@@ -80,7 +87,7 @@ class GetSalaryForHours
         ];
     }
 
-    protected function getHolidaySalary($description)
+    protected function getHolidaySalary($description): array
     {
         $perDay = $this->perday;
 
@@ -93,7 +100,7 @@ class GetSalaryForHours
         return [$description, $amount];
     }
 
-    protected function qualifyForHolidayPay()
+    protected function qualifyForHolidayPay(): bool
     {
         return $this->hour >= static::HOLIDAY_PAY_REQUIRE_WORKING_HOURS && $this->holiday !== null;
     }
