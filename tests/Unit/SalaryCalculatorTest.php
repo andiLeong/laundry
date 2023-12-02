@@ -7,7 +7,7 @@ use App\Models\Branch;
 use App\Models\Enum\AttendanceType;
 use App\Models\Holiday;
 use App\Models\Salary;
-use App\Models\SalaryCalculator;
+use App\Models\SalaryCalculation\SalaryCalculator;
 use App\Models\SalaryDetail;
 use App\Models\Shift;
 use App\Models\Staff;
