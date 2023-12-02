@@ -4,6 +4,7 @@ namespace App\Models\SalaryCalculation;
 
 use App\Models\Holiday;
 use App\Models\Shift;
+use Illuminate\Support\Str;
 
 class GetSalaryForHours
 {
@@ -12,6 +13,15 @@ class GetSalaryForHours
     private $perday;
     private $shouldWorkHour;
     private mixed $date;
+    private $holiday;
+
+    const HOLIDAY_PAY_REQUIRE_WORKING_HOURS = 8;
+    const DESCRIPTION = [
+        0 => 'working hour is ? less than shift hour ? no salary',
+        4 => 'working hour is between 4 to 8 hours, half day salary',
+        8 => 'working hour is between 8 - 12 hour, normal daily salary',
+        12 => 'working hour is euq or more than 12 hours, add 100 currently',
+    ];
 
     public function __construct(Shift $shift, $hour, $perday)
     {
@@ -20,12 +30,13 @@ class GetSalaryForHours
         $this->hour = $hour;
         $this->perday = $perday;
         $this->shouldWorkHour = $this->shift->from->diffInHours($this->shift->to);
+        $this->holiday = Holiday::where('date', $this->date)->first();
     }
 
     public function get()
     {
         $conditions = [
-            'lessThanWorkHourSalary' => fn() => $this->hour < $this->shouldWorkHour,
+            'lessThanShiftHourSalary' => fn() => $this->hour < $this->shouldWorkHour,
             'halfDaySalary' => fn() => $this->hour >= 4 && $this->hour < 8,
             'fullDaySalary' => fn() => $this->hour >= 8 && $this->hour < 12,
             'extraFullDaySalary' => fn() => $this->hour >= 12,
@@ -36,46 +47,54 @@ class GetSalaryForHours
                 return $this->{$method}();
             }
         }
+
+        return ["hour is $this->hour, unknown condition", 0];
     }
 
-    protected function lessThanWorkHourSalary()
+    protected function lessThanShiftHourSalary()
     {
-        return ["working hour is $this->hour less than shift hour $this->shouldWorkHour no salary", 0];
+        return [
+            Str::replaceArray('?', [$this->hour, $this->shouldWorkHour], static::DESCRIPTION[0]),
+            0
+        ];
     }
 
     protected function halfDaySalary()
     {
-        return ['working hour is between 4 to 8 hours, half day salary', round($this->perday / 2, 2)];
+        return [static::DESCRIPTION[4], round($this->perday / 2, 2)];
     }
 
     protected function fullDaySalary()
     {
-        [$holidayDescription, $amount] = $this->getHolidaySalary($this->date, $this->perday);
-        $description = 'working hour is between 8 - 12 hour, normal daily salary' . $holidayDescription;
+        [$description, $amount] = $this->getHolidaySalary(static::DESCRIPTION[8]);
         return [$description, round($amount, 2)];
     }
 
     protected function extraFullDaySalary()
     {
-        $perDay = $this->perday + 100;
-        [$holidayDescription, $amount] = $this->getHolidaySalary($this->date, $perDay);
-        $description = 'working hour is euq or more than 12 hours, add 100 currently' . $holidayDescription;
+        $this->perday = $this->perday + 100;
+        [$description, $amount] = $this->getHolidaySalary(static::DESCRIPTION[12]);
         return [
             $description,
             round($amount, 2),
         ];
     }
 
-    protected function getHolidaySalary($date, $perDay, $hour = 8)
+    protected function getHolidaySalary($description)
     {
-        $holiday = Holiday::where('date', $date)->first();
-        $holidayDescription = '';
+        $perDay = $this->perday;
+
         $amount = $perDay;
-        if (!is_null($holiday) && in_array($hour, [8, 12])) {
-            $holidayDescription = ' with holiday rate ' . round($holiday->rate, 1);
-            $amount = $perDay + $perDay * $holiday->rate;
+        if ($this->qualifyForHolidayPay()) {
+            $description .= ' with holiday rate ' . round($this->holiday->rate, 1);
+            $amount = $perDay + $perDay * $this->holiday->rate;
         }
 
-        return [$holidayDescription, $amount];
+        return [$description, $amount];
+    }
+
+    protected function qualifyForHolidayPay()
+    {
+        return $this->hour >= static::HOLIDAY_PAY_REQUIRE_WORKING_HOURS && $this->holiday !== null;
     }
 }
