@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\SalaryCalculator;
+use App\Models\SalaryCalculation\SalaryCalculator;
 use App\Models\Staff;
 use Illuminate\Console\Command;
 
