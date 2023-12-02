@@ -50,13 +50,26 @@ class SalaryCalculatorTest extends TestCase
     /** @test */
     public function if_salary_day_falls_on_holiday_a_day_before_should_be_salary_day(): void
     {
-//        $friday = Carbon::parse('2023-12-15');
-//        Holiday::factory()->create(['date' => $friday]);
-//        $this->assertEquals(14, $this->createCalculator($friday)->firstSalaryDay());
+        $friday = Carbon::parse('2023-12-15');
+        Holiday::factory()->create(['date' => $friday]);
+        $this->assertEquals(14, $this->createCalculator($friday)->firstSalaryDay());
 
         $thursday = Carbon::parse('2023-11-30');
         Holiday::factory()->create(['date' => $thursday]);
         $this->assertEquals(29, $this->createCalculator($thursday)->secondSalaryDay());
+    }
+
+    /** @test */
+    public function salary_day_should_not_be_weekend_or_holiday()
+    {
+        $sunday = Carbon::parse('2023-10-15');
+        $friday = Holiday::factory()->create(['date' => $sunday->copy()->subDays(2)]);
+        $thursday = Holiday::factory()->create(['date' => $sunday->copy()->subDays(3)]);
+        $this->assertEquals(11, $this->createCalculator($sunday)->firstSalaryDay());
+
+        $sunday = Carbon::parse('2023-12-31');
+        $friday = Holiday::factory()->create(['date' => $sunday->copy()->subDays(2)]);
+        $this->assertEquals(28, $this->createCalculator($sunday)->secondSalaryDay());
     }
 
     /** @test */
