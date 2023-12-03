@@ -18,6 +18,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SendVerificationCodeController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ShiftsController;
 use App\Http\Controllers\SignUpController;
 use App\Http\Controllers\TwilioSmsWebhookController;
 use App\Http\Controllers\UserPasswordController;
@@ -66,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('staff.only')->group(function () {
 
         Route::post('/admin/attendance', [AttendanceController::class, 'store']);
+        Route::get('/admin/shifts', [ShiftsController::class, 'index']);
         Route::get('/admin/attendance', [AttendanceController::class, 'index']);
         Route::get('/admin/order-paid-record', [OrderPaidRecordController::class, 'index']);
 

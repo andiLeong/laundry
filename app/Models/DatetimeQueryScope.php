@@ -14,10 +14,10 @@ trait DatetimeQueryScope
             ->where('created_at', '<', today()->endOfDay());
     }
 
-    public function scopeCurrentMonth(Builder $query)
+    public function scopeCurrentMonth(Builder $query, $column = 'created_at')
     {
-        return $query->where('created_at', '>', today()->startOfMonth())
-            ->where('created_at', '<', today()->endOfMonth());
+        return $query->where($column, '>', today()->startOfMonth())
+            ->where($column, '<', today()->endOfMonth());
     }
 
     public function scopeCurrentWeek(Builder $query)
@@ -50,10 +50,10 @@ trait DatetimeQueryScope
 
     public function scopeGroupByCreated(Builder $query, $span, $format = 'month')
     {
-        if($format == 'month'){
+        if ($format == 'month') {
             $format = '%Y-%m';
             $method = 'passMonths';
-        }else{
+        } else {
             $format = '%Y-%m-%d';
             $method = 'passDays';
         }
