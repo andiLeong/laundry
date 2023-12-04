@@ -24,7 +24,7 @@ class AdminCreateOrderTest extends TestCase
     public function it_can_create_order(): void
     {
         $this->assertDatabaseCount('orders', 0);
-        $response = $this->createOrder();
+        $response = $this->createOrderWithMock();
         $this->assertDatabaseCount('orders', 1);
         $response->assertSuccessful();
     }
@@ -64,7 +64,7 @@ class AdminCreateOrderTest extends TestCase
     {
         $name = 'user_id';
         $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
-        $this->createOrder([$name => null])->assertJsonMissingValidationErrors($name);
+        $this->createOrderWithMock([$name => null])->assertJsonMissingValidationErrors($name);
     }
 
     /** @test */
@@ -141,7 +141,7 @@ class AdminCreateOrderTest extends TestCase
             'price' => 200
         ]);
 
-        $this->createOrder([
+        $this->createOrderWithMock([
             'service_id' => $service->id,
             'amount' => 100,
         ]);
@@ -157,7 +157,7 @@ class AdminCreateOrderTest extends TestCase
         $this->assertNull($order);
 
         $service = Service::factory()->create(['price' => 201]);
-        $this->createOrder([
+        $this->createOrderWithMock([
             'service_id' => $service->id,
             'amount' => null,
         ]);
@@ -175,7 +175,7 @@ class AdminCreateOrderTest extends TestCase
         $service = Service::factory()->create(['price' => 201]);
         $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 50, 'stock' => 10]);
-        $this->createOrder([
+        $this->createOrderWithMock([
             'service_id' => $service->id,
             'product_ids' => [
                 ['id' => $product1->id],
@@ -219,7 +219,7 @@ class AdminCreateOrderTest extends TestCase
         $service = Service::factory()->create(['price' => 201]);
         $product1 = Product::factory()->create(['price' => 50, 'stock' => 10]);
         $product2 = Product::factory()->create(['price' => 70, 'stock' => 10]);
-        $this->createOrder([
+        $this->createOrderWithMock([
             'service_id' => $service->id,
             'product_ids' => [
                 ['id' => $product1->id, 'quantity' => $quantity],
@@ -289,7 +289,7 @@ class AdminCreateOrderTest extends TestCase
     public function order_paid_record_is_also_created_if_when_order_create_order_is_paid(): void
     {
         $this->assertDatabaseCount('order_paid', 0);
-        $response = $this->createOrder(['paid' => 1]);
+        $response = $this->createOrderWithMock(['paid' => 1]);
         $this->assertDatabaseCount('order_paid', 1);
         $response->assertSuccessful();
     }
@@ -298,7 +298,7 @@ class AdminCreateOrderTest extends TestCase
     public function order_paid_record_is_not_created_if_when_order_create_order_is_not_paid(): void
     {
         $this->assertDatabaseCount('order_paid', 0);
-        $response = $this->createOrder(['paid' => 0]);
+        $response = $this->createOrderWithMock(['paid' => 0]);
         $this->assertDatabaseCount('order_paid', 0);
         $response->assertSuccessful();
     }

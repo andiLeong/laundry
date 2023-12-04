@@ -18,7 +18,7 @@ class CreateOrderWithSignUpDiscountTest extends TestCase
     public function it_can_create_order_with_signup_discount_promotion(): void
     {
         $this->getPromotion();
-        $this->createOrderWithPromotions([$this->promotion->id]);
+        $this->createOrderWithPromotionsAndMock([$this->promotion->id]);
 
         $order = Order::first();
         $this->assertNotNull($order);

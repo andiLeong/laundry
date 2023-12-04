@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Listener;
+namespace App\Listeners;
 
 use App\Event\OrderCreated;
-use App\Models\Enum\OrderPayment;
 use App\Models\OrderPaid;
 use App\Models\OrderProduct;
 use Illuminate\Database\Eloquent\Collection;

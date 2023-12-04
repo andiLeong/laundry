@@ -154,7 +154,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     public function user_id_is_properly_record_when_create_promotion()
     {
         $promotion = Promotion::factory()->create();
-        $this->createOrderWithPromotions([$promotion->id], $user = User::factory()->create());
+        $this->createOrderWithPromotionsAndMock([$promotion->id], $user = User::factory()->create());
 
         $order = Order::first();
         $this->assertEquals($this->user->id, $order->creator_id);
@@ -166,7 +166,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $signUpPromotion = $this->getPromotion();
         $wednesdayPromotion = $this->getWednesdayPromotion();
-        $this->createOrderWithPromotions([$signUpPromotion->id, $wednesdayPromotion->id]);
+        $this->createOrderWithPromotionsAndMock([$signUpPromotion->id, $wednesdayPromotion->id]);
 
         $order = Order::first();
         $this->assertNotNull($order);
@@ -178,7 +178,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $signUpPromotion = $this->getPromotion();
         $wednesdayPromotion = $this->getWednesdayPromotion();
-        $this->createOrderWithPromotions([$signUpPromotion->id, $wednesdayPromotion->id]);
+        $this->createOrderWithPromotionsAndMock([$signUpPromotion->id, $wednesdayPromotion->id]);
 
         $orderPromotion = OrderPromotion::all();
         $this->assertTrue($orderPromotion->pluck('promotion_id')->contains($signUpPromotion->id));
@@ -189,7 +189,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     public function some_promotions_that_will_not_apply_discount_like_reward_gift_certificates()
     {
         $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
-        $this->createOrderWithPromotions([$rewardGiftCertificatePromotion->id]);
+        $this->createOrderWithPromotionsAndMock([$rewardGiftCertificatePromotion->id]);
 
         $orderId = OrderPromotion::where('promotion_id',
             $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
@@ -202,7 +202,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $signUpPromotion = $this->getPromotion();
         $rewardGiftCertificatePromotion = $this->rewardGiftCertificatePromotion();
-        $this->createOrderWithPromotions([$signUpPromotion->id, $rewardGiftCertificatePromotion->id]);
+        $this->createOrderWithPromotionsAndMock([$signUpPromotion->id, $rewardGiftCertificatePromotion->id]);
 
         $orderId = OrderPromotion::where('promotion_id',
             $rewardGiftCertificatePromotion->id)->first('order_id')->order_id;
@@ -236,7 +236,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $service = $this->getService();
         $user = User::factory()->create();
 
-        $this->createOrder([
+        $this->createOrderWithMock([
             'promotion_ids' => [$unqualified->id, $unqualified2->id, $signUpPromotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
@@ -259,7 +259,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $product2 = Product::factory()->create(['price' => 50, 'stock' => 10]);
         $this->assertDatabaseCount('order_products', 0);
 
-        $this->createOrder([
+        $this->createOrderWithMock([
             'promotion_ids' => [$signUpPromotion->id],
             'service_id' => $service->id,
             'user_id' => $user->id,
@@ -302,7 +302,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $signUpPromotion = $this->getPromotion();
         $service = $this->getService();
         $this->assertDatabaseCount('orders', 0);
-        $this->createOrder([
+        $this->createOrderWithMock([
             'promotion_ids' => [$signUpPromotion->id],
             'service_id' => $service->id,
             'user_id' => $this->customer()->id
@@ -319,7 +319,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $signUpPromotion = $this->getPromotion();
         $service = $this->getService();
         $this->assertDatabaseCount('orders', 0);
-        $this->createOrder([
+        $this->createOrderWithMock([
             'promotion_ids' => [$signUpPromotion->id],
             'service_id' => $service->id,
             'payment' => OrderPayment::gcash->value,

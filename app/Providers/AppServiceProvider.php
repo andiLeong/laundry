@@ -6,11 +6,10 @@ use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
 use App\Http\Validation\OrderValidate;
-use App\Models\Promotions\PromotionNotFoundException;
-use App\Models\Promotions\UserQualifiedPromotion;
 use App\Models\Sms\Contract\Sms as SmsContract;
 use App\Models\Sms\Template;
 use App\Models\Sms\Twilio;
+use App\Notification\Telegram;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Twilio\Rest\Client as TwilioSdk;
@@ -33,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         Model::unguard();
         $this->app->bind(OrderValidate::class, function ($app) {
             $request = $app['request'];
-            if($request->has('promotion_ids')){
+            if ($request->has('promotion_ids')) {
                 return new AdminCreateOrderWithPromotionValidation($request);
             }
             return new AdminCreateOrderValidation($request);
@@ -53,6 +52,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(Template::class, function ($app) {
             return new Template();
+        });
+
+        $this->app->singleton(Telegram::class, function ($app) {
+            $config = $app['config'];
+            $token = $config->get('services.telegram.token');
+            return (new Telegram($token));
         });
     }
 }
