@@ -2,13 +2,14 @@
 
 namespace App\Listeners;
 
-use App\Models\Order;
 use App\Notification\Telegram;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendNotification
+class SendNotification implements ShouldQueue
 {
+    use InteractsWithQueue;
+
     /**
      * Create the event listener.
      */

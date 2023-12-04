@@ -20,9 +20,10 @@ class Telegram
         $endPoint = 'bot' . $this->token . '/sendMessage';
         $url = $this->baseUrl . $endPoint;
 
-        $message = "service: {$order->service->name}, \n total amount: {$order->total_amount}, \n product amount: {$order->amount}, \n order description: {$order->description} \n ";
+        $message = "service: {$order->service->name}, \n total amount: {$order->total_amount},\n product amount: {$order->amount},\n order description: {$order->description}\n ";
 
         foreach ($chatIds as $id) {
+            logger('sending telegram notification');
             $response = Http::get($url, [
                 'chat_id' => $id,
                 'text' => $message
