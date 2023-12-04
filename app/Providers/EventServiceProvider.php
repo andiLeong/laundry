@@ -3,7 +3,8 @@
 namespace App\Providers;
 
 use App\Event\OrderCreated;
-use App\Listener\CreatedOrderProduct;
+use App\Listeners\CreatedOrderProduct;
+use App\Listeners\SendNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -16,6 +17,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         OrderCreated::class => [
             CreatedOrderProduct::class,
+            SendNotification::class,
         ],
     ];
 

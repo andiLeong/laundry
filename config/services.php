@@ -36,4 +36,10 @@ return [
         'auth_token' => env('TWILIO_AUTH_TOKEN'),
         'number' => env('TWILIO_NUMBER'),
     ],
+
+    'telegram' => [
+        'token' => env('TELEGRAM_TOKEN'),
+        'chat_ids' => env('TELEGRAM_CHAT_IDS'),
+        'base_url' => env('TELEGRAM_BASE_URL'),
+    ],
 ];

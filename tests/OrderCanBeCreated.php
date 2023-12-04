@@ -7,17 +7,34 @@ use App\Models\Order;
 use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
+use App\Notification\Telegram;
+use Mockery\MockInterface;
 
 trait OrderCanBeCreated
 {
     protected string $endpoint = 'api/admin/order';
     protected $promotion;
 
-    public function createOrder($overwrites = [])
+    public function createOrder($overwrites = [], $needMock = false)
     {
+        if ($needMock) {
+            $mock = $this->mock(Telegram::class, function (MockInterface $mock) {
+                $mock->shouldReceive('sendOrderCreatedNotification')->once()->andReturn(true);
+            });
+        } else {
+            $mock = $this->mock(Telegram::class, function (MockInterface $mock) {
+                $mock->shouldNotReceive('sendOrderCreatedNotification');
+            });
+        }
+
         return $this->signInAsAdmin()->postJson($this->endpoint,
             $this->orderAttributes($overwrites)
         );
+    }
+
+    public function createOrderWithMock($overwrites = [])
+    {
+        return $this->createOrder($overwrites, true);
     }
 
     protected function orderAttributes(mixed $overwrites)
@@ -27,7 +44,7 @@ trait OrderCanBeCreated
         return array_merge($attributes, $overwrites);
     }
 
-    public function createOrderWithPromotions(array $promotions, User $user = null)
+    public function createOrderWithPromotions(array $promotions, User $user = null, $needMock = false)
     {
         $user ??= User::factory()->create();
         $service = $this->getService();
@@ -37,10 +54,15 @@ trait OrderCanBeCreated
             'promotion_ids' => $promotions,
             'service_id' => $service->id,
             'user_id' => $user->id,
-        ]);
+        ], $needMock);
 
         $this->assertDatabaseCount('order_promotions', count($promotions));
         $this->assertDatabaseCount('orders', 1);
+    }
+
+    public function createOrderWithPromotionsAndMock(array $promotions, User $user = null)
+    {
+        return $this->createOrderWithPromotions($promotions, $user,true);
     }
 
     public function getService($price = 200, $name = 'full service')
