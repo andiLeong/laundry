@@ -10,4 +10,9 @@ class SalaryDetail extends Model
     use HasFactory;
 
     public $timestamps = false;
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'shift_id', 'id');
+    }
 }
