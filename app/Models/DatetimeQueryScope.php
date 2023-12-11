@@ -10,14 +10,14 @@ trait DatetimeQueryScope
 
     public function scopeToday(Builder $query)
     {
-        return $query->where('created_at', '>', today()->startOfDay())
-            ->where('created_at', '<', today()->endOfDay());
+        return $query->where('created_at', '>=', today()->startOfDay())
+            ->where('created_at', '<=', today()->endOfDay());
     }
 
     public function scopeCurrentMonth(Builder $query, $column = 'created_at')
     {
-        return $query->where($column, '>', today()->startOfMonth())
-            ->where($column, '<', today()->endOfMonth());
+        return $query->where($column, '>=', today()->startOfMonth())
+            ->where($column, '<=', today()->endOfMonth());
     }
 
     public function scopeCurrentWeek(Builder $query)
