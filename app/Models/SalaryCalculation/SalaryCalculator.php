@@ -89,6 +89,7 @@ class SalaryCalculator
                 $this->getPaidWithoutWork[] = $dt->day;
                 $dt->subDay();
             } else {
+                $this->getPaidWithoutWork[] = $dt->day;
                 break;
             }
         }
@@ -127,7 +128,7 @@ class SalaryCalculator
         return Shift::where('staff_id', $this->staff->id)
             ->with('attendance')
             ->where('date', '>=', $start)
-            ->where('date', '<=', $end)
+            ->where('date', '<', $end)
             ->get();
     }
 

@@ -434,6 +434,29 @@ class SalaryCalculatorTest extends TestCase
     }
 
     /** @test */
+    public function it_can_salary_on_salary_day_without_attendance_record()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $salaryDay = Carbon::parse('2023-12-15');
+        $calculator = $this->createCalculator($salaryDay);
+        //shifts on salary day and without punch in/out details
+
+        $shift = $this->createShift($salaryDay);
+        $calculator->calculate();
+
+        $this->assertSalaryCorrect(
+            $calculator,
+            'working hour is between 8 - 12 hour, normal daily salary salary without works on ' . $shift->date->toDateString(),
+            $salaryPerDay,
+            [null, null],
+            $shift
+        );
+    }
+
+    /** @test */
     public function it_can_not_get_holiday_salary_if_shift_date_is_near_the_weekend_on_a_half_day_shift()
     {
         $this->assertDatabaseCount('salaries', 0);
