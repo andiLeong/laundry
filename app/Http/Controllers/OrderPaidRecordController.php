@@ -20,6 +20,10 @@ class OrderPaidRecordController extends Controller
             $record->whereHas('order', fn($query) => $query->where('payment', $request->get('payment')));
         }
 
-        return $record->with('creator:id,first_name', 'order:id,payment,description')->paginate();
+        $res = $record->with('creator:id,first_name', 'order:id,payment,description')->get();
+        return [
+            'data' => $res,
+            'total'=> $res->sum('amount'),
+        ];
     }
 }

@@ -95,6 +95,16 @@ class AdminReadOrderPaidRecord extends TestCase
         $this->assertEquals($orderPaidRecord->order->payment, $result['order']['payment']);
     }
 
+    /** @test */
+    public function it_read_its_total_amount(): void
+    {
+        $orderPaidRecord = OrderPaid::factory()->create(['amount' => 300]);
+        $orderPaidRecord2 = OrderPaid::factory()->create(['amount' => 250]);
+        $total = $this->fetch()->json('total');
+
+        $this->assertEquals($orderPaidRecord->amount + $orderPaidRecord2->amount, $total);
+    }
+
     protected function fetch($query = [], $as = null)
     {
         return $this->fetchAsAdmin($query, $as);
