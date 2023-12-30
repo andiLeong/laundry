@@ -23,7 +23,7 @@ class AdminCreateOrderValidation implements OrderValidate
         'product_ids' => 'nullable|array',
         'issued_invoice' => 'required|boolean',
         'paid' => 'required|boolean',
-        'company_id' => 'nullable|in:1',
+//        'company_id' => 'nullable|in:1',
         'description' => 'nullable|string',
     ];
 

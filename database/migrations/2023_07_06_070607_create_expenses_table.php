@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('branch_id')->nullable();
+//            $table->unsignedBigInteger('branch_id')->nullable();
             $table->string('name');
             $table->unsignedFloat('amount');
             $table->timestamps();

@@ -98,16 +98,6 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function company_id_must_be_valid()
-    {
-        $name = 'company_id';
-        $rule = ['nullable', 'in:1'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->createOrder($payload)
-        );
-    }
-
-    /** @test */
     public function description_must_be_valid()
     {
         $name = 'description';

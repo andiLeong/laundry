@@ -20,7 +20,7 @@ class ExpenseFactory extends Factory
             'name' => collect(['water','staff','electricity','rental'])->random(),
             'created_at' => today()->subMonths(rand(1,4)),
             'amount' => rand(100,5000),
-            'branch_id' => rand(1,10)
+//            'branch_id' => rand(1,10)
         ];
     }
 }
