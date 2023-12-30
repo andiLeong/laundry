@@ -63,7 +63,7 @@ class AdminUpdateOrderController extends Controller
 
     public function payment()
     {
-        if ($this->order->payment === OrderPayment::CASH->name) {
+        if ($this->order->payment === OrderPayment::CASH->toLower()) {
             $this->order->update(['payment' => OrderPayment::GCASH->value]);
             return;
         }

@@ -71,8 +71,8 @@ class UpdateOrderTest extends TestCase
         $this->update($order->id, 'payment');
         $this->update($order2->id, 'payment');
 
-        $this->assertEquals(OrderPayment::GCASH->name, $order->fresh()->payment);
-        $this->assertEquals(OrderPayment::CASH->name, $order2->fresh()->payment);
+        $this->assertEquals(OrderPayment::GCASH->toLower(), $order->fresh()->payment);
+        $this->assertEquals(OrderPayment::CASH->toLower(), $order2->fresh()->payment);
     }
 
     /** @test */

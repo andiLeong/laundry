@@ -15,4 +15,9 @@ enum OrderPayment :int
             }
         }
     }
+
+    public function toLower()
+    {
+        return strtolower($this->name);
+    }
 }

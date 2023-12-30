@@ -310,7 +310,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
 
         $order = Order::first();
         $this->assertDatabaseCount('orders', 1);
-        $this->assertEquals(OrderPayment::CASH->name, $order->payment);
+        $this->assertEquals(OrderPayment::CASH->toLower(), $order->payment);
     }
 
     /** @test */
@@ -328,7 +328,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
 
         $order = Order::first();
         $this->assertDatabaseCount('orders', 1);
-        $this->assertEquals(OrderPayment::GCASH->name, $order->payment);
+        $this->assertEquals(OrderPayment::GCASH->toLower(), $order->payment);
     }
 
     private function orderAttributes(mixed $overwrites)

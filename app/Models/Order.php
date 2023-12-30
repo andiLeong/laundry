@@ -22,7 +22,7 @@ class Order extends Model
     protected function payment(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => OrderPayment::from($value)->name
+            get: fn(string $value) => OrderPayment::from($value)->toLower()
         );
     }
 
