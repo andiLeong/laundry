@@ -19,7 +19,7 @@ return new class extends Migration
             $table->datetime('from')->nullable();
             $table->datetime('to')->nullable();
             $table->unsignedDecimal('hour');
-            $table->unsignedDecimal('amount');
+            $table->decimal('amount');
         });
     }
 
