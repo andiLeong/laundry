@@ -9,7 +9,7 @@ class PunchOutTest extends PunchInTest
     protected function setUp(): void
     {
         parent::setUp();
-        $this->type = AttendanceType::out->value;
+        $this->type = AttendanceType::OUT->value;
     }
 
     /** @test */

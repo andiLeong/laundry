@@ -162,7 +162,7 @@ class SalaryCalculator
                     ];
                 }
 
-                [$in, $out] = $attendances->partition(fn($record) => $record->type === AttendanceType::in->name);
+                [$in, $out] = $attendances->partition(fn($record) => $record->type === AttendanceType::IN->name);
                 $start = $in->sortBy('time')->values()->first()?->time;
                 $end = $out->sortBy('time')->values()->last()?->time;
                 return $this->calculateSalary($shift, $start, $end);

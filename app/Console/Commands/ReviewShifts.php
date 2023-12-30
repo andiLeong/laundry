@@ -38,17 +38,17 @@ class ReviewShifts extends Command
                 ->get();
 
             [$punchInDuringShift, $punchOutDuringShift] = $punchDuringShift->partition(function ($punch) {
-                return $punch->type === AttendanceType::in->name;
+                return $punch->type === AttendanceType::IN->name;
             });
 
             $punchInBeforeShift = Attendance::where('staff_id', $shift->staff_id)
-                ->where('type', AttendanceType::in->value)
+                ->where('type', AttendanceType::IN->value)
                 ->where('time', '<=', $shift->from)
                 ->where('time', '>=', $shift->from->copy()->subHours(Shift::TIME_SPAN))
                 ->get();
 
             $punchOutAfterShift = Attendance::where('staff_id', $shift->staff_id)
-                ->where('type', AttendanceType::out->value)
+                ->where('type', AttendanceType::OUT->value)
                 ->where('time', '>=', $shift->to)
                 ->where('time', '<=', $shift->to->copy()->addHours(Shift::TIME_SPAN))
                 ->get();

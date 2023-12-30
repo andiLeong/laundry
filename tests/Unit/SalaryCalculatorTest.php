@@ -343,7 +343,7 @@ class SalaryCalculatorTest extends TestCase
         $date = $fifteen->subDay();
 
         $shift = $this->createShift($date);
-        $this->createAttendance($end = $date->copy()->setTime(20, 0), $shift->id, AttendanceType::out->value);
+        $this->createAttendance($end = $date->copy()->setTime(20, 0), $shift->id, AttendanceType::OUT->value);
         $calculator->calculate();
 
         $this->assertSalaryCorrect(

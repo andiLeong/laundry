@@ -57,15 +57,15 @@ class AdminReadOrderPaidRecord extends TestCase
     /** @test */
     public function it_can_filter_dy_payment(): void
     {
-        $cashOrder = Order::factory()->create(['payment' => OrderPayment::cash->value]);
-        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $cashOrder = Order::factory()->create(['payment' => OrderPayment::CASH->value]);
+        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
         $cashOrderPaidRecord = OrderPaid::factory()->create(['order_id' => $cashOrder->id]);
         $gcashOrderPaidRecord = OrderPaid::factory()->create(['order_id' => $gcashOrder->id]);
         $cashResult = $this->fetch([
-            'payment' => OrderPayment::cash->value,
+            'payment' => OrderPayment::CASH->value,
         ])->collect('data')->pluck('id');
         $gcashResult = $this->fetch([
-            'payment' => OrderPayment::gcash->value,
+            'payment' => OrderPayment::GCASH->value,
         ])->collect('data')->pluck('id');
 
         $this->assertTrue($cashResult->contains($cashOrderPaidRecord->id));

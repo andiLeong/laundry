@@ -32,7 +32,7 @@ class PunchInTest extends TestCase
         $this->shift = Shift::factory()->create([
             'staff_id' => $this->staff->id,
         ]);
-        $this->type = AttendanceType::in->value;
+        $this->type = AttendanceType::IN->value;
     }
 
     /** @test */

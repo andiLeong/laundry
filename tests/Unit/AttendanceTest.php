@@ -30,7 +30,7 @@ class AttendanceTest extends TestCase
     public function it_has_the_following_attributes(): void
     {
         $attendance = new Attendance();
-        $attendance->type = AttendanceType::in->value;
+        $attendance->type = AttendanceType::IN->value;
         $attendance->staff_id = $this->staff->id;
         $attendance->time = $now = now();
         $attendance->branch_id = $this->staff->branch_id;
@@ -40,7 +40,7 @@ class AttendanceTest extends TestCase
         $this->assertNotNull($attendance);
         $this->assertEquals($this->staff->id, $attendance->staff_id);
         $this->assertEquals($now->toDateString(), $attendance->time->toDateString());
-        $this->assertEquals(AttendanceType::in->name, $attendance->type);
+        $this->assertEquals(AttendanceType::IN->name, $attendance->type);
     }
 
     /** @test */

@@ -4,7 +4,12 @@ namespace App\Models\Enum;
 
 enum UserType :int
 {
-    case customer = 0;
-    case admin = 1;
-    case employee = 2;
+    case CUSTOMER = 0;
+    case ADMIN = 1;
+    case EMPLOYEE = 2;
+
+    public function toLower()
+    {
+       return strtolower($this->name);
+    }
 }

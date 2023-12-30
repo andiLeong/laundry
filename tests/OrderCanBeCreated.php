@@ -40,7 +40,7 @@ trait OrderCanBeCreated
     protected function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
-        $attributes['payment'] = OrderPayment::cash->value;
+        $attributes['payment'] = OrderPayment::CASH->value;
         return array_merge($attributes, $overwrites);
     }
 

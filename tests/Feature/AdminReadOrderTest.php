@@ -53,8 +53,8 @@ class AdminReadOrderTest extends TestCase
     /** @test */
     public function admin_can_view_all_the_order(): void
     {
-        $employee = User::factory()->create(['type' => UserType::employee->value]);
-        $employee2 = User::factory()->create(['type' => UserType::employee->value]);
+        $employee = User::factory()->create(['type' => UserType::EMPLOYEE->value]);
+        $employee2 = User::factory()->create(['type' => UserType::EMPLOYEE->value]);
         $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
         $orders = Order::factory()->create(['creator_id' => $employee2->id]);
         $ids = $this->fetchOrderIds();
@@ -238,8 +238,8 @@ class AdminReadOrderTest extends TestCase
     public function it_can_filter_by_payment(): void
     {
         $orders = Order::factory(2)->create();
-        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
-        $ids = $this->fetchOrderIds(['payment' => OrderPayment::gcash->value]);
+        $gcashOrder = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
+        $ids = $this->fetchOrderIds(['payment' => OrderPayment::GCASH->value]);
 
         $this->assertTrue($ids->contains($gcashOrder->id));
         $this->assertFalse($ids->contains($orders[0]->id));

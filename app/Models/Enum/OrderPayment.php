@@ -4,8 +4,8 @@ namespace App\Models\Enum;
 
 enum OrderPayment :int
 {
-    case cash = 1;
-    case gcash = 2;
+    case CASH = 1;
+    case GCASH = 2;
 
     public static function fromName(string $name): string
     {

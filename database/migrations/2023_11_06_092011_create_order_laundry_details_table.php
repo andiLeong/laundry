@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id');
             $table->unsignedTinyInteger('weight')->default(8);
             $table->unsignedTinyInteger('dried_minutes')->default(40);
-            $table->unsignedTinyInteger('type')->default(LaundryType::mixed_clothes->value);
-            $table->unsignedTinyInteger('wash_mode')->default(WashMode::normal->value);
+            $table->unsignedTinyInteger('type')->default(LaundryType::MIXED_CLOTHES->value);
+            $table->unsignedTinyInteger('wash_mode')->default(WashMode::NORMAL->value);
             $table->boolean('extra_wash')->default(false);
             $table->boolean('extra_rinse')->default(false);
             $table->timestamps();

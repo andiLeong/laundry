@@ -50,7 +50,7 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:' . AttendanceType::in->value . ',' . AttendanceType::out->value,
+            'type' => 'required|in:' . AttendanceType::IN->value . ',' . AttendanceType::OUT->value,
             'longitude' => 'required',
             'latitude' => 'required',
         ]);

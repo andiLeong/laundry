@@ -48,7 +48,7 @@ class CreateOrderGcashReferenceTest extends TestCase
     public function reference_number_must_be_unique()
     {
         GcashOrder::factory()->create(['reference_number' => 995]);
-        $order = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $order = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
 
         $this->signInAsAdmin()->postJson($this->endpoint,[
             'order_id' => $order->id,
@@ -70,7 +70,7 @@ class CreateOrderGcashReferenceTest extends TestCase
     {
         $this->assertDatabaseEmpty('gcash_orders');
 
-        $order = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $order = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
         $this->signInAsAdmin()->postJson($this->endpoint, [
             'order_id' => $order->id,
             'reference_number' => 'sdxccxvvxv'

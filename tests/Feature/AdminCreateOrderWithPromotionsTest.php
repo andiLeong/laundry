@@ -310,7 +310,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
 
         $order = Order::first();
         $this->assertDatabaseCount('orders', 1);
-        $this->assertEquals(OrderPayment::cash->name, $order->payment);
+        $this->assertEquals(OrderPayment::CASH->name, $order->payment);
     }
 
     /** @test */
@@ -322,19 +322,19 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
         $this->createOrderWithMock([
             'promotion_ids' => [$signUpPromotion->id],
             'service_id' => $service->id,
-            'payment' => OrderPayment::gcash->value,
+            'payment' => OrderPayment::GCASH->value,
             'user_id' => $this->customer()->id
         ]);
 
         $order = Order::first();
         $this->assertDatabaseCount('orders', 1);
-        $this->assertEquals(OrderPayment::gcash->name, $order->payment);
+        $this->assertEquals(OrderPayment::GCASH->name, $order->payment);
     }
 
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
-        $attributes['payment'] = OrderPayment::cash->value;
+        $attributes['payment'] = OrderPayment::CASH->value;
         $attributes['promotion_ids'] = [1];
         return array_merge($attributes, $overwrites);
     }

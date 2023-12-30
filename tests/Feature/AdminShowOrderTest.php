@@ -35,9 +35,9 @@ class AdminShowOrderTest extends TestCase
     /** @test */
     public function admin_can_view_all_the_order_no_matter_who_create(): void
     {
-        $admin = User::factory()->create(['type' => UserType::admin->value]);
-        $employee = User::factory()->create(['type' => UserType::employee->value]);
-        $employee2 = User::factory()->create(['type' => UserType::employee->value]);
+        $admin = User::factory()->create(['type' => UserType::ADMIN->value]);
+        $employee = User::factory()->create(['type' => UserType::EMPLOYEE->value]);
+        $employee2 = User::factory()->create(['type' => UserType::EMPLOYEE->value]);
         $employeeOrder = Order::factory()->create(['creator_id' => $employee->id]);
         $employeeOrder2 = Order::factory()->create(['creator_id' => $employee2->id]);
 
@@ -68,7 +68,7 @@ class AdminShowOrderTest extends TestCase
     /** @test */
     public function if_order_is_gcash_payment_it_can_get_gcash_reference_number(): void
     {
-        $order = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $order = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
         \App\Models\GcashOrder::create([
             'order_id' => $order->id,
             'reference_number' => 'xxx',

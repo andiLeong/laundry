@@ -17,7 +17,7 @@ class AdminShowUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = User::factory()->create(['first_name' => 'kate', 'phone' => $this->phone, 'type' => UserType::employee->value]);
+        $this->user = User::factory()->create(['first_name' => 'kate', 'phone' => $this->phone, 'type' => UserType::EMPLOYEE->value]);
     }
 
     /** @test */

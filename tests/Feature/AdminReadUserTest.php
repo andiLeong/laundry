@@ -25,7 +25,7 @@ class AdminReadUserTest extends TestCase
     /** @test */
     public function employee_can_not_access(): void
     {
-        $employee = User::factory()->create(['type' => UserType::employee->value]);
+        $employee = User::factory()->create(['type' => UserType::EMPLOYEE->value]);
         $this->signIn($employee)->getJson($this->endpoint)->assertForbidden();
     }
 

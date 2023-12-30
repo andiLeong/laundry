@@ -23,8 +23,8 @@ class OrderLaundryDetailFactory extends Factory
             'order_id' => Order::factory(),
             'weight' => 8,
             'dried_minutes' => 40,
-            'type' => LaundryType::mixed_clothes->value,
-            'wash_mode' => WashMode::normal->value,
+            'type' => LaundryType::MIXED_CLOTHES->value,
+            'wash_mode' => WashMode::NORMAL->value,
             'extra_wash' => false,
             'extra_rinse' => false,
         ];

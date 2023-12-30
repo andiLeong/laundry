@@ -306,7 +306,7 @@ class AdminCreateOrderTest extends TestCase
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
-        $attributes['payment'] = OrderPayment::cash->value;
+        $attributes['payment'] = OrderPayment::CASH->value;
         return array_merge($attributes, $overwrites);
     }
 }

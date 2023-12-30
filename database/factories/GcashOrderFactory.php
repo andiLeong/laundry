@@ -20,7 +20,7 @@ class GcashOrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => Order::factory()->create(['payment' => OrderPayment::gcash->value]),
+            'order_id' => Order::factory()->create(['payment' => OrderPayment::GCASH->value]),
             'reference_number' => Str::random(32),
         ];
     }

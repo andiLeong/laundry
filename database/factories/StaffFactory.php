@@ -20,7 +20,7 @@ class StaffFactory extends Factory
     public function definition(): array
     {
         $user = User::factory()->create([
-            'type' => UserType::employee->value,
+            'type' => UserType::EMPLOYEE->value,
             'branch_id' => Branch::factory()->create()->id
         ]);
         return [

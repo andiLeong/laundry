@@ -91,7 +91,7 @@ class ReviewShiftTest extends TestCase
     public function if_punch_out_early_and_no_punch_out_after_shift_mark_as_early_leave(): void
     {
         $this->assertFalse($this->shift->early_leave);
-        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::OUT);
         $this->artisan('shift:review');
 
         $this->assertTrue($this->shift->fresh()->early_leave);
@@ -101,8 +101,8 @@ class ReviewShiftTest extends TestCase
     public function if_punch_out_after_shift_and_punch_out_between_shift_consider_not_leave_early()
     {
         $this->assertFalse($this->shift->early_leave);
-        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
-        $this->attendance($this->shift->to->addHours(), AttendanceType::out);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::OUT);
+        $this->attendance($this->shift->to->addHours(), AttendanceType::OUT);
 
         $this->artisan('shift:review');
 
@@ -113,8 +113,8 @@ class ReviewShiftTest extends TestCase
     public function if_punch_out_early_and_the_latest_punch_out_from_the_shift_end_is_over_3_hour_consider_early_out()
     {
         $this->assertFalse($this->shift->early_leave);
-        $this->attendance($this->shift->to->subHour(), AttendanceType::out);
-        $this->attendance($this->shift->to->addHours(4), AttendanceType::out);
+        $this->attendance($this->shift->to->subHour(), AttendanceType::OUT);
+        $this->attendance($this->shift->to->addHours(4), AttendanceType::OUT);
 
         $this->artisan('shift:review');
 
@@ -125,8 +125,8 @@ class ReviewShiftTest extends TestCase
     public function if_punch_out_is_3_hour_less_than_shift_end_it_consider_not_early_leave()
     {
         $this->assertFalse($this->shift->late);
-        $this->attendance($this->shift->to->subHours(3), AttendanceType::out);
-        $this->attendance($this->shift->to->subMinutes(), AttendanceType::out);
+        $this->attendance($this->shift->to->subHours(3), AttendanceType::OUT);
+        $this->attendance($this->shift->to->subMinutes(), AttendanceType::OUT);
 
         $this->artisan('shift:review');
 
@@ -155,7 +155,7 @@ class ReviewShiftTest extends TestCase
         $this->assertTrue($this->shift->fresh()->reviewed);
     }
 
-    public function attendance($time = null, $type = AttendanceType::in)
+    public function attendance($time = null, $type = AttendanceType::IN)
     {
         return Attendance::factory()->create([
             'staff_id' => $this->staff->id,

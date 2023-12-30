@@ -67,12 +67,12 @@ class UpdateOrderTest extends TestCase
     public function it_can_toggle_order_payment_status()
     {
         $order = Order::factory()->create();
-        $order2 = Order::factory()->create(['payment' => OrderPayment::gcash->value]);
+        $order2 = Order::factory()->create(['payment' => OrderPayment::GCASH->value]);
         $this->update($order->id, 'payment');
         $this->update($order2->id, 'payment');
 
-        $this->assertEquals(OrderPayment::gcash->name, $order->fresh()->payment);
-        $this->assertEquals(OrderPayment::cash->name, $order2->fresh()->payment);
+        $this->assertEquals(OrderPayment::GCASH->name, $order->fresh()->payment);
+        $this->assertEquals(OrderPayment::CASH->name, $order2->fresh()->payment);
     }
 
     /** @test */

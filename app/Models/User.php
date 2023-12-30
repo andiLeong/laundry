@@ -56,7 +56,7 @@ class User extends Authenticatable
     protected function type(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => UserType::from($value)->name
+            get: fn(string $value) => UserType::from($value)->toLower()
         );
     }
 
@@ -70,17 +70,17 @@ class User extends Authenticatable
 
     public function isCustomer()
     {
-        return $this->type === UserType::customer->name;
+        return $this->type === UserType::CUSTOMER->toLower();
     }
 
     public function isEmployee()
     {
-        return $this->type === UserType::employee->name;
+        return $this->type === UserType::EMPLOYEE->toLower();
     }
 
     public function isAdmin()
     {
-        return $this->type === UserType::admin->name;
+        return $this->type === UserType::ADMIN->toLower();
     }
 
     public function isVerified()

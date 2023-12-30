@@ -21,7 +21,7 @@ class ShiftFactory extends Factory
     {
         $branch = Branch::factory()->create();
         $staff = User::factory()->create([
-            'type' => UserType::employee->value,
+            'type' => UserType::EMPLOYEE->value,
             'branch_id' => $branch->id
         ]);
         $date = now();

@@ -27,7 +27,7 @@ class OrderTest extends TestCase
         $this->assertEquals(1, $order->user_id);
         $this->assertEquals(2, $order->creator_id);
         $this->assertEquals(2, $order->service_id);
-        $this->assertEquals(OrderPayment::cash->name, $order->payment);
+        $this->assertEquals(OrderPayment::CASH->name, $order->payment);
         $this->assertTrue($order->paid);
     }
 

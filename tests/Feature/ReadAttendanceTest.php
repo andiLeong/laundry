@@ -121,7 +121,7 @@ class ReadAttendanceTest extends TestCase
         $response = $this->signIn($this->user)->getJson($this->endpoint)->json('data')[0];
 
         $this->assertEquals($attendance->id, $response['id']);
-        $this->assertEquals(AttendanceType::in->name, $response['type']);
+        $this->assertEquals(AttendanceType::IN->name, $response['type']);
         $this->assertEquals($attendance->time->toJson(), $response['time']);
         $this->assertEquals($attendance->staff->user->first_name, $response['staff']['first_name']);
         $this->assertEquals($attendance->staff->user->middle_name, $response['staff']['middle_name']);

@@ -15,21 +15,21 @@ abstract class TestCase extends BaseTestCase
     public function admin()
     {
         return User::factory()->create([
-            'type' => UserType::admin->value,
+            'type' => UserType::ADMIN->value,
         ]);
     }
 
     public function staff($attributes = [])
     {
         return User::factory()->create(array_merge([
-            'type' => UserType::employee->value,
+            'type' => UserType::EMPLOYEE->value,
         ], $attributes));
     }
 
     public function customer($attributes = [])
     {
         return User::factory()->create(array_merge([
-            'type' => UserType::customer->value,
+            'type' => UserType::CUSTOMER->value,
         ], $attributes));
     }
 
