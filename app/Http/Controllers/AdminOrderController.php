@@ -22,50 +22,7 @@ class AdminOrderController extends Controller
         }
 
         $orders = $query
-            ->filters([
-                'user_id' => [],
-                'description' => [],
-                'paid' => [],
-                'payment' => [],
-                'date' => [
-                    'clause' => 'whereBetween',
-                    'column' => 'created_at',
-                    'value' => [$request->get('start'), $request->get('end')],
-                    'should_attach_query' => fn($request) => $request->filled('start') && $request->filled('end'),
-                ],
-                'include_user' => [
-                    'clause' => 'whereNotNull',
-                    'column' => 'user_id',
-                    'should_attach_query' => fn($request) => $request->get('include_user') == 'true' || $request->get('include_user') == '1',
-                ],
-                'phone' => [
-                    'clause' => 'whereHas',
-                    'relationship' => 'user',
-                ],
-                'first_name' => [
-                    'clause' => 'whereHas',
-                    'relationship' => 'user',
-                ],
-                'filter_by_days' => [
-                    'clause' => 'callBack',
-                    'callback' => function (Builder $query, Request $request) {
-                        $day = $request->get('filter_by_days');
-                        if ($day === 'today') {
-                            return $query->today();
-                        }
-
-                        if ($day === 'week') {
-                            return $query->currentWeek();
-                        }
-
-                        if (is_int((int)$day)) {
-                            return $query->passDays($day);
-                        }
-
-                        return $query;
-                    }
-                ],
-            ], $request)
+            ->filters($this->query($request), $request)
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
             ->withCount('promotions')
@@ -102,5 +59,50 @@ class AdminOrderController extends Controller
                 }
                 OrderCreated::dispatch($order, $validation->products);
             });
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    protected function query(Request $request): array
+    {
+        return [
+            'user_id' => [],
+            'description' => [],
+            'paid' => [],
+            'payment' => [],
+            'date' => [
+                'clause' => 'whereBetween',
+                'column' => 'created_at',
+                'value' => [$request->get('start'), $request->get('end')],
+                'should_attach_query' => fn($request) => $request->filled('start') && $request->filled('end'),
+            ],
+            'include_user' => [
+                'clause' => 'whereNotNull',
+                'column' => 'user_id',
+                'should_attach_query' => fn($request) => $request->get('include_user') == 'true' || $request->get('include_user') == '1',
+            ],
+            'phone' => [
+                'clause' => 'whereHas',
+                'relationship' => 'user',
+            ],
+            'first_name' => [
+                'clause' => 'whereHas',
+                'relationship' => 'user',
+            ],
+            'filter_by_days' => [
+                'clause' => 'callBack',
+                'callback' => function (Builder $query, Request $request) {
+                    $day = $request->get('filter_by_days');
+                    return match (true) {
+                        $day === 'today' => $query->today(),
+                        $day === 'week' => $query->currentWeek(),
+                        is_int((int)$day) => $query->passdays($day),
+                        default => $query,
+                    };
+                }
+            ],
+        ];
     }
 }
