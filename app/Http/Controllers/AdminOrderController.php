@@ -6,6 +6,7 @@ use App\Event\OrderCreated;
 use App\Http\Validation\OrderValidate;
 use App\Models\Order;
 use App\Models\OrderPromotion;
+use App\QueryFilter\Filters\Options\AdminOrderFilterOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +23,7 @@ class AdminOrderController extends Controller
         }
 
         $orders = $query
-            ->filters($this->filter($request), $request)
+            ->filters(new AdminOrderFilterOption($request, $query), $request)
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
             ->withCount('promotions')

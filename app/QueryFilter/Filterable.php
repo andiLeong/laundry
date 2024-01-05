@@ -2,14 +2,19 @@
 
 namespace App\QueryFilter;
 
+use App\QueryFilter\Filters\Options\Option;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 trait Filterable
 {
-    public function scopeFilters(Builder $query, array $filterOptions, Request $request = null): Builder
+    public function scopeFilters(Builder $query, array|Option $filterOptions, Request $request = null): Builder
     {
-        $filterOptions ??= $this->getFilter();
+        if ($filterOptions instanceof Option) {
+            $filterOptions = $filterOptions->get();
+        } else {
+            $filterOptions ??= $this->getFilter();
+        }
         $filters = new QueryFilterManager($query, $filterOptions, $request);
         return $filters->apply();
     }
