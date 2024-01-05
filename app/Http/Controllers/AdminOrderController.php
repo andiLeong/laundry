@@ -22,7 +22,7 @@ class AdminOrderController extends Controller
         }
 
         $orders = $query
-            ->filters($this->query($request), $request)
+            ->filters($this->filter($request), $request)
             ->orderBy('id', 'desc')
             ->with('user:id,phone,first_name', 'service:name,id')
             ->withCount('promotions')
@@ -65,7 +65,7 @@ class AdminOrderController extends Controller
      * @param Request $request
      * @return array
      */
-    protected function query(Request $request): array
+    protected function filter(Request $request): array
     {
         return [
             'user_id' => [],
