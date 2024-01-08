@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VerificationToken;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SignUpController extends Controller
 {
@@ -23,11 +24,11 @@ class SignUpController extends Controller
                     $fail("The {$attribute} is invalid.");
                 }
 
-                $user = User::withoutGlobalScope('verified')->where('phone',$value)->first();
+                $user = User::withoutGlobalScope('verified')->where('phone', $value)->first();
                 if ($user !== null) {
-                    if($user->isVerified()){
-                        $fail("your account is already signup, you can sign in with your number");
-                    }else{
+                    if ($user->isVerified()) {
+                        $fail("your account is already verified, you can sign in with your number");
+                    } else {
                         $fail("we found your record, but you are not verified, please go to verify.");
                     }
                 }
@@ -48,13 +49,14 @@ class SignUpController extends Controller
             abort(502, $e->getMessage());
         }
 
-        $user = User::create($attributes);
-        VerificationToken::create([
-            'token' => $code,
-            'user_id' => $user->id,
-            'expired_at' => now()->addMinutes(5)
-        ]);
-        return $user;
-
+        return DB::transaction(function () use ($attributes, $code) {
+            $user = User::create($attributes);
+            VerificationToken::create([
+                'token' => $code,
+                'user_id' => $user->id,
+                'expired_at' => now()->addMinutes(5)
+            ]);
+            return $user;
+        });
     }
 }

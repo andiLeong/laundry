@@ -183,7 +183,7 @@ class SignUpTest extends TestCase
 
         //sign up with phone that is verified
         $response = $this->setVerifiedUser('09060147788')->signUpWithPhone($this->user->phone);
-        $this->assertValidateMessage('your account is already signup, you can sign in with your number', $response,'phone');
+        $this->assertValidateMessage('your account is already verified, you can sign in with your number', $response,'phone');
 
         //sign up with phone that is unverified
         $response = $this->setUserForVerification('09060778966')->signUpWithPhone($this->user->phone);

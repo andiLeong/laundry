@@ -38,8 +38,8 @@ class Twilio implements SmsContract
                 ['from' => $this->number, 'body' => $message]
             );
         } catch (Exception $e) {
-            $this->e = $e;
-            $this->logAndExcept(['message' => $this->e->getMessage()]);
+            $message = $e->getMessage();
+            $this->logAndThrowException($message, ['message' => $message]);
         }
 
         $result = $result->toArray();
@@ -51,9 +51,7 @@ class Twilio implements SmsContract
             return true;
         }
 
-        $this->e = new SendSmsFailureException($result['errorMessage']);
-        $this->logAndExcept($result);
-        throw $this->e;
+        $this->logAndThrowException($result['errorMessage'], $result);
     }
 
     protected function success($errorCode, $errorMessage): bool
@@ -71,9 +69,9 @@ class Twilio implements SmsContract
         ], $additional));
     }
 
-    protected function logAndExcept($result = [])
+    protected function logAndThrowException(string $message, $result = []) :void
     {
         $this->log($result);
-        throw new SendSmsFailureException($this->e->getMessage());
+        throw new SendSmsFailureException($message);
     }
 }
