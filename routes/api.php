@@ -56,7 +56,7 @@ Route::get('/service', [ServiceController::class, 'index']);
 
 
 Route::middleware('guest')->group(function () {
-    Route::post('/signup', [SignUpController::class, 'store']);
+    Route::post('/signup', [SignUpController::class, 'store'])->middleware('spam.detection:notification');
     Route::post('/login', [LoginController::class, 'store']);
     Route::post('/verification', [VerificationController::class, 'store']);
     Route::post('/verification-code/send/{phone}', [SendVerificationCodeController::class, 'store']);

@@ -175,19 +175,19 @@ class SignUpTest extends TestCase
 
         //sign up with not phone number less than 11
         $response = $this->signUpWithPhone('0906014783');
-        $this->assertValidateMessage('The phone is invalid.', $response,'phone');
+        $this->assertValidateMessage('The phone is invalid.', $response, 'phone');
 
         //sign up with not phone number not starts with 09
         $response = $this->signUpWithPhone('01060147839');
-        $this->assertValidateMessage('The phone is invalid.', $response,'phone');
+        $this->assertValidateMessage('The phone is invalid.', $response, 'phone');
 
         //sign up with phone that is verified
         $response = $this->setVerifiedUser('09060147788')->signUpWithPhone($this->user->phone);
-        $this->assertValidateMessage('your account is already verified, you can sign in with your number', $response,'phone');
+        $this->assertValidateMessage('your account is already verified, you can sign in with your number', $response, 'phone');
 
         //sign up with phone that is unverified
         $response = $this->setUserForVerification('09060778966')->signUpWithPhone($this->user->phone);
-        $this->assertValidateMessage('we found your record, but you are not verified, please go to verify.', $response,'phone');
+        $this->assertValidateMessage('we found your record, but you are not verified, please go to verify.', $response, 'phone');
     }
 
     /** @test */
@@ -198,6 +198,19 @@ class SignUpTest extends TestCase
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->signup($payload)
         );
+    }
+
+    /** @test */
+    public function it_can_detect_spam_if_field_is_filled(): void
+    {
+        $config = config('honeypot');
+
+        $response = $this->signup(['notification' => 'bar']);
+        $body = $response->json();
+        $code = $response->getStatusCode();
+
+        $this->assertEquals($body['message'], $config['message']);
+        $this->assertEquals($code, $config['code']);
     }
 
     public function signUpWithPhone($phone = null)

@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\AbortIfLoggedIn;
+use App\Http\Middleware\SpamDetector;
 use App\Http\Middleware\StaffOnly;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -69,5 +70,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'staff.only' => StaffOnly::class,
         'admin.only' => AdminOnly::class,
+        'spam.detection' => SpamDetector::class,
     ];
 }
