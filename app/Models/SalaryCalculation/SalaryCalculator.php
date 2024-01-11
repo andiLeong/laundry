@@ -45,10 +45,11 @@ class SalaryCalculator
      */
     public function calculate()
     {
-        if ($this->salaryDay() === false) {
+        if($this->staff->isNotActive() || $this->notSalaryDay()){
             return false;
         }
 
+        logger('calculating staff: ' . $this->staff->user->first_name);
         $details = $this->getSalaryDetail();
         $totalSalaries = $details->sum('amount');
         [$start, $end] = $this->coverPeriod;
@@ -75,6 +76,15 @@ class SalaryCalculator
     protected function salaryDay(): bool
     {
         return in_array($this->today->day, [$this->firstSalaryDay, $this->secondSalaryDay]);
+    }
+
+    /**
+     * determine if today is not salary day
+     * @return bool
+     */
+    protected function notSalaryDay(): bool
+    {
+        return $this->salaryDay() === false;
     }
 
     /**

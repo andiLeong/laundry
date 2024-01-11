@@ -28,6 +28,20 @@ class SalaryCalculatorTest extends TestCase
     }
 
     /** @test */
+    public function if_staff_is_not_active_we_should_not_calculate_his_salary(): void
+    {
+        $salaryDay = Carbon::parse('2024-01-15');
+        $user = $this->staff(['branch_id' => $this->branch->id]);
+        $this->staff = Staff::factory()->create([
+            'is_active' => false,
+            'user_id' => $user->id,
+            'branch_id' => $this->branch->id
+        ]);
+        $res = $this->createCalculator($salaryDay)->calculate();
+        $this->assertFalse($res);
+    }
+
+    /** @test */
     public function salary_day_is_on_15th_and_last_day_of_the_month(): void
     {
         $fifteen = Carbon::parse('2023-11-15');
@@ -79,13 +93,13 @@ class SalaryCalculatorTest extends TestCase
         $this->assertFalse($this->createCalculator($monday)->isSalaryDay());
 
         $tuesday = Carbon::parse('2023-11-14');
-        $this->assertFalse($this->createCalculator($tuesday)->isSalaryDay());
+        $this->assertTrue($this->createCalculator($tuesday)->isNotSalaryDay());
 
         $wednesday = Carbon::parse('2023-11-15');
         $this->assertTrue($this->createCalculator($wednesday)->isSalaryDay());
 
         $thursday = Carbon::parse('2023-11-16');
-        $this->assertFalse($this->createCalculator($thursday)->isSalaryDay());
+        $this->assertTrue($this->createCalculator($thursday)->isNotSalaryDay());
 
         $friday = Carbon::parse('2023-11-17');
         $this->assertFalse($this->createCalculator($friday)->isSalaryDay());
@@ -502,7 +516,7 @@ class SalaryCalculatorTest extends TestCase
 
     public function createHalfDayShift($date, $attributes = [])
     {
-        return $this->createShift($date,[
+        return $this->createShift($date, [
                 'from' => $date->copy()->setTime(8, 0)->toDateTimeString(),
                 'to' => $date->copy()->setTime(12, 0)->toDateTimeString(),
             ] + $attributes);
@@ -530,9 +544,9 @@ class SalaryCalculatorTest extends TestCase
         }
     }
 
-    protected function createCalculator($date)
+    protected function createCalculator($date = null)
     {
-        Carbon::setTestNow($date);
+        Carbon::setTestNow($date ?? now());
         return new FakeSalaryCalculator($this->staff);
     }
 }
@@ -542,6 +556,11 @@ class FakeSalaryCalculator extends SalaryCalculator
     public function isSalaryDay()
     {
         return $this->salaryDay();
+    }
+
+    public function isNotSalaryDay()
+    {
+        return $this->notSalaryDay();
     }
 
     public function firstSalaryDay()

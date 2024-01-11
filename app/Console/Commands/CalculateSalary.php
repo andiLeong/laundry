@@ -31,13 +31,7 @@ class CalculateSalary extends Command
 
         Staff::with('user')
             ->get()
-            ->each(function(Staff $staff){
-
-                logger('calculating staff: ' . $staff->user->first_name);
-                $calculator = new SalaryCalculator($staff);
-                $calculator->calculate();
-
-            });
+            ->each(fn(Staff $staff) => (new SalaryCalculator($staff))->calculate());
 
         logger('calculate staff salary finished');
     }
