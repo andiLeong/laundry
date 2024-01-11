@@ -42,4 +42,8 @@ return [
         'chat_ids' => env('TELEGRAM_CHAT_IDS'),
         'base_url' => env('TELEGRAM_BASE_URL'),
     ],
+
+    'google-recaptcha' => [
+        'secret' => env('GOOGLE_RECAPTCHA_SECRET'),
+    ],
 ];

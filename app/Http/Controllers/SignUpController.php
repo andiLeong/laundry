@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GoogleRecaptcha;
 use App\Models\Sms\Contract\Sms;
 use App\Models\Sms\Template;
 use App\Models\User;
@@ -9,10 +10,11 @@ use App\Models\VerificationToken;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SignUpController extends Controller
 {
-    public function store(Request $request, Sms $sms, Template $template)
+    public function store(Request $request, Sms $sms, Template $template, GoogleRecaptcha $googleRecaptcha)
     {
         $attributes = $request->validate([
             'phone' => ['required', 'string', function (string $attribute, mixed $value, Closure $fail) {
@@ -36,8 +38,13 @@ class SignUpController extends Controller
             'password' => 'required|string|max:90|min:8',
             'first_name' => 'required|string|max:50',
             'middle_name' => 'nullable|string|max:50',
-            'last_name' => 'required|string|max:50'
+            'last_name' => 'required|string|max:50',
+            'recaptcha_token' => ['required', 'string'],
         ]);
+
+        if (!$googleRecaptcha->pass($attributes['recaptcha_token'])) {
+            throw ValidationException::withMessages(['recaptcha_token' => 'Opps, something went wrong.']);
+        }
 
         try {
             $code = VerificationToken::generate();
@@ -49,6 +56,7 @@ class SignUpController extends Controller
             abort(502, $e->getMessage());
         }
 
+        unset($attributes['recaptcha_token']);
         return DB::transaction(function () use ($attributes, $code) {
             $user = User::create($attributes);
             VerificationToken::create([

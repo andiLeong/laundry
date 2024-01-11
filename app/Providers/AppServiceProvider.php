@@ -6,6 +6,7 @@ use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
 use App\Http\Validation\OrderValidate;
+use App\Models\GoogleRecaptcha;
 use App\Models\Sms\Contract\Sms as SmsContract;
 use App\Models\Sms\Template;
 use App\Models\Sms\Twilio;
@@ -59,5 +60,7 @@ class AppServiceProvider extends ServiceProvider
             $token = $config->get('services.telegram.token');
             return (new Telegram($token));
         });
+
+        $this->app->singleton(GoogleRecaptcha::class, fn($app) => new GoogleRecaptcha($app['config']->get('services.google-recaptcha.secret')));
     }
 }

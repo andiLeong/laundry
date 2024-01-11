@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\GoogleRecaptcha;
 use App\Models\Sms\Contract\Sms;
 use App\Models\Sms\Exception\SendSmsFailureException;
 use App\Models\Sms\Template;
@@ -30,7 +31,7 @@ class SignUpTest extends TestCase
     /** @test */
     public function it_can_sign_up_user(): void
     {
-        $response = $this->fakeSms()->signUpWithPhone()->assertSuccessful();
+        $response = $this->realSignUp()->assertSuccessful();
         $user = User::findUnverifiedById($response->json('id'));
         $this->assertNotNull($user);
     }
@@ -38,7 +39,7 @@ class SignUpTest extends TestCase
     /** @test */
     public function after_signup_phone_still_not_been_verified(): void
     {
-        $response = $this->fakeSms()->signUpWithPhone();
+        $response = $this->realSignUp();
         $user = User::findUnverifiedById($response->json('id'));
         $this->assertFalse($user->isVerified());
     }
@@ -46,7 +47,7 @@ class SignUpTest extends TestCase
     /** @test */
     public function after_signup_user_type_is_customer(): void
     {
-        $response = $this->fakeSms()->signUpWithPhone();
+        $response = $this->realSignUp();
         $user = User::findUnverifiedById($response->json('id'));
         $this->assertTrue($user->isCustomer());
     }
@@ -54,7 +55,7 @@ class SignUpTest extends TestCase
     /** @test */
     public function after_signup_an_user_object_is_return_but_exclude_sensitive_information(): void
     {
-        $this->fakeSms();
+        $this->fakeSms()->mockRecaptcha();
         $response = $this->signup([
             'password' => 'new pass',
             'phone' => $this->phone
@@ -65,7 +66,7 @@ class SignUpTest extends TestCase
     /** @test */
     public function after_signup_user_password_is_hash(): void
     {
-        $this->fakeSms();
+        $this->fakeSms()->mockRecaptcha();
         $password = '1234qwer';
         $response = $this->signup([
             'password' => $password,
@@ -81,7 +82,7 @@ class SignUpTest extends TestCase
     public function after_signup_a_verification_is_recorded(): void
     {
         $this->assertDatabaseCount('verification_tokens', 0);
-        $response = $this->fakeSms()->signUpWithPhone();
+        $response = $this->realSignUp();
         $user = User::findUnverifiedById($response->json('id'));
         $verification = $user->verification;
         $mins = $verification->expired_at->diffInMinutes(now());
@@ -94,14 +95,14 @@ class SignUpTest extends TestCase
     /** @test */
     public function verification_sms_must_send_to_the_correct_number_and_message_as_well(): void
     {
-        $this->fakeSms()->signUpWithPhone();
+        $this->realSignUp();
     }
 
     /** @test */
     public function once_sms_code_is_sent_an_sms_log_is_recorded()
     {
         $this->assertDatabaseCount('sms_logs', 0);
-        $response = $this->fakeSms()->signUpWithPhone();
+        $response = $this->realSignUp();
         $user = User::findUnverifiedById($response->json('id'));
 
         $log = SmsLog::first();
@@ -124,7 +125,7 @@ class SignUpTest extends TestCase
                 ->andThrow(SendSmsFailureException::class, 'Service unavailable')
         );
 
-        $this->signUpWithPhone()->assertStatus(502);
+        $this->mockRecaptcha()->signUpWithPhone()->assertStatus(502);
     }
 
     /** @test */
@@ -201,6 +202,26 @@ class SignUpTest extends TestCase
     }
 
     /** @test */
+    public function google_recaptcha_token_is_required(): void
+    {
+        $name = 'recaptcha_token';
+        $rule = ['required', 'string'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->signup($payload)
+        );
+    }
+
+    /** @test */
+    public function it_gets_validation_error_if_recaptcha_token_is_not_correct(): void
+    {
+        $this->mock(GoogleRecaptcha::class, function(MockInterface $mock){
+            return $mock->shouldReceive('pass')->once()->andReturn(false);
+        });
+        $response = $this->signup();
+        $this->assertValidateMessage('Opps, something went wrong.',$response,'recaptcha_token');
+    }
+
+    /** @test */
     public function it_can_detect_spam_if_field_is_filled(): void
     {
         $config = config('honeypot');
@@ -229,7 +250,20 @@ class SignUpTest extends TestCase
     private function userAttributes(mixed $overwrites): array
     {
         $attributes = User::factory()->make()->toArray();
-        $overwrites = $overwrites + ['password' => 'password'];
+        $overwrites = $overwrites + ['password' => 'password', 'recaptcha_token' => 'token'];
         return array_merge($attributes, $overwrites);
+    }
+
+    public function realSignUp()
+    {
+        return $this->mockRecaptcha()->fakeSms()->signUpWithPhone();
+    }
+
+    protected function mockRecaptcha()
+    {
+        $this->mock(GoogleRecaptcha::class, function(MockInterface $mock){
+            return $mock->shouldReceive('pass')->once()->andReturn(true);
+        });
+        return $this;
     }
 }
