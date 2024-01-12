@@ -51,6 +51,14 @@ class PunchInTest extends TestCase
     }
 
     /** @test */
+    public function non_staff_cant_perform_punch_in()
+    {
+        $this->user = $this->admin();
+        $message = $this->punchIn()->assertStatus(400)->json('message');
+        $this->assertEquals($message,'Look like you are not a staff...');
+    }
+
+    /** @test */
     public function staff_cant_perform_punch_in_if_their_shift_not_today()
     {
         Shift::first()->delete();

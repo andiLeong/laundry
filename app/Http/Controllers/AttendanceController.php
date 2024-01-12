@@ -56,6 +56,9 @@ class AttendanceController extends Controller
         ]);
 
         $staff = auth()->user()->staff;
+        if (is_null($staff)) {
+            abort(400, 'Look like you are not a staff...');
+        }
 
         $shift = Shift::where('date', today()->toDateTimeString())->where('staff_id', $staff->id)->first();
         if (is_null($shift)) {
