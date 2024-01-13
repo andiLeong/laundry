@@ -34,14 +34,17 @@ use Illuminate\Support\Facades\Route;
 // customer ordering
 // 1 customer can choose pickup date time for ordering, customer can make order himself (customer can opt in pay on delivery)
 // 2 customer can manage their address (create/delete/modify)
-// 3 when customer ordering they may choose what service they want.
-// 4 only few places are allow to pickup/delivery (at least for right now) since pickup/delivery is free
+// 3 when customer ordering they may choose what service they want. by default only 8kg service customer can choose
+//once order received we will adjust the order amount based on the actual weight (or create new order based on the actual weight)
+//update actual weight pic
+//send new order notification to customer
+//we charge delivery fee
+
+// note: when we make promotion we have to note the discount is applying for the occurring order.
+
 // 5 implement logic to check what date/time is available for pickup
 
-// employee ordering
-
 // future feature
-// 1 employee management (payroll)
 // 3 branch concept
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

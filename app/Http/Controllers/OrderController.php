@@ -18,6 +18,25 @@ class OrderController extends Controller
             ->paginate();
     }
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+//            'payment' => 'required|in:1',
+            'promotion_ids' => 'nullable|array',
+            'address_id' => 'required',
+            'product_ids' => 'nullable|array',
+            'delivery' => 'nullable|datetime',
+            'pickup' => 'required|datetime',
+            'product_apply_each_load' => 'required_if:product_ids|boolean',
+        ]);
+
+        // give default 8kg service to user, if over 8 kg we add up, if lower we reduce price
+        // staff need to manually adjust the order (add/adjust current order)
+        // update order weight pic , send order adjustment notification to user
+
+        //delivery charge per load ? or per delivery
+    }
+
     public function show($id)
     {
         $column = ['id','service_id','amount','total_amount','product_amount','paid','payment','created_at','user_id'];
