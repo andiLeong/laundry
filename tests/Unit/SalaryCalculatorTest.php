@@ -531,7 +531,7 @@ class SalaryCalculatorTest extends TestCase
     public function createAttendance($time, $shiftId, $type = 0)
     {
         return Attendance::factory()->create([
-            'staff_id' => $this->user->id,
+            'staff_id' => $this->staff->id,
             'branch_id' => $this->user->branch_id,
             'time' => $time,
             'type' => $type,
