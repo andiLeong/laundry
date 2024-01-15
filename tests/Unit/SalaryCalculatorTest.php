@@ -136,6 +136,39 @@ class SalaryCalculatorTest extends TestCase
     }
 
     /** @test */
+    public function if_calculate_is_calculated_it_should_not_calculate_again()
+    {
+        $salaryPerDay = $this->staff->daily_salary;
+        $fifteen = Carbon::parse('2023-11-15');
+        $calculator = $this->createCalculator($fifteen);
+        $date = $fifteen->copy()->subDay();
+
+        $salary = Salary::factory()->create([
+            'staff_id' => $this->staff->id,
+            'amount' => $salaryPerDay,
+            'from' => $fifteen->copy()->startOfMonth()->toDateString(),
+            'to' => $fifteen->copy()->addDay()->toDateString(),
+        ]);
+        SalaryDetail::factory()->create([
+            'salary_id' => $salary->id,
+            'amount' => $salaryPerDay,
+        ]);
+
+        $this->assertDatabaseCount('salaries', 1);
+        $this->assertDatabaseCount('salary_details', 1);
+
+        $shift = $this->createHalfDayShift($date);
+        $this->createAttendance($start = $date->copy()->setTime(8, 0), $shift->id);
+        $this->createAttendance($date->setTime(9, 0), $shift->id);
+        $this->createAttendance($date->setTime(11, 0), $shift->id, 1);
+        $this->createAttendance($end = $date->copy()->setTime(12, 0), $shift->id, 1);
+        $calculator->calculate();
+
+        $this->assertDatabaseCount('salaries', 1);
+        $this->assertDatabaseCount('salary_details', 1);
+    }
+
+    /** @test */
     public function it_can_calculate_staff_half_day_salary()
     {
         $this->assertDatabaseCount('salaries', 0);

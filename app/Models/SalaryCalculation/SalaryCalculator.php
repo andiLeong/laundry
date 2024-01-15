@@ -45,7 +45,7 @@ class SalaryCalculator
      */
     public function calculate()
     {
-        if($this->staff->isNotActive() || $this->notSalaryDay()){
+        if ($this->staff->isNotActive() || $this->notSalaryDay()) {
             return false;
         }
 
@@ -53,6 +53,16 @@ class SalaryCalculator
         $details = $this->getSalaryDetail();
         $totalSalaries = $details->sum('amount');
         [$start, $end] = $this->coverPeriod;
+
+        $existed = Salary::where('staff_id', $this->staff->id)
+            ->where('from', $start->toDateString())
+            ->where('to', $end->toDateString())
+            ->get();
+
+        if ($existed->count() > 0) {
+            logger('staff is already calculated on ' . $start->toDateString() . ' || ' . $end->toDateString());
+            return false;
+        }
 
         $salary = Salary::create([
             'staff_id' => $this->staff->id,
