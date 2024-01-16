@@ -7,4 +7,9 @@ enum OnlineOrderStatus :int
     case PENDING_PICKUP = 1;
     case PICKUP = 2;
     case DELIVERED = 3;
+
+    public function toLower()
+    {
+        return strtolower($this->name);
+    }
 }

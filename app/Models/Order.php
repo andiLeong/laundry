@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\QueryFilter\Filterable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,13 @@ class Order extends Model
     {
         return Attribute::make(
             get: fn(string $value) => OrderPayment::from($value)->toLower()
+        );
+    }
+
+    protected function type(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => OrderType::from($value)->toLower()
         );
     }
 

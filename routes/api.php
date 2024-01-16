@@ -100,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/user/profile', UserProfileController::class);
     Route::patch('/user/password', UserPasswordController::class);
     Route::get('/order', [OrderController::class, 'index']);
+    Route::post('/order', [OrderController::class, 'store'])->name('customer.order.create');
     Route::get('/order/{id}', [OrderController::class, 'show']);
     Route::post('/address', [AddressController::class, 'store']);
     Route::patch('/address/{address}', [AddressController::class, 'update']);

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
+use App\Http\Validation\CustomerCreateOrderValidation;
 use App\Http\Validation\OrderValidate;
 use App\Models\GoogleRecaptcha;
 use App\Models\Sms\Contract\Sms as SmsContract;
@@ -12,6 +13,7 @@ use App\Models\Sms\Template;
 use App\Models\Sms\Twilio;
 use App\Notification\Telegram;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Route;
 use Illuminate\Support\ServiceProvider;
 use Twilio\Rest\Client as TwilioSdk;
 
@@ -33,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
         Model::unguard();
         $this->app->bind(OrderValidate::class, function ($app) {
             $request = $app['request'];
+            if($request->route()->getName() === 'customer.order.create'){
+                return new CustomerCreateOrderValidation($request);
+            }
             if ($request->has('promotion_ids')) {
                 return new AdminCreateOrderWithPromotionValidation($request);
             }
