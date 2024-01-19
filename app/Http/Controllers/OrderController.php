@@ -10,6 +10,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -27,29 +28,30 @@ class OrderController extends Controller
     {
         $user = Auth::user();
         $data = $validation->validate();
-//        dd($data);
 
-        $pickup = Carbon::parse($data['pickup']);
-        $order = Order::create([
-            'creator_id' => $user->id,
-            'user_id' => $user->id,
-            'service_id' => $data['service_id'],
-            'amount' => $data['amount'],
-            'total_amount' => $data['total_amount'],
-            'product_amount' => $data['product_amount'],
-            'type' => OrderType::ONLINE->value,
-            'paid' => false,
-            'description' => $data['description'],
-        ]);
-        $onlineOrder = OnlineOrder::create([
-            'order_id' => $order->id,
-            'address_id' => $data['address_id'],
-            'pickup' => $pickup,
-            'delivery' => $data['delivery'] ?? $pickup->copy()->addHours(12),
-        ]);
+        return DB::transaction(function () use ($data, $user, $validation) {
+            $pickup = Carbon::parse($data['pickup']);
+            $order = Order::create([
+                'creator_id' => $user->id,
+                'user_id' => $user->id,
+                'service_id' => $data['service_id'],
+                'amount' => $data['amount'],
+                'total_amount' => $data['total_amount'],
+                'product_amount' => $data['product_amount'],
+                'type' => OrderType::ONLINE->value,
+                'paid' => false,
+                'description' => $data['description'],
+            ]);
+            $onlineOrder = OnlineOrder::create([
+                'order_id' => $order->id,
+                'address_id' => $data['address_id'],
+                'pickup' => $pickup,
+                'delivery' => $data['delivery'] ?? $pickup->copy()->addHours(12),
+            ]);
 
-        OrderCreated::dispatch($order, $validation->products);
-        return $data;
+            OrderCreated::dispatch($order, $validation->products);
+            return $onlineOrder;
+        });
         // give default 8kg service to user, if over 8 kg we add up, if lower we reduce price
         // staff need to manually adjust the order (add/adjust current order)
         // update order weight pic , send order adjustment notification to user

@@ -22,7 +22,6 @@ return new class extends Migration
             $table->timestamp('pickup');
             $table->timestamp('pickup_at')->nullable();
             $table->timestamp('deliver_at')->nullable();
-            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
