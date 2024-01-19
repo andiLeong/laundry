@@ -20,8 +20,8 @@ class SalaryFactory extends Factory
         return [
             'amount' => rand(10000,20000),
             'staff_id' => Staff::factory()->create(),
-            'from' => '2023-11-01',
-            'to' => '2023-11-16',
+            'from' => '2023-10-01',
+            'to' => '2023-10-16',
         ];
     }
 }
