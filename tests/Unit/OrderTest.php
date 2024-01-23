@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\OnlineOrder;
 use App\Models\Order;
 use App\Models\Service;
 use App\Models\User;
@@ -65,5 +66,28 @@ class OrderTest extends TestCase
         ])->create();
 
         $this->assertEquals($service->id, $order->fresh()->service->id);
+    }
+
+    /** @test */
+    public function it_can_has_an_online_order()
+    {
+        $order = Order::factory()->create();
+        $onlineOrder = OnlineOrder::factory()->create([
+            'order_id' => $order->id
+        ]);
+
+        $this->assertEquals($order->onlineOrder->id, $onlineOrder->id);
+    }
+
+    /** @test */
+    public function it_can_has_many_child_orders()
+    {
+        $order = Order::factory()->create();
+        $children = Order::factory(2)->create([
+            'parent_id' => $order->id
+        ]);
+
+        $this->assertEquals($order->children[0]->id, $children[0]->id);
+        $this->assertEquals($order->children[1]->id, $children[1]->id);
     }
 }

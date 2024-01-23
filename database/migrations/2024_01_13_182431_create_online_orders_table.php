@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('online_orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id')->unique();
-            $table->unsignedBigInteger('address_id')->unique();
+            $table->unsignedBigInteger('address_id');
             $table->unsignedTinyInteger('status')->default(OnlineOrderStatus::PENDING_PICKUP->value);
             $table->unsignedTinyInteger('delivery_fee')->default(0);
             $table->timestamp('delivery')->nullable();

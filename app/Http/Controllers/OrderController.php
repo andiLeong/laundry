@@ -7,7 +7,6 @@ use App\Http\Validation\OrderValidate;
 use App\Models\Enum\OrderType;
 use App\Models\OnlineOrder;
 use App\Models\Order;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,12 +23,12 @@ class OrderController extends Controller
             ->paginate();
     }
 
-    public function store(Request $request, OrderValidate $validation)
+    public function store(OrderValidate $validation)
     {
-        $user = Auth::user();
         $data = $validation->validate();
 
-        return DB::transaction(function () use ($data, $user, $validation) {
+        return DB::transaction(function () use ($data) {
+            $user = Auth::user();
             $pickup = Carbon::parse($data['pickup']);
             $order = Order::create([
                 'creator_id' => $user->id,
@@ -49,7 +48,7 @@ class OrderController extends Controller
                 'delivery' => $data['delivery'] ?? $pickup->copy()->addHours(12),
             ]);
 
-            OrderCreated::dispatch($order, $validation->products);
+            OrderCreated::dispatch($order, $data['product']);
             return $onlineOrder;
         });
         // give default 8kg service to user, if over 8 kg we add up, if lower we reduce price
@@ -64,8 +63,21 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $column = ['id', 'service_id', 'amount', 'total_amount', 'product_amount', 'paid', 'payment', 'created_at', 'user_id'];
-        $order = Order::select($column)->where('id', $id)->with(['service:id,name', 'products:order_id,name,quantity,price,total_price'])->first();
+        $column = [
+            'id',
+            'service_id',
+            'amount',
+            'total_amount',
+            'product_amount',
+            'paid',
+            'payment',
+            'created_at',
+            'user_id'
+        ];
+        $order = Order::select($column)->where('id', $id)->with([
+            'service:id,name',
+            'products:order_id,name,quantity,price,total_price'
+        ])->first();
 
         if (is_null($order) || $order->user_id !== auth()->id()) {
             abort(404, 'Order not found');

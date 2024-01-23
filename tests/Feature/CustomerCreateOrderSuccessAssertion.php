@@ -46,7 +46,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
     }
 
     /** @test */
-    public function after_order_created_product_amount()
+    public function after_order_created_product_amount_is_correct()
     {
         $quantity = 5;
         $quantity2 = 3;
@@ -181,14 +181,17 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $order = Order::latest()->first();
         $onlineOrder = OnlineOrder::where('order_id', $order->id)->first();
 
+        $this->assertNotNull($onlineOrder);
         $this->assertEquals($pickup, $onlineOrder->pickup);
+        $this->assertNull($onlineOrder->pickup_at);
+        $this->assertNull($onlineOrder->deliver_at);
         $this->assertEquals($delivery, $onlineOrder->delivery);
     }
 
     /** @test */
     public function after_order_created_delivery_time_is_12_hours_forwarded_if_delivery_is_not_provided()
     {
-        $mock = $this->mock(Telegram::class, function (MockInterface $mock) {
+        $this->mock(Telegram::class, function (MockInterface $mock) {
             $mock->shouldReceive('sendOrderCreatedNotification')->once()->andReturn(true);
         });
 

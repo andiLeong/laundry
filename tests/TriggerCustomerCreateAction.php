@@ -26,13 +26,9 @@ trait TriggerCustomerCreateAction
     public function createOrder($overwrites = [], $needMock = false)
     {
         if ($needMock) {
-            $mock = $this->mock(Telegram::class, function (MockInterface $mock) {
+            $this->mock(Telegram::class, function (MockInterface $mock) {
                 $mock->shouldReceive('sendOrderCreatedNotification')->once()->andReturn(true);
             });
-        } else {
-//            $mock = $this->mock(Telegram::class, function (MockInterface $mock) {
-//                $mock->shouldNotReceive('sendOrderCreatedNotification');
-//            });
         }
 
         return $this->signIn($this->user)->postJson($this->endpoint,

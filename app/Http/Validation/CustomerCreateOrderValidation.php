@@ -41,7 +41,7 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
 
         $this->service = Service::mostRequested();
         $data['service_id'] = $this->service->id;
-        unset($data['product_ids']);
+        $data['product'] = $this->products;
         return $this->afterValidate($data);
     }
 

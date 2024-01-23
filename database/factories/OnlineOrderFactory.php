@@ -6,7 +6,6 @@ use App\Models\Address;
 use App\Models\Enum\OnlineOrderStatus;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\OnlineOrder>
@@ -29,7 +28,6 @@ class OnlineOrderFactory extends Factory
             'pickup' => now()->addHours(1),
             'pickup_at' => now()->addHours(2),
             'deliver_at' => now()->addHours(5),
-            'description' => Str::random(50),
         ];
     }
 }
