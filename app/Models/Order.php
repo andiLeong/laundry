@@ -69,6 +69,11 @@ class Order extends Model
         return $this->hasMany(Order::class, 'parent_id', 'id');
     }
 
+    public function images()
+    {
+        return $this->hasMany(OrderImage::class, 'order_id', 'id');
+    }
+
     public function gcash()
     {
         return $this->hasOne(GcashOrder::class);

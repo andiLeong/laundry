@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\Enum\OrderPayment;
 use App\Models\OnlineOrder;
 use App\Models\Order;
+use App\Models\OrderImage;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -89,5 +90,16 @@ class OrderTest extends TestCase
 
         $this->assertEquals($order->children[0]->id, $children[0]->id);
         $this->assertEquals($order->children[1]->id, $children[1]->id);
+    }
+
+    /** @test */
+    public function it_can_has_many_images()
+    {
+        $order = Order::factory()->create();
+        $image = OrderImage::factory()->create(['order_id' => $order->id]);
+        $image2 = OrderImage::factory()->create(['order_id' => $order->id]);
+
+        $this->assertEquals($order->images[0]->id, $image->id);
+        $this->assertEquals($order->images[1]->id, $image2->id);
     }
 }
