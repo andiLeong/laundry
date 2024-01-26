@@ -18,6 +18,7 @@ class EventServiceProvider extends ServiceProvider
         OrderCreated::class => [
             CreatedOrderProduct::class,
             SendNotification::class,
+//            CreatedOrderProduct::class,
         ],
     ];
 
