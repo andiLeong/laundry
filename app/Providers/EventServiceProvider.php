@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Event\OrderCreated;
 use App\Listeners\CreatedOrderProduct;
+use App\Listeners\CreateOrderImage;
 use App\Listeners\SendNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -18,7 +19,7 @@ class EventServiceProvider extends ServiceProvider
         OrderCreated::class => [
             CreatedOrderProduct::class,
             SendNotification::class,
-//            CreatedOrderProduct::class,
+            CreateOrderImage::class,
         ],
     ];
 

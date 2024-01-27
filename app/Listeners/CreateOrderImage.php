@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Event\OrderCreated;
 use App\Models\OrderImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CreateOrderImage
 {
@@ -21,17 +22,21 @@ class CreateOrderImage
      */
     public function handle(OrderCreated $event): void
     {
-        if(is_null($this->request->hasFile('images'))){
+        $images = $this->request->file('image');
+        if (is_null($images)) {
             return;
         }
 
         $order = $event->order;
 
-        $path = $this->request->file('images')->store('order');
-        OrderImage::create([
-            'order_id' => $order->id,
-            'uploaded_by' => $order->creator_id,
-            'path' => $path
-        ]);
+        foreach ($images as $image) {
+            $name = $order->id . '_' . Str::random(32) . '.' . $image->extension();
+            $path = $image->storeAs('order', $name);
+            OrderImage::create([
+                'order_id' => $order->id,
+                'uploaded_by' => $order->creator_id,
+                'path' => $path
+            ]);
+        }
     }
 }

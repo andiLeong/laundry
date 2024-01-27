@@ -13,6 +13,8 @@ use App\Models\Service;
 use App\Models\User;
 use App\Notification\Telegram;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 use Tests\TestCase;
 use Tests\TriggerCustomerCreateAction;
@@ -206,5 +208,34 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $onlineOrder = OnlineOrder::where('order_id', $order->id)->first();
 
         $this->assertEquals($pickup->copy()->addHours(12)->toDateTimeString(), $onlineOrder->delivery);
+    }
+
+    /** @test */
+    public function after_order_created_order_image_is_recorded()
+    {
+        $this->assertDatabaseCount('order_images', 0);
+        $fake = UploadedFile::fake()->image('order.jpg');
+        $this->createOrderWithMock(['image' => [$fake]]);
+        $order = Order::latest()->first();
+        $image = $order->images->first();
+
+        $this->assertNotEmpty($image->path);
+        $this->assertEquals($image->creator->id, $this->user->id);
+        $this->assertNotNull($image);
+        $this->assertDatabaseCount('order_images', 1);
+    }
+
+    /** @test */
+    public function after_order_created_order_image_name_is_correctly_set()
+    {
+        $fake = UploadedFile::fake()->image('order.jpg');
+        $this->createOrderWithMock(['image' => [$fake]]);
+        $order = Order::latest()->first();
+        $image = $order->images->first();
+
+        $file = explode('/', $image->path);
+        $name = end($file);
+        $this->assertTrue(str_starts_with($name, $order->id . '_'));
+        $this->assertTrue(str_ends_with($name, '.' . $fake->extension()));
     }
 }

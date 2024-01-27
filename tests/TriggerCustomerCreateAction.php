@@ -14,6 +14,7 @@ trait TriggerCustomerCreateAction
     {
         $attributes = OnlineOrder::factory()->make()->toArray();
         $attributes['address_id'] = $this->address->id;
+        unset($attributes['order_id']);
 //        dd($attributes);
         return array_merge($attributes, $overwrites);
     }
