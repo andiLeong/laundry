@@ -18,8 +18,8 @@ class ShiftsController extends Controller
 
         if($request->filled('year') && $request->filled('month')){
             $start = Carbon::parse($request->get('year') . '-' . $request->get('month'));
-            $shift->where('date', '>', $start)
-                ->where('date', '<', $start->copy()->endOfMonth());
+            $shift->where('date', '>=', $start)
+                ->where('date', '<=', $start->copy()->endOfMonth());
         }else{
             $shift->currentMonth('date');
         }

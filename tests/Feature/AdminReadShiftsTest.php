@@ -69,6 +69,28 @@ class AdminReadShiftsTest extends TestCase
     }
 
     /** @test */
+    public function it_can_read_first_and_last_day_of_the_month(): void
+    {
+        $shift = Shift::factory()->create(['staff_id' => $this->staff->id]);
+        $shift2 = Shift::factory()->create([
+            'staff_id' => $this->staff->id,
+            'date' => '2024-02-01'
+        ]);
+        $shift3 = Shift::factory()->create([
+            'staff_id' => $this->staff->id,
+            'date' => '2024-02-29'
+        ]);
+        $ids = $this->fetch([
+            'year' => 2024,
+            'month' => 2,
+        ],$this->user)->collect()->pluck('id');
+
+        $this->assertTrue($ids->contains($shift2->id));
+        $this->assertTrue($ids->contains($shift3->id));
+        $this->assertFalse($ids->contains($shift->id));
+    }
+
+    /** @test */
     public function only_admin_or_employee_can_access()
     {
         $this->signIn()->getJson($this->endpoint)->assertForbidden();
