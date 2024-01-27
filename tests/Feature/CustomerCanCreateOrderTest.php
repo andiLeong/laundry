@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestAuthEndpoint;
 use Tests\TestCase;
 use Tests\TriggerCustomerCreateAction;
@@ -68,6 +69,46 @@ class CustomerCanCreateOrderTest extends TestCase
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrder($payload)
         );
+    }
+
+    /** @test */
+    public function image_is_nullable()
+    {
+        $name = 'image';
+        $rule = ['nullable', 'array'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
+    public function image_array_size_validation()
+    {
+        $file = UploadedFile::fake()->image('avatar.jpg');
+        $file2 = UploadedFile::fake()->image('avatar2.jpg');
+        $file3 = UploadedFile::fake()->image('avatar3.jpg');
+        $response = $this->createOrder(['image' => [1, 2, 3, 4],]);
+        $response2 = $this->createOrder(['image' => [$file,$file2,$file3],]);
+        $this->assertValidateMessage('The image field must not have more than 2 items.',$response,'image');
+        $this->assertValidateMessage('The image field must not have more than 2 items.',$response2,'image');
+    }
+
+    /** @test */
+    public function image_type_validation()
+    {
+        $response = $this->createOrder(['image' => ['string',2],]);
+        $this->assertValidateMessage('The image.0 field must be an image.',$response,'image.0');
+        $this->assertValidateMessage('The image.1 field must be an image.',$response,'image.1');
+    }
+
+    /** @test */
+    public function image_size_validation()
+    {
+        $file = UploadedFile::fake()->create('avatar.jpg',3000);
+        $file2 = UploadedFile::fake()->create('avatar2.jpg',3000);
+        $response = $this->createOrder(['image' => [$file,$file2],]);
+        $this->assertValidateMessage('The image.0 field must not be greater than 2048 kilobytes.',$response,'image.0');
+        $this->assertValidateMessage('The image.1 field must not be greater than 2048 kilobytes.',$response,'image.1');
     }
 
     /** @test */

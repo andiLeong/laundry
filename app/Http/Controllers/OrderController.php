@@ -39,7 +39,7 @@ class OrderController extends Controller
                 'product_amount' => $data['product_amount'],
                 'type' => OrderType::ONLINE->value,
                 'paid' => false,
-                'description' => $data['description'],
+                'description' => $data['description'] ?? '',
             ]);
             $onlineOrder = OnlineOrder::create([
                 'order_id' => $order->id,

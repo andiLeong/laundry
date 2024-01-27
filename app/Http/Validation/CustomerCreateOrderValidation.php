@@ -28,6 +28,8 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
             'pickup' => 'required|date', //todo add more validation logic on the pickup date
 //            'product_apply_each_load' => 'required_if:product_ids|boolean',
             'description' => 'nullable|string|max:255',
+            'image' => 'nullable|array|max:2',
+            'image.*' => 'image|max:2048',
         ];
     }
 
