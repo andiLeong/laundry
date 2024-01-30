@@ -19,34 +19,30 @@ class OnlineOrder extends Model
         );
     }
 
-    public function isDelivied()
+    public function isDelivered()
     {
         return $this->status === OnlineOrderStatus::DELIVERED->toLower();
     }
 
-    public function isPickup()
+    /**
+     * determine if intended update status is coming from previous status
+     * @param $status
+     * @return bool
+     */
+    protected function cantUpdateStatus($status): bool
     {
-        return $this->status == OnlineOrderStatus::PICKUP->toLower();
-    }
+        $names = OnlineOrderStatus::names();
+        $key = array_search($status, $names);
+        if ($key === false || $key === 0) {
+            return false;
+        }
 
-    public function isNotPickup()
-    {
-       return !$this->isPickup();
-    }
-
-    public function isPending()
-    {
-        return $this->status == OnlineOrderStatus::PENDING_PICKUP->toLower();
-    }
-
-    public function isNotPending()
-    {
-       return !$this->isPending();
+        return $names[$key - 1] == $this->status;
     }
 
     public function markAsPickup()
     {
-        if($this->isNotPending()){
+        if ($this->cantUpdateStatus(OnlineOrderStatus::PICKUP->name)) {
             throw new LogicException('Order must from pending pickup to picked up');
         }
 
@@ -58,7 +54,7 @@ class OnlineOrder extends Model
 
     public function markAsDelivered()
     {
-        if($this->isNotPickup()){
+        if ($this->cantUpdateStatus(OnlineOrderStatus::DELIVERED->name)) {
             throw new LogicException('Order need to pickup first, then set delivery status');
         }
 
