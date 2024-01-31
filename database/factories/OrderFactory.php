@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,6 +31,8 @@ class OrderFactory extends Factory
             'issued_invoice' => 0,
             'description' => null,
             'payment' => OrderPayment::CASH->value,
+            'type' => OrderType::WALKIN->value,
+            'parent_id' => 0,
         ];
     }
 }

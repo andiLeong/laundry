@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\QueryFilter\Filterable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,13 @@ class Order extends Model
     {
         return Attribute::make(
             get: fn(string $value) => OrderPayment::from($value)->toLower()
+        );
+    }
+
+    protected function type(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => OrderType::from($value)->toLower()
         );
     }
 
@@ -49,6 +57,21 @@ class Order extends Model
     public function products()
     {
         return $this->hasMany(OrderProduct::class, 'order_id', 'id');
+    }
+
+    public function onlineOrder()
+    {
+        return $this->hasOne(OnlineOrder::class, 'order_id', 'id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Order::class, 'parent_id', 'id');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(OrderImage::class, 'order_id', 'id');
     }
 
     public function gcash()

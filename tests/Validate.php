@@ -97,6 +97,21 @@ class Validate
     /**
      * @throws \Exception
      */
+    public function date()
+    {
+        $invalids = [
+            [$this->name => 48656878],
+            [$this->name => 'string'],
+            [$this->name => ['a','b']]
+        ];
+
+        $this->currentRule = 'required';
+        $this->trigger($invalids);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function string()
     {
         $invalids = [

@@ -25,4 +25,12 @@ class Service extends Model
     {
         return $this->full_service;
     }
+
+    public static function mostRequested()
+    {
+        return static::where('up_to', 8)
+            ->where('full_service', true)
+            ->where('primary', true)
+            ->first();
+    }
 }
