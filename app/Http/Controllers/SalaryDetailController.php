@@ -19,6 +19,6 @@ class SalaryDetailController extends Controller
             abort(404, 'hey this is not your record');
         }
 
-        return SalaryDetail::with('shift:id,date')->where('salary_id', $id)->paginate();
+        return SalaryDetail::with('shift:id,date,from,to')->where('salary_id', $id)->orderBy('from')->paginate();
     }
 }

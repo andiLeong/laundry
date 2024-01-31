@@ -15,6 +15,6 @@ class SalaryController extends Controller
             $query->where('staff_id', $user->staff->id);
         }
 
-        return $query->with('staff:id,user_id','staff.user:id,first_name')->paginate();
+        return $query->with('staff:id,user_id','staff.user:id,first_name')->orderBy('id','desc')->paginate();
     }
 }
