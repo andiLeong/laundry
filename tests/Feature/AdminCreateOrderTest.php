@@ -3,10 +3,12 @@
 
 use App\Models\Enum\OrderPayment;
 use App\Models\Order;
+use App\Models\OrderImage;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\OrderCanBeCreated;
 use Tests\TestCase;
 use Tests\UserCanBeVerified;
@@ -120,6 +122,63 @@ class AdminCreateOrderTest extends TestCase
     {
         $name = 'service_id';
         $this->createOrder([$name => 9988])->assertJsonValidationErrorFor($name);
+    }
+
+    /** @test */
+    public function image_is_nullable()
+    {
+        $name = 'image';
+        $rule = ['required', 'array'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
+    public function image_array_size_validation()
+    {
+        $file = UploadedFile::fake()->image('avatar.jpg');
+        $file2 = UploadedFile::fake()->image('avatar2.jpg');
+        $file3 = UploadedFile::fake()->image('avatar3.jpg');
+        $file4 = UploadedFile::fake()->image('avatar4.jpg');
+        $file5 = UploadedFile::fake()->image('avatar5.jpg');
+        $file6 = UploadedFile::fake()->image('avatar5.jpg');
+        $response = $this->createOrder(['image' => [1, 2, 3, 4, 5, 6, 7],]);
+        $response2 = $this->createOrder(['image' => [$file, $file2, $file3, $file4, $file5, $file6],]);
+        $this->assertValidateMessage('The image field must not have more than 5 items.', $response, 'image');
+        $this->assertValidateMessage('The image field must not have more than 5 items.', $response2, 'image');
+    }
+
+    /** @test */
+    public function image_type_validation()
+    {
+        $response = $this->createOrder(['image' => ['string', 2],]);
+        $this->assertValidateMessage('The image.0 field must be an image.', $response, 'image.0');
+        $this->assertValidateMessage('The image.1 field must be an image.', $response, 'image.1');
+    }
+
+    /** @test */
+    public function image_size_validation()
+    {
+        $file = UploadedFile::fake()->create('avatar.jpg', 3000);
+        $file2 = UploadedFile::fake()->create('avatar2.jpg', 3000);
+        $response = $this->createOrder(['image' => [$file, $file2],]);
+        $this->assertValidateMessage('The image.0 field must not be greater than 2048 kilobytes.', $response, 'image.0');
+        $this->assertValidateMessage('The image.1 field must not be greater than 2048 kilobytes.', $response, 'image.1');
+    }
+
+    /** @test */
+    public function it_can_create_order_image()
+    {
+        $this->assertDatabaseEmpty('orders');
+        $this->assertDatabaseEmpty('order_images');
+        $this->createOrderWithMock();
+        $order = Order::first();
+        $image = OrderImage::where('order_id', $order->id)->first();
+        $file = explode('/', $image->path);
+        $name = end($file);
+        $this->assertTrue(str_starts_with($name, $order->id . '_'));
+        $this->assertNotNull($image);
     }
 
     /** @test */
@@ -297,6 +356,7 @@ class AdminCreateOrderTest extends TestCase
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
+        $attributes['image'] = [UploadedFile::fake()->create('avatar.jpg', 501)];
         return array_merge($attributes, $overwrites);
     }
 }

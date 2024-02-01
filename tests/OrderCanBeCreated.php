@@ -8,6 +8,7 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
 use App\Notification\Telegram;
+use Illuminate\Http\UploadedFile;
 use Mockery\MockInterface;
 
 trait OrderCanBeCreated
@@ -41,6 +42,7 @@ trait OrderCanBeCreated
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
+        $attributes['image'] = [UploadedFile::fake()->create('avatar.jpg', 501)];
         return array_merge($attributes, $overwrites);
     }
 
