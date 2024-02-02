@@ -23,7 +23,7 @@ class OrderImage extends Model
             OrderImage::create([
                 'order_id' => $orderId,
                 'uploaded_by' => $userId,
-                'path' => $image->storeAs('order', static::name($orderId, $userId))
+                'path' => $image->storeAs('order', static::name($orderId, $image->extension()))
             ]);
         }
     }

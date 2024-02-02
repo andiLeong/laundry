@@ -178,6 +178,7 @@ class AdminCreateOrderTest extends TestCase
         $file = explode('/', $image->path);
         $name = end($file);
         $this->assertTrue(str_starts_with($name, $order->id . '_'));
+        $this->assertTrue(str_ends_with($name, '.jpg'));
         $this->assertNotNull($image);
     }
 
