@@ -29,21 +29,14 @@ class CreateOrderImage
             return;
         }
 
-        if($event instanceof OrderCreated){
+        if ($event instanceof OrderCreated) {
             $orderId = $event->order->id;
             $creatorId = $event->order->creator_id;
-        }else{
+        } else {
             $orderId = $event->onlineOrder->order_id;
             $creatorId = Auth::id();
         }
 
-        foreach ($images as $image) {
-            $name = $orderId . '_' . Str::random(32) . '.' . $image->extension();
-            OrderImage::create([
-                'order_id' => $orderId,
-                'uploaded_by' => $creatorId,
-                'path' => $image->storeAs('order', $name)
-            ]);
-        }
+        OrderImage::put($images, $creatorId, $orderId);
     }
 }
