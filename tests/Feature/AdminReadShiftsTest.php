@@ -71,7 +71,7 @@ class AdminReadShiftsTest extends TestCase
     /** @test */
     public function it_can_read_first_and_last_day_of_the_month(): void
     {
-        $shift = Shift::factory()->create(['staff_id' => $this->staff->id]);
+        $shift = Shift::factory()->create(['staff_id' => $this->staff->id,'created_at' => '2024-01-30']);
         $shift2 = Shift::factory()->create([
             'staff_id' => $this->staff->id,
             'date' => '2024-02-01'
