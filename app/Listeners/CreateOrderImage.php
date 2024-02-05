@@ -2,12 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Event\OrderCreated;
 use App\Events\OnlineOrderStatusUpdated;
+use App\Events\OrderCreated;
+use App\Events\OrderUpdated;
 use App\Models\OrderImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class CreateOrderImage
 {
@@ -22,7 +22,7 @@ class CreateOrderImage
     /**
      * Handle the event.
      */
-    public function handle(OrderCreated|OnlineOrderStatusUpdated $event): void
+    public function handle(OrderCreated|OnlineOrderStatusUpdated|OrderUpdated $event): void
     {
         $images = $this->request->file('image');
         if (is_null($images)) {
@@ -32,6 +32,9 @@ class CreateOrderImage
         if ($event instanceof OrderCreated) {
             $orderId = $event->order->id;
             $creatorId = $event->order->creator_id;
+        } else if ($event instanceof OrderUpdated) {
+            $orderId = $event->order->id;
+            $creatorId = Auth::id();
         } else {
             $orderId = $event->onlineOrder->order_id;
             $creatorId = Auth::id();

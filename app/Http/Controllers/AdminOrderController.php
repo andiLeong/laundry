@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Event\OrderCreated;
+use App\Events\OrderCreated;
+use App\Events\OrderUpdated;
 use App\Http\Validation\OrderValidate;
 use App\Models\Order;
 use App\Models\OrderPromotion;
@@ -60,6 +61,30 @@ class AdminOrderController extends Controller
                 }
                 OrderCreated::dispatch($order, $validation->products);
             });
+    }
+
+    public function update($id, Request $request)
+    {
+        $order = Order::where('id', $id)->first();
+        if (is_null($order)) {
+            abort(404, 'Order is not found');
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|decimal:0,4',
+            'service_id' => 'required',
+            'description' => 'nullable|string',
+            'image' => 'nullable|array|max:5',
+            'image.*' => 'image|max:2048',
+        ]);
+
+        $attributes = array_merge($validated, [
+            'total_amount' => $validated['amount'] + $order['product_amount']
+        ]);
+        $order->update($attributes);
+        OrderUpdated::dispatch($order);
+
+        return ['success'];
     }
 
     /**
