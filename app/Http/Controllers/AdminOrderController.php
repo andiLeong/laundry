@@ -72,12 +72,13 @@ class AdminOrderController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|decimal:0,4',
-            'service_id' => 'required',
-            'description' => 'nullable|string',
+            'service_id' => 'required|exists:services,id',
+            'description' => 'nullable|string|max:255',
             'image' => 'nullable|array|max:5',
             'image.*' => 'image|max:2048',
         ]);
 
+        unset($validated['image']);
         $attributes = array_merge($validated, [
             'total_amount' => $validated['amount'] + $order['product_amount']
         ]);
