@@ -42,8 +42,14 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->created_at->lt($start)) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount',
-            'products', 'gcash');
+        $order->load(
+            'user:id,first_name,phone,last_name,middle_name',
+            'service:id,name',
+            'promotions:id,name,discount',
+            'products',
+            'gcash',
+            'images.creator:id,first_name',
+        );
         return $order;
     }
 

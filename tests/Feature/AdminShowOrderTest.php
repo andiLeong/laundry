@@ -4,6 +4,7 @@
 use App\Models\Enum\OrderPayment;
 use App\Models\Enum\UserType;
 use App\Models\Order;
+use App\Models\OrderImage;
 use App\Models\OrderPromotion;
 use App\Models\Promotion;
 use App\Models\Service;
@@ -52,13 +53,17 @@ class AdminShowOrderTest extends TestCase
         $user = User::factory()->create();
         $service = Service::factory()->create();
         $order = Order::factory()->create(['user_id' => $user->id, 'service_id' => $service->id]);
+        $orderImage = OrderImage::factory()->create(['order_id' => $order->id,]);
         OrderPromotion::insertByPromotions($promotions, $order);
         $order = $this->fetch($order->id);
+        dump($order->json());
 
         $orderPromotion = array_column($order['promotions'], 'name');
         $this->assertEquals($user->phone, $order['user']['phone']);
         $this->assertEquals($user->first_name, $order['user']['first_name']);
         $this->assertEquals($service->name, $order['service']['name']);
+        $this->assertEquals($orderImage->path, $order['images'][0]['path']);
+        $this->assertEquals($orderImage->creator->first_name, $order['images'][0]['creator']['first_name']);
         $this->assertArrayHasKey('gcash', $order->json());
 
         $this->assertTrue(in_array($promotions[1]->name, $orderPromotion));
@@ -92,6 +97,6 @@ class AdminShowOrderTest extends TestCase
 
     protected function fetch($id, $as = null)
     {
-        return $this->fetchAsAdmin([],$as,$this->endpoint . $id);
+        return $this->fetchAsAdmin([], $as, $this->endpoint . $id);
     }
 }
