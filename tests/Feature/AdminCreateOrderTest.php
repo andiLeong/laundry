@@ -130,7 +130,7 @@ class AdminCreateOrderTest extends TestCase
     public function image_is_nullable()
     {
         $name = 'image';
-        $rule = ['required', 'array'];
+        $rule = ['nullable', 'array'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrder($payload)
         );

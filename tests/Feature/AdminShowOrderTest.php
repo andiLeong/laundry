@@ -56,7 +56,6 @@ class AdminShowOrderTest extends TestCase
         $orderImage = OrderImage::factory()->create(['order_id' => $order->id,]);
         OrderPromotion::insertByPromotions($promotions, $order);
         $order = $this->fetch($order->id);
-        dump($order->json());
 
         $orderPromotion = array_column($order['promotions'], 'name');
         $this->assertEquals($user->phone, $order['user']['phone']);

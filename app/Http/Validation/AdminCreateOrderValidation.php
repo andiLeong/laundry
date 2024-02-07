@@ -25,7 +25,7 @@ class AdminCreateOrderValidation implements OrderValidate
         'paid' => 'required|boolean',
 //        'company_id' => 'nullable|in:1',
         'description' => 'nullable|string',
-        'image' => 'required|array|max:5',
+        'image' => 'nullable|array|max:5',
         'image.*' => 'image|max:2048',
     ];
 
