@@ -42,7 +42,6 @@ trait OrderCanBeCreated
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
-        $attributes['image'] = [UploadedFile::fake()->create('avatar.jpg', 501)];
         return array_merge($attributes, $overwrites);
     }
 

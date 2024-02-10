@@ -7,8 +7,11 @@ use App\Models\OrderImage;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+use Mockery\MockInterface;
 use Tests\OrderCanBeCreated;
 use Tests\OrderImageCanBeValidated;
 use Tests\TestCase;
@@ -23,6 +26,7 @@ class AdminCreateOrderTest extends TestCase
     use OrderImageCanBeValidated;
 
     protected string $phone = '09060785699';
+    private mixed $id;
 
     /** @test */
     public function it_can_create_order(): void
@@ -136,20 +140,6 @@ class AdminCreateOrderTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_can_create_order_image()
-    {
-        $this->assertDatabaseEmpty('orders');
-        $this->assertDatabaseEmpty('order_images');
-        $this->createOrderWithMock();
-        $order = Order::first();
-        $image = OrderImage::where('order_id', $order->id)->first();
-        $file = explode('/', $image->path);
-        $name = end($file);
-        $this->assertTrue(str_starts_with($name, $order->id . '_'));
-        $this->assertTrue(str_ends_with($name, '.jpg'));
-        $this->assertNotNull($image);
-    }
 
     /** @test */
     public function it_use_service_price_as_amount_if_service_id_is_provided()
@@ -172,16 +162,15 @@ class AdminCreateOrderTest extends TestCase
     /** @test */
     public function its_amount_default_to_service_price()
     {
-        $order = Order::first();
-        $this->assertNull($order);
-
+        $description = Str::random();
         $service = Service::factory()->create(['price' => 201]);
         $this->createOrderWithMock([
             'service_id' => $service->id,
             'amount' => null,
+            'description' => $description,
         ]);
 
-        $order = Order::first();
+        $order = Order::where('description', $description)->first();
         $this->assertEquals(201, $order->amount);
     }
 
@@ -322,11 +311,30 @@ class AdminCreateOrderTest extends TestCase
         $response->assertSuccessful();
     }
 
+    /** @test */
+    public function it_can_create_order_image()
+    {
+        $this->mock(Filesystem::class, function (MockInterface $mock) {
+            $mock->shouldReceive('putFileAs')->andReturn('1_' . Str::random() . '.jpg');
+        });
+        $this->assertDatabaseEmpty('orders');
+        $this->assertDatabaseEmpty('order_images');
+        $this->createOrderWithMock([
+            'image' => [UploadedFile::fake()->create('avatar.jpg', 501)]
+        ]);
+        $order = Order::first();
+        $image = OrderImage::where('order_id', $order->id)->first();
+        $file = explode('/', $image->path);
+        $name = end($file);
+        $this->assertTrue(str_starts_with($name, '1_'));
+        $this->assertTrue(str_ends_with($name, '.jpg'));
+        $this->assertNotNull($image);
+    }
+
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
-        $attributes['image'] = [UploadedFile::fake()->create('avatar.jpg', 501)];
         return array_merge($attributes, $overwrites);
     }
 }

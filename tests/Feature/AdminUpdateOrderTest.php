@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\OrderImage;
 use App\Models\Service;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
+use Mockery\MockInterface;
 use Tests\AdminAuthorization;
 use Tests\OrderImageCanBeValidated;
 use Tests\TestCase;
@@ -110,6 +112,9 @@ class AdminUpdateOrderTest extends TestCase
     /** @test */
     public function it_can_add_order_image(): void
     {
+        $this->mock(Filesystem::class, function (MockInterface $mock) {
+            $mock->shouldReceive('putFileAs')->andReturn('1_' . Str::random() . '.jpg');
+        });
         $this->assertDatabaseCount('order_images',0);
 
         $this->updateorder(['image' => [$this->generateImageFile()]])
