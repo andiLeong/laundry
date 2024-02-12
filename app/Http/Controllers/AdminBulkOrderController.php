@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Event\OrderCreated;
+use App\Events\OrderCreated;
 use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Models\Order;
 use Illuminate\Http\Request;

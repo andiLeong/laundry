@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Event\OrderCreated;
+use App\Events\OrderCreated;
+use App\Events\OrderUpdated;
 use App\Http\Validation\OrderValidate;
 use App\Models\Order;
 use App\Models\OrderPromotion;
@@ -41,8 +42,14 @@ class AdminOrderController extends Controller
         if ($user->isEmployee() && $order->created_at->lt($start)) {
             abort(403, 'You do not have right to perform this action');
         }
-        $order->load('user:id,first_name,phone,last_name,middle_name', 'service:id,name', 'promotions:id,name,discount',
-            'products', 'gcash');
+        $order->load(
+            'user:id,first_name,phone,last_name,middle_name',
+            'service:id,name',
+            'promotions:id,name,discount',
+            'products',
+            'gcash',
+            'images.creator:id,first_name',
+        );
         return $order;
     }
 
@@ -60,6 +67,31 @@ class AdminOrderController extends Controller
                 }
                 OrderCreated::dispatch($order, $validation->products);
             });
+    }
+
+    public function update($id, Request $request)
+    {
+        $order = Order::where('id', $id)->first();
+        if (is_null($order)) {
+            abort(404, 'Order is not found');
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|decimal:0,4',
+            'service_id' => 'required|exists:services,id',
+            'description' => 'nullable|string|max:255',
+            'image' => 'nullable|array|max:5',
+            'image.*' => 'image|max:2048',
+        ]);
+
+        unset($validated['image']);
+        $attributes = array_merge($validated, [
+            'total_amount' => $validated['amount'] + $order['product_amount']
+        ]);
+        $order->update($attributes);
+        OrderUpdated::dispatch($order);
+
+        return ['success'];
     }
 
     /**

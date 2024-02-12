@@ -30,7 +30,7 @@ class AdminReadShiftsTest extends TestCase
     {
         $shift = Shift::factory()->create(['staff_id' => $this->staff->id]);
         $shift2 = Shift::factory()->create();
-        $ids = $this->fetch([],$this->user)->assertOk()->collect()->pluck('id');
+        $ids = $this->fetch([], $this->user)->assertOk()->collect()->pluck('id');
 
         $this->assertTrue($ids->contains($shift->id));
         $this->assertFalse($ids->contains($shift2->id));
@@ -44,7 +44,7 @@ class AdminReadShiftsTest extends TestCase
             'staff_id' => $this->staff->id,
             'date' => today()->subMonth()->toDateString(),
         ]);
-        $ids = $this->fetch([],$this->user)->collect()->pluck('id');
+        $ids = $this->fetch([], $this->user)->collect()->pluck('id');
 
         $this->assertTrue($ids->contains($shift->id));
         $this->assertFalse($ids->contains($shift2->id));
@@ -62,7 +62,7 @@ class AdminReadShiftsTest extends TestCase
         $ids = $this->fetch([
             'year' => today()->subMonth()->year,
             'month' => today()->subMonth()->month
-        ],$this->user)->collect()->pluck('id');
+        ], $this->user)->collect()->pluck('id');
 
         $this->assertTrue($ids->contains($shift2->id));
         $this->assertFalse($ids->contains($shift->id));
@@ -71,7 +71,7 @@ class AdminReadShiftsTest extends TestCase
     /** @test */
     public function it_can_read_first_and_last_day_of_the_month(): void
     {
-        $shift = Shift::factory()->create(['staff_id' => $this->staff->id,'date' => '2024-01-30']);
+        $shift = Shift::factory()->create(['staff_id' => $this->staff->id, 'date' => '2024-01-01']);
         $shift2 = Shift::factory()->create([
             'staff_id' => $this->staff->id,
             'date' => '2024-02-01'
@@ -83,7 +83,7 @@ class AdminReadShiftsTest extends TestCase
         $ids = $this->fetch([
             'year' => 2024,
             'month' => 2,
-        ],$this->user)->collect()->pluck('id');
+        ], $this->user)->collect()->pluck('id');
 
         $this->assertTrue($ids->contains($shift2->id));
         $this->assertTrue($ids->contains($shift3->id));

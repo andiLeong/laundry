@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use App\Event\OrderCreated;
+use App\Events\OrderUpdated;
 use App\Events\OnlineOrderStatusUpdated;
+use App\Events\OrderCreated;
 use App\Listeners\CreatedOrderProduct;
 use App\Listeners\CreateOrderImage;
 use App\Listeners\SendNotification;
@@ -24,6 +25,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         OnlineOrderStatusUpdated::class => [
 //            CreateOrderImage::class,
+        ],
+        OrderUpdated::class => [
+            CreateOrderImage::class,
         ],
     ];
 

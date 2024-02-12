@@ -12,9 +12,10 @@ use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use App\Notification\Telegram;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Mockery\MockInterface;
 use Tests\TestCase;
 use Tests\TriggerCustomerCreateAction;
@@ -215,7 +216,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
     {
         $this->assertDatabaseCount('order_images', 0);
         $fake = UploadedFile::fake()->image('order.jpg');
-        $this->createOrderWithMock(['image' => [$fake]]);
+        $this->mockFileSystem()->createOrderWithMock(['image' => [$fake]]);
         $order = Order::latest()->first();
         $image = $order->images->first();
 
@@ -228,8 +229,9 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
     /** @test */
     public function after_order_created_order_image_name_is_correctly_set()
     {
+        $this->assertDatabaseCount('order_images', 0);
         $fake = UploadedFile::fake()->image('order.jpg');
-        $this->createOrderWithMock(['image' => [$fake]]);
+        $this->mockFileSystem(2)->createOrderWithMock(['image' => [$fake], 'description' => 'hay']);
         $order = Order::latest()->first();
         $image = $order->images->first();
 
@@ -237,5 +239,13 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $name = end($file);
         $this->assertTrue(str_starts_with($name, $order->id . '_'));
         $this->assertTrue(str_ends_with($name, '.' . $fake->extension()));
+    }
+
+    public function mockFileSystem($id = 1)
+    {
+        $this->mock(Filesystem::class, function (MockInterface $mock) use($id) {
+            $mock->shouldReceive('putFileAs')->andReturn($id . '_' . Str::random() . '.jpg');
+        });
+        return $this;
     }
 }

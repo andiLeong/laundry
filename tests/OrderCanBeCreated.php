@@ -8,6 +8,7 @@ use App\Models\Promotion;
 use App\Models\Service;
 use App\Models\User;
 use App\Notification\Telegram;
+use Illuminate\Http\UploadedFile;
 use Mockery\MockInterface;
 
 trait OrderCanBeCreated

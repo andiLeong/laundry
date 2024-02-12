@@ -12,8 +12,9 @@ use App\Models\Sms\Contract\Sms as SmsContract;
 use App\Models\Sms\Template;
 use App\Models\Sms\Twilio;
 use App\Notification\Telegram;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Twilio\Rest\Client as TwilioSdk;
 
@@ -35,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         Model::unguard();
         $this->app->bind(OrderValidate::class, function ($app) {
             $request = $app['request'];
-            if($request->route()->getName() === 'customer.order.create'){
+            if ($request->route()->getName() === 'customer.order.create') {
                 return new CustomerCreateOrderValidation($request);
             }
             if ($request->has('promotion_ids')) {
@@ -66,6 +67,11 @@ class AppServiceProvider extends ServiceProvider
             return (new Telegram($token));
         });
 
-        $this->app->singleton(GoogleRecaptcha::class, fn($app) => new GoogleRecaptcha($app['config']->get('services.google-recaptcha.secret')));
+        $this->app->singleton(Filesystem::class, function () {
+            return Storage::disk('digitalocean');
+        });
+
+        $this->app->singleton(GoogleRecaptcha::class,
+            fn($app) => new GoogleRecaptcha($app['config']->get('services.google-recaptcha.secret')));
     }
 }
