@@ -64,6 +64,11 @@ class SalaryCalculator
             return false;
         }
 
+        if($details->isEmpty()){
+            logger('do not find any shift assigned for staff ' . $this->staff->user->first_name);
+            return false;
+        }
+
         $salary = Salary::create([
             'staff_id' => $this->staff->id,
             'amount' => $totalSalaries,

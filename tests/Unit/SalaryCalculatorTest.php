@@ -528,6 +528,23 @@ class SalaryCalculatorTest extends TestCase
         );
     }
 
+    /** @test */
+    public function if_staff_no_assigned_shifts_it_should_not_create_salary_and_salary_detail_record()
+    {
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+
+        $salaryPerDay = $this->staff->daily_salary;
+        $salaryDay = Carbon::parse('2024-02-15');
+        $calculator = $this->createCalculator($salaryDay);
+
+        $res = $calculator->calculate();
+
+        $this->assertFalse($res);
+        $this->assertDatabaseCount('salaries', 0);
+        $this->assertDatabaseCount('salary_details', 0);
+    }
+
     public function createAttendance($time, $shiftId, $type = 0)
     {
         return Attendance::factory()->create([

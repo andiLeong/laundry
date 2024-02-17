@@ -25,6 +25,8 @@ class AdminCreateOrderValidation implements OrderValidate
         'paid' => 'required|boolean',
 //        'company_id' => 'nullable|in:1',
         'description' => 'nullable|string',
+        'image' => 'nullable|array|max:5',
+        'image.*' => 'image|max:2048',
     ];
 
     public function __construct(public Request $request)
@@ -47,6 +49,7 @@ class AdminCreateOrderValidation implements OrderValidate
         $data['amount'] ??= $this->service->price;
 
         unset($data['product_ids']);
+        unset($data['image']);
         return $this->afterValidate($data);
     }
 

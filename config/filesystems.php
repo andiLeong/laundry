@@ -56,6 +56,17 @@ return [
             'throw' => false,
         ],
 
+        'digitalocean' => [
+            'driver' => 's3',
+            'key' => env('DIGITALOCEAN_SPACES_KEY'),
+            'secret' => env('DIGITALOCEAN_SPACES_SECRET'),
+            'endpoint' => env('DIGITALOCEAN_SPACES_ENDPOINT'),
+            'region' => env('DIGITALOCEAN_SPACES_REGION'),
+            'bucket' => env('DIGITALOCEAN_SPACES_BUCKET', 'default-bucket'),
+            'url' => env('DIGITALOCEAN_SPACES_BASE_URL', 'http://fake-url.com/'),
+            'path' => env('DIGITALOCEAN_SPACES_PATH','sbin/test')
+        ],
+
     ],
 
     /*
