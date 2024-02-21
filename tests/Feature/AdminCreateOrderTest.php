@@ -2,6 +2,7 @@
 
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\Models\Order;
 use App\Models\OrderImage;
 use App\Models\Product;
@@ -329,6 +330,27 @@ class AdminCreateOrderTest extends TestCase
         $this->assertTrue(str_starts_with($name, '1_'));
         $this->assertTrue(str_ends_with($name, '.jpg'));
         $this->assertNotNull($image);
+    }
+
+    /** @test */
+    public function it_can_record_parent_id()
+    {
+        $this->withoutExceptionHandling();
+        $user = $this->customer();
+        $this->assertDatabaseCount('orders', 0);
+        $parentOrder = Order::factory()->create([
+            'type' => OrderType::ONLINE->value,
+            'user_id' => $user->id
+        ]);
+        $response = $this->createOrderWithMock([
+            'parent_id' => $parentOrder->id,
+            'user_id' => $user->id
+        ]);
+        $order = Order::find($response->json()['id']);
+
+        $this->assertEquals($order['parent_id'], $parentOrder->id);
+        $this->assertEquals($order['user_id'], $user->id);
+        $this->assertEquals($order['type'], OrderType::ONLINE->toLower());
     }
 
     private function orderAttributes(mixed $overwrites)

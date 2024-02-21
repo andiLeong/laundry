@@ -2,6 +2,8 @@
 
 namespace App\Http\Validation;
 
+use App\Models\Enum\OrderType;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -23,11 +25,12 @@ class AdminCreateOrderValidation implements OrderValidate
         'product_ids' => 'nullable|array',
         'issued_invoice' => 'required|boolean',
         'paid' => 'required|boolean',
-//        'company_id' => 'nullable|in:1',
+        'parent_id' => 'nullable',
         'description' => 'nullable|string',
         'image' => 'nullable|array|max:5',
         'image.*' => 'image|max:2048',
     ];
+    private $type = null;
 
     public function __construct(public Request $request)
     {
@@ -44,12 +47,16 @@ class AdminCreateOrderValidation implements OrderValidate
         $this
             ->validateService()
             ->validateProduct()
-            ->validateUser();
+            ->validateUser()
+            ->validateParentId();
 
         $data['amount'] ??= $this->service->price;
 
         unset($data['product_ids']);
         unset($data['image']);
+        if(!is_null($this->type)){
+            $data['type'] = $this->type;
+        }
         return $this->afterValidate($data);
     }
 
@@ -170,5 +177,25 @@ class AdminCreateOrderValidation implements OrderValidate
             'product_amount' => $productAmount,
             'total_amount' => $this->validated['amount'] + $productAmount
         ]);
+    }
+
+    private function validateParentId()
+    {
+        if ($this->request->has('parent_id') && !is_null($this->request->get('parent_id'))) {
+            if (is_null($this->user)) {
+                $this->exception('parent_id', 'you must provider user');
+            }
+
+            $id = $this->request->get('parent_id');
+            $order = Order::where('id', $id)->where('user_id', $this->user->id)->where('type', OrderType::ONLINE->value)->where('parent_id', 0)->first();
+
+            if (is_null($order)) {
+                $this->exception('parent_id', 'order is not existed');
+            }
+
+            $this->type = OrderType::ONLINE->value;
+        }
+
+        return $this;
     }
 }
