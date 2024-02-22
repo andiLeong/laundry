@@ -6,7 +6,11 @@ use App\Models\Enum\OnlineOrderStatus;
 use App\Models\Enum\OrderType;
 use App\Models\OnlineOrder;
 use App\Models\Order;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+use Mockery\MockInterface;
 use Tests\AdminAuthorization;
 use Tests\OrderImageCanBeValidated;
 use Tests\TestCase;
@@ -111,6 +115,26 @@ class OnlineOrderStatusUpdateTest extends TestCase
 
         $this->assertEquals(OnlineOrderStatus::DELIVERED->toLower(), $this->onlineOrder->fresh()->status);
         $this->assertEquals(now()->toDateTimeString(), $this->onlineOrder->fresh()->deliver_at);
+    }
+
+
+    /** @test */
+    public function it_can_upload_image_when_update_status(): void
+    {
+        $this->mock(Filesystem::class, function (MockInterface $mock) {
+            $mock->shouldReceive('putFileAs')->andReturn($this->order->id . '_' . Str::random() . '.jpg');
+        });
+
+        $this->assertDatabaseCount('order_images', 0);
+        $fake = UploadedFile::fake()->image('order.jpg');
+
+        $this->update(['image' => [$fake],'type' => 'pickup']);
+        $image = $this->order->refresh()->images->first();
+
+        $file = explode('/', $image->path);
+        $name = end($file);
+        $this->assertTrue(str_starts_with($name, $this->order->id . '_'));
+        $this->assertTrue(str_ends_with($name, '.' . $fake->extension()));
     }
 
     public function update($arr = [])
