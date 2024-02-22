@@ -87,6 +87,16 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function type_must_be_valid()
+    {
+        $name = 'type';
+        $rule = ['required', 'in:'. OrderType::ONLINE->value . ',' . OrderType::WALKIN->value];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
     public function issued_invoice_must_be_valid()
     {
         $name = 'issued_invoice';
@@ -336,6 +346,7 @@ class AdminCreateOrderTest extends TestCase
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
+        $attributes['type'] = OrderType::WALKIN->value;
         return array_merge($attributes, $overwrites);
     }
 }

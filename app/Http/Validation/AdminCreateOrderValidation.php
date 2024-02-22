@@ -2,6 +2,7 @@
 
 namespace App\Http\Validation;
 
+use App\Models\Enum\OrderType;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -15,22 +16,23 @@ class AdminCreateOrderValidation implements OrderValidate
     public User|null $user;
     public Collection|null $products = null;
     public array $validated;
-    public array $rules = [
-        'amount' => 'nullable|decimal:0,4',
-        'payment' => 'required|in:1,2',
-        'user_id' => 'nullable',
-        'service_id' => 'required',
-        'product_ids' => 'nullable|array',
-        'issued_invoice' => 'required|boolean',
-        'paid' => 'required|boolean',
-        'description' => 'nullable|string',
-        'image' => 'nullable|array|max:5',
-        'image.*' => 'image|max:2048',
-    ];
+    public array $rules = [];
 
     public function __construct(public Request $request)
     {
-
+        $this->rules = [
+            'amount' => 'nullable|decimal:0,4',
+            'payment' => 'required|in:1,2',
+            'user_id' => 'nullable',
+            'service_id' => 'required',
+            'product_ids' => 'nullable|array',
+            'issued_invoice' => 'required|boolean',
+            'paid' => 'required|boolean',
+            'description' => 'nullable|string',
+            'image' => 'nullable|array|max:5',
+            'image.*' => 'image|max:2048',
+            'type' => 'required|in:'. OrderType::ONLINE->value . ',' . OrderType::WALKIN->value,
+        ];
     }
 
     /**

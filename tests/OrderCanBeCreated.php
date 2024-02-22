@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\Models\Order;
 use App\Models\Promotion;
 use App\Models\Service;
@@ -42,6 +43,7 @@ trait OrderCanBeCreated
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
+        $attributes['type'] = OrderType::WALKIN->value;
         return array_merge($attributes, $overwrites);
     }
 
