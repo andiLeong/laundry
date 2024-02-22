@@ -32,7 +32,6 @@ class OrderFactory extends Factory
             'description' => null,
             'payment' => OrderPayment::CASH->value,
             'type' => OrderType::WALKIN->value,
-            'parent_id' => 0,
         ];
     }
 }

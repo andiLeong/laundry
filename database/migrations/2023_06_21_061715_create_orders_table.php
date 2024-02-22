@@ -18,7 +18,7 @@ return new class extends Migration {
 //            $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('user_id')->index()->nullable();
 //            $table->unsignedBigInteger('company_id')->nullable();
-            $table->unsignedBigInteger('parent_id')->default(0);
+//            $table->unsignedBigInteger('parent_id')->default(0);
             $table->string('description')->nullable();
             $table->unsignedDecimal('amount');
             $table->unsignedDecimal('total_amount');

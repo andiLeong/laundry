@@ -81,18 +81,6 @@ class OrderTest extends TestCase
     }
 
     /** @test */
-    public function it_can_has_many_child_orders()
-    {
-        $order = Order::factory()->create();
-        $children = Order::factory(2)->create([
-            'parent_id' => $order->id
-        ]);
-
-        $this->assertEquals($order->children[0]->id, $children[0]->id);
-        $this->assertEquals($order->children[1]->id, $children[1]->id);
-    }
-
-    /** @test */
     public function it_can_has_many_images()
     {
         $order = Order::factory()->create();

@@ -332,27 +332,6 @@ class AdminCreateOrderTest extends TestCase
         $this->assertNotNull($image);
     }
 
-    /** @test */
-    public function it_can_record_parent_id()
-    {
-        $this->withoutExceptionHandling();
-        $user = $this->customer();
-        $this->assertDatabaseCount('orders', 0);
-        $parentOrder = Order::factory()->create([
-            'type' => OrderType::ONLINE->value,
-            'user_id' => $user->id
-        ]);
-        $response = $this->createOrderWithMock([
-            'parent_id' => $parentOrder->id,
-            'user_id' => $user->id
-        ]);
-        $order = Order::find($response->json()['id']);
-
-        $this->assertEquals($order['parent_id'], $parentOrder->id);
-        $this->assertEquals($order['user_id'], $user->id);
-        $this->assertEquals($order['type'], OrderType::ONLINE->toLower());
-    }
-
     private function orderAttributes(mixed $overwrites)
     {
         $attributes = Order::factory()->make()->toArray();
