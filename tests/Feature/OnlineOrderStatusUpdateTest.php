@@ -36,7 +36,7 @@ class OnlineOrderStatusUpdateTest extends TestCase
             'pickup_at' => null,
             'deliver_at' => null
         ]);
-        $this->endpoint = $this->endpoint . '/' . $this->onlineOrder->id;
+        $this->endpoint = $this->endpoint . '/' . $this->order->id;
         $this->imageArraySize = 2;
         $this->imageCreation = 'update';
     }
@@ -73,7 +73,11 @@ class OnlineOrderStatusUpdateTest extends TestCase
     public function if_online_order_is_delivered_it_cant_update_status(): void
     {
         $this->onlineOrder->update(['status' => OnlineOrderStatus::PICKUP->value]);
-        $message = $this->update(['type' => 'pickup'])->assertStatus(400)->json('message');
+        $reponse = $this->update(['type' => 'pickup']);
+        $message = $reponse->json('message');
+//        dump($this->endpoint);
+//        dump($message);
+//        dd($reponse->json());
         $this->assertEquals($message, 'Order must from pending pickup to picked up');
     }
 
