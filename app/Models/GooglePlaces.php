@@ -19,6 +19,7 @@ class GooglePlaces
 
     public function get($id)
     {
+        dd('real implements');
         $query = urldecode(http_build_query([
             'key' => $this->config['secret'],
             'fields' => $this->config['fields']

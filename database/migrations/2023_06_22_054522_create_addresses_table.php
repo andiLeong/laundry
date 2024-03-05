@@ -12,13 +12,9 @@ return new class extends Migration {
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->index();
             $table->unsignedBigInteger('place_id');
-            $table->string('name', 100)->nullable();
-            $table->string('number', 100);
-            $table->string('street');
-            $table->string('city', 100);
-            $table->string('province', 100);
+            $table->string('room', 100)->nullable();
             $table->timestamps();
         });
     }
