@@ -73,11 +73,7 @@ class OnlineOrderStatusUpdateTest extends TestCase
     public function if_online_order_is_delivered_it_cant_update_status(): void
     {
         $this->onlineOrder->update(['status' => OnlineOrderStatus::PICKUP->value]);
-        $reponse = $this->update(['type' => 'pickup']);
-        $message = $reponse->json('message');
-//        dump($this->endpoint);
-//        dump($message);
-//        dd($reponse->json());
+        $message = $this->update(['type' => 'pickup'])->json('message');
         $this->assertEquals($message, 'Order must from pending pickup to picked up');
     }
 
