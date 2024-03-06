@@ -39,7 +39,7 @@ class AddressController extends Controller
     public function update(Address $address, Request $request)
     {
         $address->update($request->validate([
-            'name' => 'required|string|max:100',
+            'room' => 'required|string|max:100',
         ]));
     }
 
@@ -49,16 +49,5 @@ class AddressController extends Controller
             abort(403, 'You do not have the right to perform this action');
         }
         $address->delete();
-    }
-
-    protected function validateAttribute(Request $request)
-    {
-        return $request->validate([
-            'city' => 'required|string|max:100',
-            'number' => 'required|string|max:100',
-            'province' => 'required|string|max:100',
-            'street' => 'required|string|max:255',
-            'name' => 'nullable|string|max:100',
-        ]);
     }
 }

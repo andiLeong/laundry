@@ -15,9 +15,9 @@ class UpdateAddressTest extends TestCase
     public function it_can_update_address_by_authenticated_user(): void
     {
         $address = Address::factory()->create();
-        $response = $this->updateAddress(['number' => 'new number'],$address);
+        $response = $this->updateAddress(['room' => '2748'],$address);
 
-        $this->assertEquals('new number', $address->refresh()->number);
+        $this->assertEquals('2748', $address->refresh()->room);
         $response->assertStatus(200);
     }
 
@@ -34,49 +34,9 @@ class UpdateAddressTest extends TestCase
     }
 
     /** @test */
-    public function update_name_must_valid()
+    public function update_room_must_valid()
     {
-        $name = 'name';
-        $rule = ['nullable','string','max:100'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->updateAddress($payload)
-        );
-    }
-
-    /** @test */
-    public function update_street_must_valid()
-    {
-        $name = 'street';
-        $rule = ['required','string','max:255'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->updateAddress($payload)
-        );
-    }
-
-    /** @test */
-    public function update_province_must_valid()
-    {
-        $name = 'province';
-        $rule = ['required','string','max:100'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->updateAddress($payload)
-        );
-    }
-
-    /** @test */
-    public function update_city_must_valid()
-    {
-        $name = 'city';
-        $rule = ['required','string','max:100'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->updateAddress($payload)
-        );
-    }
-
-    /** @test */
-    public function update_number_must_valid()
-    {
-        $name = 'number';
+        $name = 'room';
         $rule = ['required','string','max:100'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->updateAddress($payload)
