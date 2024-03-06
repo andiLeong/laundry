@@ -38,6 +38,9 @@ class AddressController extends Controller
 
     public function update(Address $address, Request $request)
     {
+        if ($address->user_id !== auth()->id()) {
+            abort(403, 'You do not have the right to perform this action');
+        }
         $address->update($request->validate([
             'room' => 'required|string|max:100',
         ]));

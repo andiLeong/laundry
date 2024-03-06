@@ -54,6 +54,22 @@ class CustomerCanCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function pickup_cant_be_past()
+    {
+        $response = $this->createOrder(['pickup' => now()->subHours(3)]);
+        $this->assertValidateMessage('Pickup date cant in the past.',$response,'pickup');
+    }
+
+    /** @test */
+    public function pickup_at_least_one_hour_from_now()
+    {
+        $response = $this->createOrder(['pickup' => now()->addMinutes(20)]);
+        $response2 = $this->createOrder(['pickup' => now()->addMinutes(61)]);
+        $this->assertValidateMessage('Pickup date at least one hour from now.',$response,'pickup');
+        $response2->assertJsonMissingValidationErrors('pickup');
+    }
+
+    /** @test */
     public function description_is_nullable()
     {
         $name = 'description';
@@ -71,6 +87,13 @@ class CustomerCanCreateOrderTest extends TestCase
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrder($payload)
         );
+    }
+
+    /** @test */
+    public function delivery_cant_be_past()
+    {
+        $response = $this->createOrder(['delivery' => now()->subHours(3)]);
+        $this->assertValidateMessage('Delivery date cant in the past.',$response,'delivery');
     }
 
     /** @test */
