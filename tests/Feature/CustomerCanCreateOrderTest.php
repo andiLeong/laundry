@@ -97,6 +97,16 @@ class CustomerCanCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function add_products_is_nullable()
+    {
+        $name = 'add_products';
+        $rule = ['nullable', 'in:0,1'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
     public function image_is_nullable()
     {
         $name = 'image';

@@ -43,6 +43,7 @@ class OrderController extends Controller
             ]);
             $onlineOrder = OnlineOrder::create([
                 'order_id' => $order->id,
+                'add_products' => $data['add_products'] ?? 0,
                 'address_id' => $data['address_id'],
                 'pickup' => $pickup,
                 'delivery' => $data['delivery'] ?? $pickup->copy()->addHours(12),

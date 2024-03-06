@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('address_id');
             $table->unsignedTinyInteger('status')->default(OnlineOrderStatus::PENDING_PICKUP->value);
             $table->unsignedTinyInteger('delivery_fee')->default(0);
+            $table->unsignedTinyInteger('add_products')->default(0);
             $table->timestamp('delivery')->nullable();
             $table->timestamp('pickup');
             $table->timestamp('pickup_at')->nullable();

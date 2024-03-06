@@ -26,7 +26,7 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
                     ->where(fn(Builder $query) => $query->where('user_id', auth()->id()))
             ],
             'product_ids' => 'nullable|array',
-            'delivery' => ['nullable','date',
+            'delivery' => ['bail', 'nullable', 'date',
                 function (string $attribute, mixed $value, Closure $fail) {
                     $date = Carbon::parse($value);
                     if ($date->isPast()) {
@@ -34,7 +34,7 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
                     }
                 }
             ],
-            'pickup' => ['required', 'date',
+            'pickup' => ['bail', 'required', 'date',
                 function (string $attribute, mixed $value, Closure $fail) {
                     $date = Carbon::parse($value);
                     if ($date->isPast()) {
@@ -46,7 +46,7 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
                     }
                 }
             ],
-//            'product_apply_each_load' => 'required_if:product_ids|boolean',
+            'add_products' => 'nullable|in:0,1',
             'description' => 'nullable|string|max:255',
             'image' => 'nullable|array|max:2',
             'image.*' => 'image|max:2048',

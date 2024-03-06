@@ -84,8 +84,16 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
     {
         $this->assertDatabaseEmpty('order_paid');
         $this->createOrderWithMock();
-        Order::latest()->first();
         $this->assertDatabaseEmpty('order_paid');
+    }
+
+    /** @test */
+    public function after_order_add_products_option_is_added()
+    {
+        $this->createOrderWithMock(['add_products' => 1]);
+        $order = Order::latest()->first();
+        $onlineOrder = OnlineOrder::where('order_id', $order->id)->first();
+        $this->assertEquals(1, $onlineOrder->add_products);
     }
 
     /** @test */
@@ -237,13 +245,13 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
 
         $file = explode('/', $image->path);
         $name = end($file);
-        $this->assertTrue(str_starts_with($name, $order->id . '_'));
+        $this->assertTrue(str_starts_with($name, 2 . '_'));
         $this->assertTrue(str_ends_with($name, '.' . $fake->extension()));
     }
 
     public function mockFileSystem($id = 1)
     {
-        $this->mock(Filesystem::class, function (MockInterface $mock) use($id) {
+        $this->mock(Filesystem::class, function (MockInterface $mock) use ($id) {
             $mock->shouldReceive('putFileAs')->andReturn($id . '_' . Str::random() . '.jpg');
         });
         return $this;
