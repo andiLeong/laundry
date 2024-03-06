@@ -38,7 +38,9 @@ class AddressController extends Controller
 
     public function update(Address $address, Request $request)
     {
-        $address->update($this->validateAttribute($request));
+        $address->update($request->validate([
+            'name' => 'required|string|max:100',
+        ]));
     }
 
     public function destroy(Address $address)
