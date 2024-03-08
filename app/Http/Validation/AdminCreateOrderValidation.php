@@ -20,19 +20,7 @@ class AdminCreateOrderValidation implements OrderValidate
 
     public function __construct(public Request $request)
     {
-        $this->rules = [
-            'amount' => 'nullable|decimal:0,4',
-            'payment' => 'required|in:1,2',
-            'user_id' => 'nullable',
-            'service_id' => 'required',
-            'product_ids' => 'nullable|array',
-            'issued_invoice' => 'required|boolean',
-            'paid' => 'required|boolean',
-            'description' => 'nullable|string',
-            'image' => 'nullable|array|max:5',
-            'image.*' => 'image|max:2048',
-            'type' => 'required|in:'. OrderType::ONLINE->value . ',' . OrderType::WALKIN->value,
-        ];
+        $this->setRule();
     }
 
     /**
@@ -46,8 +34,6 @@ class AdminCreateOrderValidation implements OrderValidate
             ->validateService()
             ->validateProduct()
             ->validateUser();
-
-        $data['amount'] ??= $this->service->price;
 
         unset($data['product_ids']);
         unset($data['image']);
@@ -164,13 +150,40 @@ class AdminCreateOrderValidation implements OrderValidate
     protected function afterValidate($data): array
     {
         $this->validated = $data;
-        $this->setAmount();
+        $this->setAmount()->setProductAmount()->setTotalAmount();
 
-        $productAmount = $this->getProductAmount();
-        return array_merge($this->validated, [
-            'product_amount' => $productAmount,
-            'total_amount' => $this->validated['amount'] + $productAmount
-        ]);
+        return $this->validated;
+    }
+
+    protected function setRule(): static
+    {
+        $this->rules = [
+            'amount' => 'nullable|decimal:0,4',
+            'payment' => 'required|in:1,2',
+            'user_id' => 'nullable',
+            'service_id' => 'required',
+            'product_ids' => 'nullable|array',
+            'issued_invoice' => 'required|boolean',
+            'paid' => 'required|boolean',
+            'description' => 'nullable|string',
+            'image' => 'nullable|array|max:5',
+            'image.*' => 'image|max:2048',
+            'type' => 'required|in:' . OrderType::ONLINE->value . ',' . OrderType::WALKIN->value,
+        ];
+
+        return $this;
+    }
+
+    protected function setProductAmount(): static
+    {
+        $this->validated['product_amount'] = $this->getProductAmount();
+        return $this;
+    }
+
+    protected function setTotalAmount(): static
+    {
+        $this->validated['total_amount'] = $this->validated['amount'] + $this->validated['product_amount'];
+        return $this;
     }
 
 }

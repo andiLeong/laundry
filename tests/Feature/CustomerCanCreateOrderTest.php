@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Address;
+use App\Models\Branch;
 use App\Models\OnlineOrder;
 use App\Models\Order;
 use App\Models\Product;
@@ -32,6 +33,7 @@ class CustomerCanCreateOrderTest extends TestCase
         $this->address = Address::factory()->create([
             'user_id' => $this->user->id
         ]);
+        $this->branch = Branch::factory()->create();
         $this->imageArraySize = 2;
     }
 

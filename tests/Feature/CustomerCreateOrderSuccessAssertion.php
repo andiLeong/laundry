@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Address;
+use App\Models\Branch;
+use App\Models\DeliveryFeeCalculator;
 use App\Models\Enum\OnlineOrderStatus;
 use App\Models\Enum\OrderPayment;
 use App\Models\Enum\OrderType;
 use App\Models\OnlineOrder;
 use App\Models\Order;
+use App\Models\Place;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -32,6 +35,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         parent::setUp();
         $this->service = Service::factory()->create();
         $this->user = User::factory()->create();
+        $this->branch = Branch::factory()->create();
         $this->address = Address::factory()->create([
             'user_id' => $this->user->id
         ]);
@@ -43,7 +47,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $this->createOrderWithMock();
         $order = Order::latest()->first();
 
-        $this->assertEquals($order->total_amount, $order->service->price);
+        $this->assertEquals($order->total_amount, $order->service->price + $this->getDeliveryFee());
         $this->assertEquals($order->amount, $order->service->price);
         $this->assertEquals(0, $order->product_amount);
     }
@@ -65,7 +69,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $order = Order::latest()->first();
 
         $this->assertEquals($order->amount, $order->service->price);
-        $this->assertEquals($productAmount + $order->amount, $order->total_amount);
+        $this->assertEquals($productAmount + $order->amount + $this->getDeliveryFee(), $order->total_amount);
         $this->assertEquals($productAmount, $order->product_amount);
 
         $this->assertDatabaseHas('order_products', [
@@ -255,5 +259,11 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
             $mock->shouldReceive('putFileAs')->andReturn($id . '_' . Str::random() . '.jpg');
         });
         return $this;
+    }
+
+    public function getDeliveryFee()
+    {
+        $place = Place::find($this->address->place_id);
+        return (new DeliveryFeeCalculator($place, $this->branch))->calculate();
     }
 }

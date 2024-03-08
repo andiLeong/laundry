@@ -2,29 +2,32 @@
 
 namespace App\Http\Validation;
 
+use App\Models\Address;
+use App\Models\Branch;
+use App\Models\DeliveryFeeCalculator;
+use App\Models\Place;
 use App\Models\Service;
 use Closure;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidation
+class CustomerCreateOrderValidation extends AdminCreateOrderValidation
 {
 
     public array $rules = [];
+    private mixed $address;
 
     public function __construct(public Request $request)
     {
         parent::__construct($this->request);
+    }
+
+    protected function setRule(): static
+    {
         $this->rules = [
 //            'promotion_ids' => 'nullable|array',
-            'address_id' => [
-                'required',
-                Rule::exists('addresses', 'id')
-                    ->where(fn(Builder $query) => $query->where('user_id', auth()->id()))
-            ],
+            'address_id' => ['required'],
             'product_ids' => 'nullable|array',
             'delivery' => ['bail', 'nullable', 'date',
                 function (string $attribute, mixed $value, Closure $fail) {
@@ -51,6 +54,8 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
             'image' => 'nullable|array|max:2',
             'image.*' => 'image|max:2048',
         ];
+
+        return $this;
     }
 
     /**
@@ -59,18 +64,33 @@ class CustomerCreateOrderValidation extends AdminCreateOrderWithPromotionValidat
     public function validate(): array
     {
         $data = $this->request->validate($this->rules);
-        $this->validateProduct();
+        $this->validateAddress()->validateProduct();
+
+        $place = Place::find($this->address->place_id);
+        $calculator = new DeliveryFeeCalculator($place, Branch::first());
 
         $this->service = Service::mostRequested();
         $data['service_id'] = $this->service->id;
         $data['product'] = $this->products;
+        $data['delivery_fee'] = $calculator->calculate();
         return $this->afterValidate($data);
     }
 
-    protected function setAmount(): static
+    public function validateAddress(): static
     {
-        $this->validated['amount'] = $this->service->price;
+        $address = Address::where('id', $this->request->address_id)->where('user_id', auth()->id())->first();
+        if (is_null($address)) {
+            $this->exception('address_id', 'We\'re sorry, we could not find your address');
+        }
+        $this->address = $address;
         return $this;
     }
 
+    protected function setTotalAmount(): static
+    {
+        $this->validated['total_amount'] = $this->validated['amount']
+            + $this->validated['product_amount']
+            + $this->validated['delivery_fee'];
+        return $this;
+    }
 }

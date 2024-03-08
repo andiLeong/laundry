@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\OrderCreated;
 use App\Http\Validation\OrderValidate;
+use App\Models\DeliveryFeeCalculator;
 use App\Models\Enum\OrderType;
 use App\Models\OnlineOrder;
 use App\Models\Order;
@@ -37,6 +38,7 @@ class OrderController extends Controller
                 'amount' => $data['amount'],
                 'total_amount' => $data['total_amount'],
                 'product_amount' => $data['product_amount'],
+                'delivery_fee' => $data['delivery_fee'],
                 'type' => OrderType::ONLINE->value,
                 'paid' => false,
                 'description' => $data['description'] ?? '',
