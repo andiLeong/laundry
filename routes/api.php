@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminStatController;
 use App\Http\Controllers\AdminUpdateOrderController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DeliveryFeeController;
 use App\Http\Controllers\GcashOrderController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
@@ -108,6 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/address', [AddressController::class, 'store']);
     Route::patch('/address/{address}', [AddressController::class, 'update']);
     Route::get('/address', [AddressController::class, 'index']);
+    Route::get('/place/delivery-fee/{id}', [DeliveryFeeController::class, 'get']);
 //    Route::delete('/address/{address}', [AddressController::class, 'destroy']);
 });
 
