@@ -16,6 +16,7 @@ use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OnlineOrderStatusController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderPaidRecordController;
+use App\Http\Controllers\AdminPlaceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SalaryController;
@@ -91,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/user/qualified-promotion/{user}/{service}', [UserQualifiedPromotionController::class, 'index']);
 
         Route::get('/admin/user/{user:phone}', [AdminUserController::class, 'show']);
+        Route::get('/admin/place', [AdminPlaceController::class, 'index']);
     });
 
     Route::middleware('admin.only')->group(function () {
