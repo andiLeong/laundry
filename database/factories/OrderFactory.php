@@ -26,13 +26,13 @@ class OrderFactory extends Factory
             'amount' => $amount = rand(120,150),
             'total_amount' => $amount,
             'product_amount' => 0,
+            'delivery_fee' => 0,
             'creator_id' => User::factory(),
             'paid' => 1,
             'issued_invoice' => 0,
             'description' => null,
             'payment' => OrderPayment::CASH->value,
             'type' => OrderType::WALKIN->value,
-            'parent_id' => 0,
         ];
     }
 }

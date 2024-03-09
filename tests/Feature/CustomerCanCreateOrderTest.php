@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Address;
+use App\Models\Branch;
 use App\Models\OnlineOrder;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Tests\OrderImageCanBeValidated;
 use Tests\TestAuthEndpoint;
 use Tests\TestCase;
@@ -33,6 +33,7 @@ class CustomerCanCreateOrderTest extends TestCase
         $this->address = Address::factory()->create([
             'user_id' => $this->user->id
         ]);
+        $this->branch = Branch::factory()->create();
         $this->imageArraySize = 2;
     }
 
@@ -55,6 +56,22 @@ class CustomerCanCreateOrderTest extends TestCase
     }
 
     /** @test */
+    public function pickup_cant_be_past()
+    {
+        $response = $this->createOrder(['pickup' => now()->subHours(3)]);
+        $this->assertValidateMessage('Pickup date cant in the past.',$response,'pickup');
+    }
+
+    /** @test */
+    public function pickup_at_least_one_hour_from_now()
+    {
+        $response = $this->createOrder(['pickup' => now()->addMinutes(20)]);
+        $response2 = $this->createOrder(['pickup' => now()->addMinutes(61)]);
+        $this->assertValidateMessage('Pickup date at least one hour from now.',$response,'pickup');
+        $response2->assertJsonMissingValidationErrors('pickup');
+    }
+
+    /** @test */
     public function description_is_nullable()
     {
         $name = 'description';
@@ -69,6 +86,23 @@ class CustomerCanCreateOrderTest extends TestCase
     {
         $name = 'delivery';
         $rule = ['nullable', 'date'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrder($payload)
+        );
+    }
+
+    /** @test */
+    public function delivery_cant_be_past()
+    {
+        $response = $this->createOrder(['delivery' => now()->subHours(3)]);
+        $this->assertValidateMessage('Delivery date cant in the past.',$response,'delivery');
+    }
+
+    /** @test */
+    public function add_products_is_nullable()
+    {
+        $name = 'add_products';
+        $rule = ['nullable', 'in:0,1'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrder($payload)
         );

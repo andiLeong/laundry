@@ -12,6 +12,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GcashOrderController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
+use App\Http\Controllers\OnlineOrderStatusController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderPaidRecordController;
 use App\Http\Controllers\ProductController;
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/attendance', [AttendanceController::class, 'index']);
         Route::get('/admin/order-paid-record', [OrderPaidRecordController::class, 'index']);
 
+        Route::patch('/admin/online-order/{id}', [OnlineOrderStatusController::class, 'update']);
         Route::post('/admin/gcash-order', [GcashOrderController::class, 'store']);
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);
@@ -106,7 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/address', [AddressController::class, 'store']);
     Route::patch('/address/{address}', [AddressController::class, 'update']);
     Route::get('/address', [AddressController::class, 'index']);
-    Route::delete('/address/{address}', [AddressController::class, 'destroy']);
+//    Route::delete('/address/{address}', [AddressController::class, 'destroy']);
 });
 
 

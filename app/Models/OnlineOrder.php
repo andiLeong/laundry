@@ -32,12 +32,13 @@ class OnlineOrder extends Model
     protected function cantUpdateStatus($status): bool
     {
         $names = OnlineOrderStatus::names();
-        $key = array_search($status, $names);
-        if ($key === false || $key === 0) {
+        $statusKey = array_search(strtoupper($this->status), $names);
+        $targetKey = array_search($status, $names);
+        if ($statusKey === false || $targetKey === false) {
             return false;
         }
 
-        return $names[$key - 1] == $this->status;
+        return ($statusKey + 1) !== $targetKey;
     }
 
     public function markAsPickup()

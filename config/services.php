@@ -46,4 +46,9 @@ return [
     'google-recaptcha' => [
         'secret' => env('GOOGLE_RECAPTCHA_SECRET'),
     ],
+
+    'google-place' => [
+        'secret' => env('GOOGLE_PLACE_SECRET'),
+        'fields' => 'addressComponents,formattedAddress,location,displayName,types',
+    ],
 ];

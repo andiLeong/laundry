@@ -18,11 +18,12 @@ return new class extends Migration {
 //            $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('user_id')->index()->nullable();
 //            $table->unsignedBigInteger('company_id')->nullable();
-            $table->unsignedBigInteger('parent_id')->default(0);
+//            $table->unsignedBigInteger('parent_id')->default(0);
             $table->string('description')->nullable();
             $table->unsignedDecimal('amount');
             $table->unsignedDecimal('total_amount');
             $table->unsignedBigInteger('product_amount')->default(0);
+            $table->unsignedInteger('delivery_fee')->default(0);
             $table->unsignedTinyInteger('paid')->default(1);
             $table->unsignedTinyInteger('payment')->default(1);
             $table->unsignedTinyInteger('issued_invoice')->default(0);

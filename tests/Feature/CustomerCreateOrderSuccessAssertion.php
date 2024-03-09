@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Address;
+use App\Models\Branch;
+use App\Models\DeliveryFeeCalculator;
 use App\Models\Enum\OnlineOrderStatus;
 use App\Models\Enum\OrderPayment;
 use App\Models\Enum\OrderType;
 use App\Models\OnlineOrder;
 use App\Models\Order;
+use App\Models\Place;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -32,6 +35,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         parent::setUp();
         $this->service = Service::factory()->create();
         $this->user = User::factory()->create();
+        $this->branch = Branch::factory()->create();
         $this->address = Address::factory()->create([
             'user_id' => $this->user->id
         ]);
@@ -43,8 +47,9 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $this->createOrderWithMock();
         $order = Order::latest()->first();
 
-        $this->assertEquals($order->total_amount, $order->service->price);
+        $this->assertEquals($order->total_amount, $order->service->price + $this->getDeliveryFee());
         $this->assertEquals($order->amount, $order->service->price);
+        $this->assertEquals($order->delivery_fee, $this->getDeliveryFee());
         $this->assertEquals(0, $order->product_amount);
     }
 
@@ -65,7 +70,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
         $order = Order::latest()->first();
 
         $this->assertEquals($order->amount, $order->service->price);
-        $this->assertEquals($productAmount + $order->amount, $order->total_amount);
+        $this->assertEquals($productAmount + $order->amount + $this->getDeliveryFee(), $order->total_amount);
         $this->assertEquals($productAmount, $order->product_amount);
 
         $this->assertDatabaseHas('order_products', [
@@ -84,8 +89,16 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
     {
         $this->assertDatabaseEmpty('order_paid');
         $this->createOrderWithMock();
-        Order::latest()->first();
         $this->assertDatabaseEmpty('order_paid');
+    }
+
+    /** @test */
+    public function after_order_add_products_option_is_added()
+    {
+        $this->createOrderWithMock(['add_products' => 1]);
+        $order = Order::latest()->first();
+        $onlineOrder = OnlineOrder::where('order_id', $order->id)->first();
+        $this->assertEquals(1, $onlineOrder->add_products);
     }
 
     /** @test */
@@ -237,15 +250,21 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
 
         $file = explode('/', $image->path);
         $name = end($file);
-        $this->assertTrue(str_starts_with($name, $order->id . '_'));
+        $this->assertTrue(str_starts_with($name, 2 . '_'));
         $this->assertTrue(str_ends_with($name, '.' . $fake->extension()));
     }
 
     public function mockFileSystem($id = 1)
     {
-        $this->mock(Filesystem::class, function (MockInterface $mock) use($id) {
+        $this->mock(Filesystem::class, function (MockInterface $mock) use ($id) {
             $mock->shouldReceive('putFileAs')->andReturn($id . '_' . Str::random() . '.jpg');
         });
         return $this;
+    }
+
+    public function getDeliveryFee()
+    {
+        $place = Place::find($this->address->place_id);
+        return (new DeliveryFeeCalculator($place, $this->branch))->calculate();
     }
 }

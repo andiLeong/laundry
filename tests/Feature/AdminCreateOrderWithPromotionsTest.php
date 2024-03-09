@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Enum\OrderPayment;
+use App\Models\Enum\OrderType;
 use App\Models\Order;
 use App\Models\OrderPromotion;
 use App\Models\Product;
@@ -335,6 +336,7 @@ class AdminCreateOrderWithPromotionsTest extends TestCase
     {
         $attributes = Order::factory()->make()->toArray();
         $attributes['payment'] = OrderPayment::CASH->value;
+        $attributes['type'] = OrderType::WALKIN->value;
         $attributes['promotion_ids'] = [1];
         return array_merge($attributes, $overwrites);
     }

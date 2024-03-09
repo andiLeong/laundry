@@ -24,7 +24,7 @@ class EventServiceProvider extends ServiceProvider
             CreateOrderImage::class,
         ],
         OnlineOrderStatusUpdated::class => [
-//            CreateOrderImage::class,
+            CreateOrderImage::class,
         ],
         OrderUpdated::class => [
             CreateOrderImage::class,

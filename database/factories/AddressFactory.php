@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Place;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,11 +20,8 @@ class AddressFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->word() . ' residence',
-            'city' => fake()->city(),
-            'province' => fake()->city(),
-            'street' => fake()->streetName(),
-            'number' => (string) rand(1,9000)
+            'place_id' => Place::factory(),
+            'room' => (string) rand(1,9000)
         ];
     }
 }

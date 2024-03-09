@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Http\Validation\AddressValidation;
 use App\Http\Validation\AdminCreateBulkOrderValidation;
 use App\Http\Validation\AdminCreateOrderValidation;
 use App\Http\Validation\AdminCreateOrderWithPromotionValidation;
 use App\Http\Validation\CustomerCreateOrderValidation;
 use App\Http\Validation\OrderValidate;
+use App\Models\GooglePlaces;
 use App\Models\GoogleRecaptcha;
 use App\Models\Sms\Contract\Sms as SmsContract;
 use App\Models\Sms\Template;
@@ -70,6 +72,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Filesystem::class, function () {
             return Storage::disk('digitalocean');
         });
+
+        $this->app->bind(AddressValidation::class, function ($app) {
+            return new AddressValidation($app[GooglePlaces::class]);
+        });
+
+        $this->app->singleton(GooglePlaces::class,
+            fn($app) => new GooglePlaces($app['config']->get('services.google-place')));
 
         $this->app->singleton(GoogleRecaptcha::class,
             fn($app) => new GoogleRecaptcha($app['config']->get('services.google-recaptcha.secret')));
