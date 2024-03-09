@@ -17,7 +17,16 @@ class AdminOrderFilterOption extends Option
         'phone',
         'first_name',
         'filter_by_days',
+        'id',
     ];
+
+    protected function id(): array
+    {
+        return [
+            'clause' => 'whereIn',
+            'value' => explode(',', $this->request->get('id')),
+        ];
+    }
 
     protected function date(): array
     {

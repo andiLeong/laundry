@@ -134,6 +134,18 @@ class AdminReadOrderTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_by_ids(): void
+    {
+        $orders = Order::factory(3)->create();
+        $firstTwoOrders = $orders->take(2)->pluck('id');
+        $ids = $this->fetchOrderIds(['id' => implode(',', $firstTwoOrders->toArray())]);
+
+        $this->assertTrue($ids->contains($firstTwoOrders[0]));
+        $this->assertTrue($ids->contains($firstTwoOrders[1]));
+        $this->assertFalse($ids->contains($orders[2]->id));
+    }
+
+    /** @test */
     public function it_can_filter_order_by_today(): void
     {
         $order = Order::factory()->create(['created_at' => now()->subDay()]);
