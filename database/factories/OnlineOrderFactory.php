@@ -23,7 +23,6 @@ class OnlineOrderFactory extends Factory
             'address_id' => Address::factory(),
             'order_id' => Order::factory(),
             'status' => OnlineOrderStatus::PENDING_PICKUP->value,
-            'delivery_fee' => 0,
             'add_products' => 0,
             'delivery' => now()->addHours(12),
             'pickup' => now()->addHours(2),

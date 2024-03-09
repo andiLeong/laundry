@@ -49,6 +49,7 @@ class CustomerCreateOrderSuccessAssertion extends TestCase
 
         $this->assertEquals($order->total_amount, $order->service->price + $this->getDeliveryFee());
         $this->assertEquals($order->amount, $order->service->price);
+        $this->assertEquals($order->delivery_fee, $this->getDeliveryFee());
         $this->assertEquals(0, $order->product_amount);
     }
 
