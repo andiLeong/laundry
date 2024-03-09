@@ -8,6 +8,13 @@ class DeliveryFeeCalculator
      * @var \Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|\Illuminate\Foundation\Application|mixed
      */
     private mixed $config;
+
+    /**
+     * the actual distance in meter between 2 point
+     * @var int
+     */
+    private int $distance;
+
     private Place $to;
     private Branch $from;
 
@@ -24,7 +31,8 @@ class DeliveryFeeCalculator
             return 0;
         }
 
-        $actualDistance = $this->getDistance();
+        $actualDistance = $this->computeDistance();
+        $this->distance = $actualDistance;
 //        dump($actualDistance);
 
         if($actualDistance < $this->config['min_meter']){
@@ -49,9 +57,8 @@ class DeliveryFeeCalculator
     /**
      * get the point to point distance between 2 places
      */
-    protected function getDistance()
+    protected function computeDistance()
     {
-
         $to = new Coordinate($this->to->longitude,$this->to->latitude);
         $from = new Coordinate($this->from->longitude,$this->from->latitude);
 
@@ -64,5 +71,10 @@ class DeliveryFeeCalculator
         $r = 6371008; // Earth's average radius, in meters
         $d = $r * $c;
         return (int) round($d);
+    }
+
+    public function getDistance(): int
+    {
+        return $this->distance;
     }
 }

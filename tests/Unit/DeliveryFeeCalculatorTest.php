@@ -95,7 +95,7 @@ class FakeDeliveryFeeCalculator extends DeliveryFeeCalculator
 {
     public function distance()
     {
-        return $this->getDistance();
+        return $this->computeDistance();
     }
 
 }

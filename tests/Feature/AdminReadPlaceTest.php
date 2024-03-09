@@ -46,19 +46,31 @@ class AdminReadPlaceTest extends TestCase
     public function it_can_search_by_name(): void
     {
         $place = Place::factory()->create(['name' => 'foo']);
-        $places = $this->fetch(['name' => 'foo'])->json('data');
-        $this->assertEquals($place->name, $places[0]['name']);
+        $place2 = Place::factory()->create(['name' => 'bfooar']);
+        $place3 = Place::factory()->create(['name' => 'f o o b']);
+        $place4 = Place::factory()->create(['name' => 'f oo b']);
+        $places = $this->fetchIds(['name' => 'foo']);
+        $this->assertTrue($places->contains($place->id));
+        $this->assertTrue($places->contains($place2->id));
+        $this->assertFalse($places->contains($place3->id));
+        $this->assertFalse($places->contains($place4->id));
     }
 
     /** @test */
-    public function delivery_fee_is_being_return(): void
+    public function delivery_fee_and_distance_is_being_return(): void
     {
         $places = $this->fetch()->assertStatus(200)->json('data');
         $this->assertArrayHasKey('delivery_fee', $places[0]);
+        $this->assertArrayHasKey('distance', $places[0]);
     }
 
     protected function fetch($query = [], $as = null)
     {
         return $this->fetchAsAdmin($query, $as);
+    }
+
+    public function fetchIds($query = [], $as = null)
+    {
+        return $this->fetch($query, $as)->collect('data')->pluck('id');
     }
 }

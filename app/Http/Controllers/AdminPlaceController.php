@@ -12,12 +12,15 @@ class AdminPlaceController extends Controller
     public function index(Request $request)
     {
         return Place::query()
-            ->filters(['name' => []], $request)
+            ->filters([
+                'name' => ['clause' => 'like',]
+            ], $request)
             ->orderBy('id', 'desc')
             ->paginate()
-            ->through(function ($place){
+            ->through(function ($place) {
                 $calculator = new DeliveryFeeCalculator($place, Branch::first());
                 $place->delivery_fee = $calculator->calculate();
+                $place->distance = $calculator->getDistance();
                 return $place;
             });
     }
