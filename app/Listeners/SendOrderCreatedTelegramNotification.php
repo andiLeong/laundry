@@ -6,7 +6,7 @@ use App\Notification\Telegram;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendNotification implements ShouldQueue
+class SendOrderCreatedTelegramNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
