@@ -66,7 +66,7 @@ class CustomerCanCreateOrderTest extends TestCase
     public function pickup_at_least_one_hour_from_now()
     {
         $response = $this->createOrder(['pickup' => now()->addMinutes(20)]);
-        $response2 = $this->createOrder(['pickup' => now()->addMinutes(61)]);
+        $response2 = $this->createOrderWithMock(['pickup' => now()->addMinutes(61)]);
         $this->assertValidateMessage('Pickup date at least one hour from now.',$response,'pickup');
         $response2->assertJsonMissingValidationErrors('pickup');
     }
