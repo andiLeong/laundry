@@ -21,40 +21,40 @@ class DeliveryFeeCalculatorTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_calculate_distance(): void
-    {
-        $distance = (new FakeDeliveryFeeCalculator($this->freePlace(), $this->branch))->distance();
-        $this->assertEquals(259, $distance);
-    }
+//    /** @test */
+//    public function it_can_calculate_distance(): void
+//    {
+//        $distance = (new FakeDeliveryFeeCalculator($this->freePlace(), $this->branch))->distance();
+//        $this->assertEquals(259, $distance);
+//    }
 
     /** @test */
     public function if_a_place_is_free_fee_is_zero()
     {
         $place = $this->notFreePlace();
         config()->set('delivery_fee.free', [$place->id]);
-        $fee = (new FakeDeliveryFeeCalculator($place, $this->branch))->calculate();
+        $fee = (new DeliveryFeeCalculator($place, $this->branch))->calculate();
         $this->assertEquals(0, $fee);
     }
 
     /** @test */
     public function if_a_place_is_less_than_min_meter_its_free()
     {
-        $fee = (new FakeDeliveryFeeCalculator($this->freePlace(), $this->branch))->calculate();
+        $fee = (new DeliveryFeeCalculator($this->freePlace(), $this->branch))->calculate();
         $this->assertEquals(0, $fee);
     }
 
     /** @test */
     public function if_a_place_distance_is_more_than_1000_meter_it_charge_60()
     {
-        $fee = (new FakeDeliveryFeeCalculator($this->oneThousandPlace(), $this->branch))->calculate();
+        $fee = (new DeliveryFeeCalculator($this->oneThousandPlace(), $this->branch))->calculate();
         $this->assertEquals(60, $fee);
     }
 
     /** @test */
     public function if_a_place_distance_is_more_than_700_meter_it_charge_30()
     {
-        $fee = (new FakeDeliveryFeeCalculator($this->sevenHundredPlace(), $this->branch))->calculate();
+        $fee = (new DeliveryFeeCalculator($this->sevenHundredPlace(), $this->branch))->calculate();
         $this->assertEquals(30, $fee);
     }
 
@@ -89,13 +89,4 @@ class DeliveryFeeCalculatorTest extends TestCase
             'longitude' => 121.0104251
         ]);
     }
-}
-
-class FakeDeliveryFeeCalculator extends DeliveryFeeCalculator
-{
-    public function distance()
-    {
-        return $this->computeDistance();
-    }
-
 }

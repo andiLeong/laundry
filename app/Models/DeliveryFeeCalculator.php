@@ -31,16 +31,15 @@ class DeliveryFeeCalculator
             return 0;
         }
 
-        $actualDistance = $this->computeDistance();
+        $actualDistance = $this->distance()->calculate();
         $this->distance = $actualDistance;
-//        dump($actualDistance);
 
-        if($actualDistance < $this->config['min_meter']){
+        if ($actualDistance < $this->config['min_meter']) {
             return 0;
         }
 
-        foreach ($this->config['price'] as $distance => $fee){
-            if($actualDistance >= $distance){
+        foreach ($this->config['price'] as $distance => $fee) {
+            if ($actualDistance >= $distance) {
                 return $fee;
             }
         }
@@ -54,27 +53,18 @@ class DeliveryFeeCalculator
         return in_array($this->to->id, $this->config['free']);
     }
 
-    /**
-     * get the point to point distance between 2 places
-     */
-    protected function computeDistance()
-    {
-        $to = new Coordinate($this->to->longitude,$this->to->latitude);
-        $from = new Coordinate($this->from->longitude,$this->from->latitude);
-
-        $p1 = deg2rad($to->latitude);
-        $p2 = deg2rad($from->latitude);
-        $dp = deg2rad($from->latitude - $to->latitude);
-        $dl = deg2rad($from->longitude - $to->longitude);
-        $a = (sin($dp/2) * sin($dp/2)) + (cos($p1) * cos($p2) * sin($dl/2) * sin($dl/2));
-        $c = 2 * atan2(sqrt($a),sqrt(1-$a));
-        $r = 6371008; // Earth's average radius, in meters
-        $d = $r * $c;
-        return (int) round($d);
-    }
-
     public function getDistance(): int
     {
         return $this->distance;
+    }
+
+    /**
+     * get a distance calculator instance
+     */
+    protected function distance(): DistanceCalculator
+    {
+        $to = new Coordinate($this->to->longitude, $this->to->latitude);
+        $from = new Coordinate($this->from->longitude, $this->from->latitude);
+        return new DistanceCalculator($from, $to);
     }
 }
