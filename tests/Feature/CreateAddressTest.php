@@ -92,6 +92,17 @@ class CreateAddressTest extends TestCase
     }
 
     /** @test */
+    public function if_place_is_far_away_from_branch_gets_validation_exception(): void
+    {
+        $this->mock(AddressValidation::class, function (MockInterface $mock) {
+            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('The place seem like too far way from our branch'));
+        });
+        $response = $this->createAddress();
+
+        $this->assertValidateMessage('The place seem like too far way from our branch', $response, 'place_id');
+    }
+
+    /** @test */
     public function it_gets_validation_exception_if_google_api_return_error(): void
     {
         $this->mock(GooglePlaces::class, function (MockInterface $mock) {

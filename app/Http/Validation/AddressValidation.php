@@ -2,6 +2,9 @@
 
 namespace App\Http\Validation;
 
+use App\Models\Branch;
+use App\Models\Coordinate;
+use App\Models\DistanceCalculator;
 use App\Models\GooglePlaces;
 use App\Models\Place;
 use Illuminate\Config\Repository;
@@ -28,6 +31,9 @@ class AddressValidation
         $this->config = config('place');
     }
 
+    /**
+     * @throws \Exception
+     */
     public function validate($placeId)
     {
         $place = Place::where('place_id', $placeId)->first();
@@ -37,12 +43,12 @@ class AddressValidation
             return true;
         }
 
-        if(!$this->google->get($placeId)){
+        if (!$this->google->get($placeId)) {
             throw new \Exception('Error on getting place, please contact support!');
         }
 
         $this->payload = $this->google->body;
-        $this->check();
+        $this->checkDistance()->checkLocation();
 
         $this->place = Place::create([
             'place_id' => $placeId,
@@ -63,7 +69,7 @@ class AddressValidation
         return $this->place;
     }
 
-    protected function check(): void
+    protected function checkLocation(): static
     {
         foreach ($this->payload['addressComponents'] as $component) {
 
@@ -81,6 +87,22 @@ class AddressValidation
                 throw new \Exception('place is not in the service city');
             }
         }
+
+        return $this;
+    }
+
+    private function checkDistance(): static
+    {
+        $branch = Branch::first();
+        $location = $this->payload['location'];
+        $to = new Coordinate($location['longitude'], $location['latitude']);
+        $from = new Coordinate($branch->longitude, $branch->latitude);
+        $distance = (new DistanceCalculator($from, $to))->calculate();
+
+        if ($distance >= $this->config['max_distance']) {
+            throw new \Exception('The place seem like too far way from our branch');
+        }
+        return $this;
     }
 
     public function __get(string $name)
