@@ -8,6 +8,23 @@ use Illuminate\Http\Request;
 
 class OrderInvoiceController extends Controller
 {
+    public function index(Request $request)
+    {
+        return OrderInvoice::query()
+            ->filters([
+                'order_id' => [
+                    'clause' => 'whereIn',
+                    'value' => explode(',', $request->get('order_id')),
+                ],
+                'invoice_id' => [
+                    'clause' => 'whereIn',
+                    'value' => explode(',', $request->get('invoice_id')),
+                ],
+            ], $request)
+            ->orderBy('id', 'desc')
+            ->paginate();
+    }
+
     public function store(Request $request)
     {
         $attributes = $request->validate([
