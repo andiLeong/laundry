@@ -34,16 +34,6 @@ class AdminUpdateOrderController extends Controller
         return $this->$column();
     }
 
-    public function issuedInvoice()
-    {
-        if ($this->order->issued_invoice) {
-            $this->order->unissueInvoice();
-            return;
-        }
-
-        $this->order->issueInvoice();
-    }
-
     public function paid()
     {
         if ($this->order->paid) {

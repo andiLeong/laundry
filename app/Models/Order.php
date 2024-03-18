@@ -84,13 +84,4 @@ class Order extends Model
         $this->update(['paid' => false]);
     }
 
-    public function issueInvoice()
-    {
-        $this->update(['issued_invoice' => true]);
-    }
-
-    public function unissueInvoice()
-    {
-        $this->update(['issued_invoice' => false]);
-    }
 }

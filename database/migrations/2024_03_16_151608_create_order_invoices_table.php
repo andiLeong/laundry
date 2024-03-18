@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('order_invoices', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id')->unique();
-            $table->string('invoice_id')->unique();
+            $table->string('invoice_id');
             $table->unsignedDecimal('amount');
             $table->timestamps();
         });

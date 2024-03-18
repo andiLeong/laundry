@@ -52,18 +52,6 @@ class UpdateOrderTest extends TestCase
     }
 
     /** @test */
-    public function it_can_toggle_order_issue_invoice_status()
-    {
-        $order = Order::factory()->create();
-        $order2 = Order::factory()->create(['issued_invoice' => true]);
-        $this->update($order->id, 'issued_invoice');
-        $this->update($order2->id, 'issued_invoice');
-
-        $this->assertTrue($order->fresh()->issued_invoice);
-        $this->assertFalse($order2->fresh()->issued_invoice);
-    }
-
-    /** @test */
     public function it_can_toggle_order_payment_status()
     {
         $order = Order::factory()->create();
