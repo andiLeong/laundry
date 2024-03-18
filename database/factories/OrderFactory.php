@@ -29,7 +29,6 @@ class OrderFactory extends Factory
             'delivery_fee' => 0,
             'creator_id' => User::factory(),
             'paid' => 1,
-            'issued_invoice' => 0,
             'description' => null,
             'payment' => OrderPayment::CASH->value,
             'type' => OrderType::WALKIN->value,

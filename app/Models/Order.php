@@ -17,7 +17,6 @@ class Order extends Model
 
     protected $casts = [
         'paid' => 'boolean',
-        'issued_invoice' => 'boolean'
     ];
 
     protected function payment(): Attribute

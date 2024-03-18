@@ -97,16 +97,6 @@ class AdminCreateOrderTest extends TestCase
     }
 
     /** @test */
-    public function issued_invoice_must_be_valid()
-    {
-        $name = 'issued_invoice';
-        $rule = ['required', 'in:0,1'];
-        Validate::name($name)->against($rule)->through(
-            fn($payload) => $this->createOrder($payload)
-        );
-    }
-
-    /** @test */
     public function paid_must_be_valid()
     {
         $name = 'paid';

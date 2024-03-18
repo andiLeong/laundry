@@ -26,7 +26,6 @@ return new class extends Migration {
             $table->unsignedInteger('delivery_fee')->default(0);
             $table->unsignedTinyInteger('paid')->default(1);
             $table->unsignedTinyInteger('payment')->default(1);
-            $table->unsignedTinyInteger('issued_invoice')->default(0);
             $table->unsignedBigInteger('creator_id');
             $table->timestamps();
 
