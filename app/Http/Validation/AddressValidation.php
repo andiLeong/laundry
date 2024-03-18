@@ -108,8 +108,8 @@ class AddressValidation
     public function __get(string $name)
     {
         $attributes = [
-            'name' => $this->payload['formattedAddress'],
-            'address' => $this->payload['displayName']['text'],
+            'address' => $this->payload['formattedAddress'],
+            'name' => $this->payload['displayName']['text'],
             'latitude' => $this->payload['location']['latitude'],
             'longitude' => $this->payload['location']['longitude'],
         ];
