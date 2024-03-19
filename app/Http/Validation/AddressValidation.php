@@ -72,19 +72,9 @@ class AddressValidation
     protected function checkLocation(): static
     {
         foreach ($this->payload['addressComponents'] as $component) {
-
             $types = $component['types'];
-
             if (in_array('country', $types) && !in_array($component['longText'], $this->config['country'])) {
                 throw new \Exception('place is not in the service country');
-            }
-
-            if (in_array('administrative_area_level_1', $types) && !in_array($component['longText'], $this->config['province'])) {
-                throw new \Exception('place is not in the service province');
-            }
-
-            if (in_array('locality', $types) && !in_array($component['longText'], $this->config['city'])) {
-                throw new \Exception('place is not in the service city');
             }
         }
 
@@ -100,7 +90,7 @@ class AddressValidation
         $distance = (new DistanceCalculator($from, $to))->calculate();
 
         if ($distance >= $this->config['max_distance']) {
-            throw new \Exception('The place seem like too far way from our branch');
+            throw new \Exception('The place seem like too far way from our branch. around '. $distance . 'm');
         }
         return $this;
     }

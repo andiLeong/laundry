@@ -69,37 +69,37 @@ class CreateAddressTest extends TestCase
         $this->assertValidateMessage('place is not in the service country', $response, 'place_id');
     }
 
-    /** @test */
-    public function if_place_is_not_in_service_city_gets_validation_exception(): void
-    {
-        $this->mock(AddressValidation::class, function (MockInterface $mock) {
-            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('place is not in the service city'));
-        });
-        $response = $this->createAddress();
+//    /** @test */
+//    public function if_place_is_not_in_service_city_gets_validation_exception(): void
+//    {
+//        $this->mock(AddressValidation::class, function (MockInterface $mock) {
+//            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('place is not in the service city'));
+//        });
+//        $response = $this->createAddress();
+//
+//        $this->assertValidateMessage('place is not in the service city', $response, 'place_id');
+//    }
 
-        $this->assertValidateMessage('place is not in the service city', $response, 'place_id');
-    }
-
-    /** @test */
-    public function if_place_is_not_in_service_province_gets_validation_exception(): void
-    {
-        $this->mock(AddressValidation::class, function (MockInterface $mock) {
-            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('place is not in the service province'));
-        });
-        $response = $this->createAddress();
-
-        $this->assertValidateMessage('place is not in the service province', $response, 'place_id');
-    }
+//    /** @test */
+//    public function if_place_is_not_in_service_province_gets_validation_exception(): void
+//    {
+//        $this->mock(AddressValidation::class, function (MockInterface $mock) {
+//            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('place is not in the service province'));
+//        });
+//        $response = $this->createAddress();
+//
+//        $this->assertValidateMessage('place is not in the service province', $response, 'place_id');
+//    }
 
     /** @test */
     public function if_place_is_far_away_from_branch_gets_validation_exception(): void
     {
         $this->mock(AddressValidation::class, function (MockInterface $mock) {
-            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('The place seem like too far way from our branch'));
+            $mock->shouldReceive('validate')->once()->andThrow(new \Exception('The place seem like too far way from our branch. around 3000m'));
         });
         $response = $this->createAddress();
 
-        $this->assertValidateMessage('The place seem like too far way from our branch', $response, 'place_id');
+        $this->assertValidateMessage('The place seem like too far way from our branch. around 3000m', $response, 'place_id');
     }
 
     /** @test */
