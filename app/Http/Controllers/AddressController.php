@@ -12,7 +12,9 @@ class AddressController extends Controller
 {
     public function index()
     {
-        return Address::where('user_id', auth()->id())->get();
+        return Address::select('room')
+            ->with('place:id,name,address')
+            ->where('user_id', auth()->id())->get();
     }
 
     public function store(Request $request, AddressValidation $addressValidation)

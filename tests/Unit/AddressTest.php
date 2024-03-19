@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Address;
+use App\Models\Place;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -37,5 +38,14 @@ class AddressTest extends TestCase
         $address = Address::factory()->create(['user_id' => $user->id]);
 
         $this->assertEquals($user->id, $address->user->id);
+    }
+
+    /** @test */
+    public function it_has_a_place()
+    {
+        $address = Address::factory()->create();
+        $place = Place::find($address->place_id);
+
+        $this->assertEquals($place->id, $address->place->id);
     }
 }

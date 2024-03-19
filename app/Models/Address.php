@@ -13,4 +13,9 @@ class Address extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function place()
+    {
+        return $this->hasOne(Place::class, 'id', 'place_id');
+    }
 }
