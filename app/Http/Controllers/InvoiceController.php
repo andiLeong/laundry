@@ -31,7 +31,7 @@ class InvoiceController extends Controller
             'amount' => 'required|int',
             'name' => 'required|string|max:255',
         ]);
-        $orderIds = explode(',', $attributes['order_id']);
+        $orderIds = array_unique(explode(',', $attributes['order_id']));
         $orders = Order::whereIn('id', $orderIds)->get();
         $orderInvoice = OrderInvoice::whereIn('order_id', $orderIds)->get();
         if ($orders->isEmpty() || count($orderIds) != $orders->count() || $orderInvoice->isNotEmpty()) {

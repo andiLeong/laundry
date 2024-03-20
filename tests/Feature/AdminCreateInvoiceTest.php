@@ -112,6 +112,12 @@ class AdminCreateInvoiceTest extends TestCase
         $this->assertEquals('000025', $invoice->invoice_id);
     }
 
+    /** @test */
+    public function if_submit_duplicated_order_ids_it_should_not_throw_400(): void
+    {
+        $this->createOrderInvoice(['order_id' => $this->order->id . ',' . $this->order->id])->assertSuccessful();
+    }
+
     public function createOrderInvoice($overwrites = [])
     {
         $att = $this->attributes($overwrites);
