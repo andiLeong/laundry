@@ -23,16 +23,15 @@ class ReadAddressTest extends TestCase
     /** @test */
     public function it_can_read_all_the_address_of_an_user(): void
     {
-        $this->markTestSkipped();
         $this->signIn();
         $address = Address::factory(2)->create(['user_id' => $this->user->id]);
         $address2 = Address::factory()->create();
         $response = $this->getJson('/api/address');
-        $addressIds = array_column(json_decode($response->getContent()), 'id');
+        $names = $response->collect()->map(fn($ars) => $ars['place']['name'])->toArray();
 
-        $this->assertTrue(in_array($address[0]['id'], $addressIds));
-        $this->assertTrue(in_array($address[1]['id'], $addressIds));
-        $this->assertNotTrue(in_array($address2->id, $addressIds));
+        $this->assertTrue(in_array($address[0]['place']['name'], $names));
+        $this->assertTrue(in_array($address[1]['place']['name'], $names));
+        $this->assertNotTrue(in_array($address2->place->name, $names));
         $response->assertStatus(200);
     }
 

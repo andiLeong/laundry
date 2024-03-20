@@ -12,7 +12,7 @@ class AddressController extends Controller
 {
     public function index()
     {
-        return Address::select('room')
+        return Address::select('room','place_id')
             ->with('place:id,name,address')
             ->where('user_id', auth()->id())->get();
     }
