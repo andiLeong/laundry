@@ -2,14 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\OrderInvoice>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice>
  */
-class OrderInvoiceFactory extends Factory
+class InvoiceFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,8 +18,9 @@ class OrderInvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => Order::factory(),
             'invoice_id' => Str::random(),
+            'name' => fake()->name,
+            'amount' => rand(100, 500)
         ];
     }
 }

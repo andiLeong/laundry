@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderInvoice;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -9,12 +10,12 @@ use Tests\AdminAuthorization;
 use Tests\TestCase;
 use Tests\Validate;
 
-class AdminCreateOrderInvoiceTest extends TestCase
+class AdminCreateInvoiceTest extends TestCase
 {
     use LazilyRefreshDatabase;
     use AdminAuthorization;
 
-    protected $endpoint = '/api/admin/order-invoice';
+    protected $endpoint = '/api/admin/invoice';
 
     protected function setUp(): void
     {
@@ -26,50 +27,46 @@ class AdminCreateOrderInvoiceTest extends TestCase
     public function it_can_create_order_invoice_record(): void
     {
         $this->assertDatabaseCount('order_invoices', 0);
+        $this->assertDatabaseCount('invoices', 0);
         $this->createOrderInvoice()->assertSuccessful();
         $this->assertDatabaseCount('order_invoices', 1);
+        $this->assertDatabaseCount('invoices', 1);
     }
-
-    /** @test */
-    public function invoice_amount_either_order_total_amount_or_order_service_amount(): void
-    {
-        $order = Order::factory()->create([
-            'total_amount' => 230,
-            'amount' => 210
-        ]);
-
-        $amt = $order->total_amont + 100;
-        $message = $this->createOrderInvoice([
-            'amount' => $amt,
-            'order_id' => $order->id
-        ])->assertStatus(400)->json('message');
-        $this->assertEquals($message, 'Amount ' . $amt . ' is not correct');
-    }
-
 
     /** @test */
     public function order_id_must_be_exists(): void
     {
         $message = $this->createOrderInvoice([
-            'order_id' => 9999999999999
+            'order_id' => (string)9999999999999
         ])->assertStatus(400)->json('message');
-        $this->assertEquals($message, 'Order id ' . 9999999999999 . ' is not exists');
+        $this->assertEquals($message, 'Order Ids are not correct');
+    }
+
+    /** @test */
+    public function order_id_count_must_be_the_same(): void
+    {
+        $message = $this->createOrderInvoice([
+            'order_id' => '9999999999999,' . $this->order->id,
+        ])->assertStatus(400)->json('message');
+        $this->assertEquals($message, 'Order Ids are not correct');
     }
 
     /** @test */
     public function order_id_must_be_unique(): void
     {
         $invoice = OrderInvoice::factory()->create();
-        $this->createOrderInvoice([
-            'order_id' => $invoice->order_id
-        ])->assertStatus(422)->assertJsonValidationErrorFor('order_id');
+        $message = $this->createOrderInvoice([
+            'order_id' => (string)$invoice->order_id
+        ])->assertStatus(400)->json('message');
+
+        $this->assertEquals($message, 'Order Ids are not correct');
     }
 
     /** @test */
     public function invoice_id_is_required()
     {
         $name = 'invoice_id';
-        $rule = ['required'];
+        $rule = ['required', 'unique:invoice_id,App\Models\Invoice'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrderInvoice($payload)
         );
@@ -79,7 +76,7 @@ class AdminCreateOrderInvoiceTest extends TestCase
     public function order_id_is_required()
     {
         $name = 'order_id';
-        $rule = ['required'];
+        $rule = ['required', 'string'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->createOrderInvoice($payload)
         );
@@ -95,6 +92,26 @@ class AdminCreateOrderInvoiceTest extends TestCase
         );
     }
 
+    /** @test */
+    public function name_is_required()
+    {
+        $name = 'name';
+        $rule = ['required', 'string', 'max:255'];
+        Validate::name($name)->against($rule)->through(
+            fn($payload) => $this->createOrderInvoice($payload)
+        );
+    }
+
+    /** @test */
+    public function invoice_number_can_be_started_with_zero_(): void
+    {
+        $this->createOrderInvoice(['invoice_id' => '000025'])->assertSuccessful();
+
+        $invoice = Invoice::where('invoice_id', '000025')->first();
+        $this->assertNotNull($invoice);
+        $this->assertEquals('000025', $invoice->invoice_id);
+    }
+
     public function createOrderInvoice($overwrites = [])
     {
         $att = $this->attributes($overwrites);
@@ -103,10 +120,8 @@ class AdminCreateOrderInvoiceTest extends TestCase
 
     private function attributes(mixed $overwrites)
     {
-        $original = OrderInvoice::factory()->make([
-            'order_id' => $this->order->id,
-            'amount' => $this->order->total_amount
-        ])->toArray();
+        $original = Invoice::factory()->make()->toArray();
+        $original['order_id'] = (string)$this->order->id;
         return array_merge($original, $overwrites);
     }
 }

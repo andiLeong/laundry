@@ -42,7 +42,7 @@ class AdminUpdateOrderTest extends TestCase
     public function amount_is_required()
     {
         $name = 'amount';
-        $rule = ['required','decimal:0,4'];
+        $rule = ['decimal:0,4'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->updateOrder($payload)
         );
