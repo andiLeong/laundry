@@ -169,7 +169,7 @@ class SignUpTest extends TestCase
     public function phone_must_valid(): void
     {
         $name = 'phone';
-        $rule = ['required', 'unique:phone:' . User::class . ':09172149989'];
+        $rule = ['required', 'unique:phone,' . User::class . ',09172149989'];
         Validate::name($name)->against($rule)->through(
             fn($payload) => $this->signup($payload)
         );

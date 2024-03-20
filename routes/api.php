@@ -84,7 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::patch('/admin/online-order/{id}', [OnlineOrderStatusController::class, 'update']);
         Route::post('/admin/invoice', [InvoiceController::class, 'store']);
-        Route::get('/admin/order-invoice', [InvoiceController::class, 'index']);
+        Route::get('/admin/invoice', [InvoiceController::class, 'index']);
         Route::post('/admin/gcash-order', [GcashOrderController::class, 'store']);
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);

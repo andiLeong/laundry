@@ -14,10 +14,6 @@ class InvoiceController extends Controller
     {
         return Invoice::query()
             ->filters([
-                'order_id' => [
-                    'clause' => 'whereIn',
-                    'value' => explode(',', $request->get('order_id')),
-                ],
                 'invoice_id' => [
                     'clause' => 'whereIn',
                     'value' => explode(',', $request->get('invoice_id')),
