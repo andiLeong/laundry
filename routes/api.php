@@ -15,7 +15,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogOutController;
 use App\Http\Controllers\OnlineOrderStatusController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderInvoiceController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderPaidRecordController;
 use App\Http\Controllers\AdminPlaceController;
 use App\Http\Controllers\ProductController;
@@ -83,8 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/order-paid-record', [OrderPaidRecordController::class, 'index']);
 
         Route::patch('/admin/online-order/{id}', [OnlineOrderStatusController::class, 'update']);
-        Route::post('/admin/order-invoice', [OrderInvoiceController::class, 'store']);
-        Route::get('/admin/order-invoice', [OrderInvoiceController::class, 'index']);
+        Route::post('/admin/invoice', [InvoiceController::class, 'store']);
+        Route::get('/admin/invoice', [InvoiceController::class, 'index']);
         Route::post('/admin/gcash-order', [GcashOrderController::class, 'store']);
         Route::post('/admin/order-bulk', AdminBulkOrderController::class);
         Route::get('/admin/order', [AdminOrderController::class, 'index']);

@@ -102,7 +102,7 @@ class Validate
         $invalids = [
             [$this->name => 48656878],
             [$this->name => 'string'],
-            [$this->name => ['a','b']]
+            [$this->name => ['a', 'b']]
         ];
 
         $this->currentRule = 'required';
@@ -225,7 +225,7 @@ class Validate
             $method = $rule[0];
         } else {
             $method = array_shift($rule);
-            $args = $rule;
+            $args = explode(',', $rule[0]);
         }
 
         if ($needMessage) {
