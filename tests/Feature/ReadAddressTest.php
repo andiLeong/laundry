@@ -27,7 +27,7 @@ class ReadAddressTest extends TestCase
         $address = Address::factory(2)->create(['user_id' => $this->user->id]);
         $address2 = Address::factory()->create();
         $response = $this->getJson('/api/address');
-        $names = $response->collect()->map(fn($ars) => $ars['place']['name'])->toArray();
+        $names = $response->collect('data')->map(fn($ars) => $ars['name'])->toArray();
 
         $this->assertTrue(in_array($address[0]['place']['name'], $names));
         $this->assertTrue(in_array($address[1]['place']['name'], $names));

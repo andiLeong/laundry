@@ -12,9 +12,12 @@ class AddressController extends Controller
 {
     public function index()
     {
-        return Address::select('room','place_id')
-            ->with('place:id,name,address')
-            ->where('user_id', auth()->id())->get();
+        $address = Address::select('addresses.room', 'places.name', 'places.address')
+            ->leftJoin('places', 'places.id', '=', 'addresses.place_id')
+            ->where('addresses.user_id', auth()->id())
+            ->orderBy('addresses.created_at', 'desc')
+            ->get();
+        return ['data' => $address];
     }
 
     public function store(Request $request, AddressValidation $addressValidation)
@@ -22,10 +25,10 @@ class AddressController extends Controller
         $attribute = $request->validate([
             'room' => 'nullable|string|max:100',
             'place_id' => ['required', 'string',
-                function (string $attribute, mixed $value, Closure $fail) use($addressValidation) {
-                    try{
-                       $addressValidation->validate($value);
-                    }catch (Exception $e){
+                function (string $attribute, mixed $value, Closure $fail) use ($addressValidation) {
+                    try {
+                        $addressValidation->validate($value);
+                    } catch (Exception $e) {
                         $fail($e->getMessage());
                     }
                 }
