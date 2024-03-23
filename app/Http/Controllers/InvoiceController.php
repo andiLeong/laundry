@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
@@ -20,7 +21,11 @@ class InvoiceController extends Controller
                 ],
             ], $request)
             ->orderBy('id', 'desc')
-            ->paginate();
+            ->paginate()
+            ->through(function($invoice){
+                $invoice['date'] = Carbon::parse($invoice['created_at'])->toDateString();
+                return $invoice;
+            });
     }
 
     public function store(Request $request)

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Invoice;
-use App\Models\OrderInvoice;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\AdminAuthorization;
 use Tests\TestCase;
@@ -29,6 +28,17 @@ class AdminReadInvoiceTest extends TestCase
 
         $this->assertTrue($ids->contains($this->invoice[0]->id));
         $this->assertTrue($ids->contains($this->invoice[1]->id));
+    }
+
+    /** @test */
+    public function it_can_read_invoice_date(): void
+    {
+        $today = today();
+        $invoice = Invoice::factory()->create(['created_at' => $today]);
+        $invoice = $this->fetch()->assertOk()->collect('data')->where('id', $invoice->id)->first();
+
+        $this->assertArrayHasKey('date', $invoice);
+        $this->assertEquals($today->toDateString(),$invoice['date']);
     }
 
     /** @test */
