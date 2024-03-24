@@ -12,7 +12,7 @@ class AddressController extends Controller
 {
     public function index()
     {
-        $address = Address::select('addresses.room', 'places.name', 'places.address')
+        $address = Address::select('addresses.room', 'places.name', 'places.address','addresses.id')
             ->leftJoin('places', 'places.id', '=', 'addresses.place_id')
             ->where('addresses.user_id', auth()->id())
             ->orderBy('addresses.created_at', 'desc')
